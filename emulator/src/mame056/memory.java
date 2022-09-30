@@ -7,72 +7,8 @@ import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.opbase_handlerPtr;
 import arcadeflex.v078.generic.funcPtr.setopbase;
-import static arcadeflex.v078.mame.memoryH.ENTRY_COUNT;
-import arcadeflex.v078.mame.memoryH.ExtMemory;
-import arcadeflex.v078.mame.memoryH.IO_ReadPort;
-import arcadeflex.v078.mame.memoryH.IO_WritePort;
-import static arcadeflex.v078.mame.memoryH.IS_MEMPORT_END;
-import static arcadeflex.v078.mame.memoryH.IS_MEMPORT_MARKER;
-import static arcadeflex.v078.mame.memoryH.IS_SPARSE;
-import static arcadeflex.v078.mame.memoryH.LEVEL1_BITS;
-import static arcadeflex.v078.mame.memoryH.LEVEL1_INDEX;
-import static arcadeflex.v078.mame.memoryH.LEVEL2_BITS;
-import static arcadeflex.v078.mame.memoryH.LEVEL2_INDEX;
-import static arcadeflex.v078.mame.memoryH.LEVEL2_MASK;
-import static arcadeflex.v078.mame.memoryH.MAX_BANKS;
-import static arcadeflex.v078.mame.memoryH.MAX_EXT_MEMORY;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_ABITS_MASK;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_ABITS_VAL_MASK;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_MASK;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_READ;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_WRITE;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_MARKER;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_TYPE_IO;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_TYPE_MASK;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_TYPE_MEM;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_16;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_32;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_8;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_MASK;
-import static arcadeflex.v078.mame.memoryH.MRA_RAM;
-import arcadeflex.v078.mame.memoryH.Memory_ReadAddress;
-import arcadeflex.v078.mame.memoryH.Memory_WriteAddress;
-import static arcadeflex.v078.mame.memoryH.SPARSE_THRESH;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK1;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK10;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK11;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK12;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK13;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK14;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK15;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK16;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK17;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK18;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK19;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK2;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK20;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK21;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK22;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK23;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK24;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK3;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK4;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK5;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK6;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK7;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK8;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANK9;
-import static arcadeflex.v078.mame.memoryH.STATIC_BANKMAX;
-import static arcadeflex.v078.mame.memoryH.STATIC_COUNT;
-import static arcadeflex.v078.mame.memoryH.STATIC_NOP;
-import static arcadeflex.v078.mame.memoryH.STATIC_RAM;
-import static arcadeflex.v078.mame.memoryH.STATIC_RAMROM;
-import static arcadeflex.v078.mame.memoryH.STATIC_ROM;
-import static arcadeflex.v078.mame.memoryH.STATIC_UNMAP;
-import static arcadeflex.v078.mame.memoryH.SUBTABLE_ALLOC;
-import static arcadeflex.v078.mame.memoryH.SUBTABLE_BASE;
-import static arcadeflex.v078.mame.memoryH.SUBTABLE_COUNT;
-import static arcadeflex.v078.mame.memoryH.SUBTABLE_MASK;
+import static arcadeflex.v078.mame.memory.*;
+import static arcadeflex.v078.mame.memoryH.*;
 import static common.ptr.*;
 import static common.libc.cstring.*;
 import static arcadeflex036.osdepend.*;
@@ -88,194 +24,6 @@ import static java.lang.System.exit;
 
 public class memory {
 
-    /**
-     * *************************************************************************
-     *
-     * memory.c
-     *
-     * Functions which handle the CPU memory and I/O port access.
-     *
-     * Caveats:
-     *
-     * The install_mem/port_*_handler functions are only intended to be called
-     * at driver init time. Do not call them after this time.
-     *
-     * If your driver executes an opcode which crosses a bank-switched boundary,
-     * it will pull the wrong data out of memory. Although not a common case,
-     * you may need to revert to memcpy to work around this. See machine/tnzs.c
-     * for an example.
-     *
-     **************************************************************************
-     */
-    /**
-     * *************************************************************************
-     *
-     * Basic theory of memory handling:
-     *
-     * An address with up to 32 bits is passed to a memory handler. First, the
-     * non-significant bits are removed from the bottom; for example, a 16-bit
-     * memory handler doesn't care about the low bit, so that is removed.
-     *
-     * Next, the address is broken into two halves, an upper half and a lower
-     * half. The number of bits in each half varies based on the total number of
-     * address bits. The upper half is then used as an index into the
-     * base_lookup table.
-     *
-     * If the value pulled from the table is within the range 192-255, then the
-     * lower half of the address is needed to resolve the final handler. The
-     * value from the table (192-255) is combined with the lower address bits to
-     * form an index into a subtable.
-     *
-     * Table values in the range 0-31 are reserved for internal handling (such
-     * as RAM, ROM, NOP, and banking). Table values between 32 and 192 are
-     * assigned dynamically at startup.
-     *
-     **************************************************************************
-     */
-
-    /*TODO*////* macros for the profiler */
-/*TODO*///#define MEMREADSTART			profiler_mark(PROFILER_MEMREAD);
-/*TODO*///#define MEMREADEND(ret)			{ profiler_mark(PROFILER_END); return ret; }
-/*TODO*///#define MEMWRITESTART			profiler_mark(PROFILER_MEMWRITE);
-/*TODO*///#define MEMWRITEEND(ret)		{ (ret); profiler_mark(PROFILER_END); return; }
-/*TODO*///
-    public static int DATABITS_TO_SHIFT(int d) {
-        return (((d) == 32) ? 2 : ((d) == 16) ? 1 : 0);
-    }
-
-    /* helper macros */
-    public static boolean HANDLER_IS_RAM(int h) {
-        return ((h) == STATIC_RAM);
-    }
-
-    public static boolean HANDLER_IS_ROM(int h) {
-        return ((h) == STATIC_ROM);
-    }
-
-    public static boolean HANDLER_IS_RAMROM(int h) {
-        return ((h) == STATIC_RAMROM);
-    }
-
-    public static boolean HANDLER_IS_NOP(int h) {
-        return ((h) == STATIC_NOP);
-    }
-
-    public static boolean HANDLER_IS_BANK(int h) {
-        return ((h) >= STATIC_BANK1 && (h) <= STATIC_BANKMAX);
-    }
-
-    public static boolean HANDLER_IS_STATIC(int h) {
-        return (h < STATIC_COUNT && h != -15000);//special handle for arcadeflex
-    }
-
-    public static int HANDLER_TO_BANK(int h) {
-        return h;
-    }
-
-    /*TODO*///#define BANK_TO_HANDLER(b)		((void *)(b))
-/*TODO*///
-
-    /*-------------------------------------------------
-            TYPE DEFINITIONS
-    -------------------------------------------------*/
-    public static class bank_data {
-
-        int used;/* is this bank used? */
-        int cpunum;/* the CPU it is used for */
-        int base;/* the base offset */
-        int readoffset;/* original base offset for reads */
-        int writeoffset;/* original base offset for writes */
-    }
-
-    public static class handler_data {
-
-        public Object handler;/* function pointer for handler */
-        public int offset;/* base offset for handler */
-
-        public static handler_data[] create(int n) {
-            handler_data[] a = new handler_data[n];
-            for (int k = 0; k < n; k++) {
-                a[k] = new handler_data();
-            }
-            return a;
-        }
-    }
-
-    public static class table_data {
-
-        UBytePtr table;/* pointer to base of table */
-        int /*UINT8*/ subtable_count;/* number of subtables used */
-        int /*UINT8*/ subtable_alloc;/* number of subtables allocated */
-        handler_data[] handlers;/* pointer to which set of handlers */
-    }
-
-    public static class memport_data {
-
-        int cpunum;/* CPU index */
-        int abits;/* address bits */
-        int dbits;/* data bits */
-        int ebits;/* effective address bits */
-        int /*offs_t*/ mask;/* address mask */
-        table_data read = new table_data();/* memory read lookup table */
-        table_data write = new table_data();/* memory write lookup table */
-    }
-
-    public static class cpu_data {
-
-        UBytePtr rombase;/* ROM base pointer */
-        UBytePtr rambase;/* RAM base pointer */
-        opbase_handlerPtr opbase;/* opcode base handler */
-        memport_data mem = new memport_data();/* memory tables */
-        memport_data port = new memport_data();/* port tables */
-    }
-    /*TODO*///
-/*TODO*///struct memory_address_table
-/*TODO*///{
-/*TODO*///	int 				bits;				/* address bits */
-/*TODO*///	read8_handler		handler;			/* handler associated with that */
-/*TODO*///};
-
-    /*-------------------------------------------------
-	GLOBAL VARIABLES
-    -------------------------------------------------*/
-    public static UBytePtr OP_ROM = new UBytePtr();/* opcode ROM base */
-    public static UBytePtr OP_RAM = new UBytePtr();/* opcode RAM base */
-    public static int opcode_entry;/* opcode readmem entry */
-    public static UBytePtr readmem_lookup;/* memory read lookup table */
-    public static UBytePtr writemem_lookup;/* memory write lookup table */
-    public static UBytePtr readport_lookup;/* port read lookup table */
-    public static UBytePtr writeport_lookup;/* port write lookup table */
-    public static int mem_amask;/* memory address mask */
-    public static int port_amask;/* port address mask */
-
-    public static UBytePtr[] cpu_bankbase = new UBytePtr[STATIC_COUNT];/* array of bank bases */
-    public static ExtMemory[] ext_memory = ExtMemory.create(MAX_EXT_MEMORY);/* externally-allocated memory */
-
-    public static opbase_handlerPtr opbasefunc;/* opcode base override */
-
-    public static handler_data[] rmemhandler8 = handler_data.create(ENTRY_COUNT);/* 8-bit memory read handlers */
-    public static handler_data[] rmemhandler16 = handler_data.create(ENTRY_COUNT);/* 16-bit memory read handlers */
-    public static handler_data[] rmemhandler32 = handler_data.create(ENTRY_COUNT);/* 32-bit memory read handlers */
-    public static handler_data[] wmemhandler8 = handler_data.create(ENTRY_COUNT);/* 8-bit memory write handlers */
-    public static handler_data[] wmemhandler16 = handler_data.create(ENTRY_COUNT);/* 16-bit memory write handlers */
-    public static handler_data[] wmemhandler32 = handler_data.create(ENTRY_COUNT);/* 32-bit memory write handlers */
-
-    public static handler_data[] rporthandler8 = handler_data.create(ENTRY_COUNT);/* 8-bit port read handlers */
-    public static handler_data[] rporthandler16 = handler_data.create(ENTRY_COUNT);/* 16-bit port read handlers */
-    public static handler_data[] rporthandler32 = handler_data.create(ENTRY_COUNT);/* 32-bit port read handlers */
-    public static handler_data[] wporthandler8 = handler_data.create(ENTRY_COUNT);/* 8-bit port write handlers */
-    public static handler_data[] wporthandler16 = handler_data.create(ENTRY_COUNT);/* 16-bit port write handlers */
-    public static handler_data[] wporthandler32 = handler_data.create(ENTRY_COUNT);/* 32-bit port write handlers */
-
- /*TODO*///static read8_handler 		rmemhandler8s[STATIC_COUNT];	/* copy of 8-bit static read memory handlers */
-/*TODO*///static write8_handler 		wmemhandler8s[STATIC_COUNT];	/* copy of 8-bit static write memory handlers */
-/*TODO*///
-    public static cpu_data[] cpudata = new cpu_data[MAX_CPU];/* data gathered for each CPU */
-    public static bank_data[] bankdata = new bank_data[MAX_BANKS];/* data gathered for each bank */
- /*TODO*///
-/*TODO*///offs_t encrypted_opcode_start[MAX_CPU],encrypted_opcode_end[MAX_CPU];
-/*TODO*///
-/*TODO*///
 
     /*-------------------------------------------------
 	memory_init - initialize the memory system
@@ -344,44 +92,9 @@ public class memory {
 /*TODO*///	memset(ext_memory, 0, sizeof(ext_memory));
     }
 
-    /*-------------------------------------------------
-	memory_set_opcode_base - set the base of
-	ROM
-    -------------------------------------------------*/
-    public static void memory_set_opcode_base(int cpunum, UBytePtr base) {
-        cpudata[cpunum].rombase = base;
-    }
 
-    /*TODO*///
-/*TODO*///
-/*TODO*///void memory_set_encrypted_opcode_range(int cpunum,offs_t min_address,offs_t max_address)
-/*TODO*///{
-/*TODO*///	encrypted_opcode_start[cpunum] = min_address;
-/*TODO*///	encrypted_opcode_end[cpunum] = max_address;
-/*TODO*///}
-/*TODO*///
 
-    /*-------------------------------------------------
-	memory_set_context - set the memory context
-    -------------------------------------------------*/
-    public static void memory_set_context(int activecpu) {
-        OP_RAM = cpu_bankbase[STATIC_RAM] = cpudata[activecpu].rambase;
-        OP_ROM = cpudata[activecpu].rombase;
-        opcode_entry = STATIC_ROM;
-
-        readmem_lookup = cpudata[activecpu].mem.read.table;
-        writemem_lookup = cpudata[activecpu].mem.write.table;
-        readport_lookup = cpudata[activecpu].port.read.table;
-        writeport_lookup = cpudata[activecpu].port.write.table;
-
-        mem_amask = cpudata[activecpu].mem.mask;
-        port_amask = cpudata[activecpu].port.mask;
-
-        opbasefunc = cpudata[activecpu].opbase;
-    }
-
-    
-
+  
     /*-------------------------------------------------
             memory_set_bankhandler_r - set readmemory
             handler for bank memory (8-bit only!)
@@ -1046,7 +759,7 @@ public class memory {
 	init_cpudata - initialize the cpudata
 	structure for each CPU
 -------------------------------------------------*/
-    static int init_cpudata() {
+   public static int init_cpudata() {
         int cpunum;
 
         /* zap the cpudata structure */
@@ -1058,7 +771,7 @@ public class memory {
             int cputype = Machine.drv.cpu[cpunum].cpu_type & ~CPU_FLAGS_MASK;
 
             /* set the RAM/ROM base */
-            cpudata[cpunum].rambase = cpudata[cpunum].rombase = memory_region(REGION_CPU1 + cpunum);
+            cpudata[cpunum].rambase =  cpudata[cpunum].op_ram = cpudata[cpunum].op_rom =memory_region(REGION_CPU1 + cpunum);
             cpudata[cpunum].opbase = null;
             /*TODO*///		encrypted_opcode_start[cpunum] = 0;
 /*TODO*///		encrypted_opcode_end[cpunum] = 0;
@@ -1277,7 +990,7 @@ public class memory {
     /*-------------------------------------------------
     	verify_ports - verify the port structs
     -------------------------------------------------*/
-    static int verify_ports() {
+    public static int verify_ports() {
         int cpunum;
 
         /* loop over CPUs */
@@ -1402,7 +1115,7 @@ public class memory {
     	allocate_memory - allocate memory for
     	sparse CPU address spaces
     -------------------------------------------------*/
-    static int allocate_memory() {
+    public static int allocate_memory() {
         int ext = 0;//struct ExtMemory *ext = ext_memory;
         int cpunum;
 
@@ -1634,7 +1347,7 @@ public class memory {
     	populate_ports - populate the port mapping
     	tables with entries
     -------------------------------------------------*/
-    static int populate_ports() {
+    public static int populate_ports() {
         int cpunum;
 
         /* loop over CPUs */
@@ -3286,7 +2999,7 @@ public class memory {
     	init_static - sets up the static memory
     	handlers
     -------------------------------------------------*/
-    static int init_static() {
+    public static int init_static() {
         /*TODO*///	memset(rmemhandler8,  0, sizeof(rmemhandler8));
         /*TODO*///	memset(rmemhandler8s, 0, sizeof(rmemhandler8s));
         /*TODO*///	memset(rmemhandler16, 0, sizeof(rmemhandler16));

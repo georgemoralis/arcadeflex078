@@ -3,11 +3,9 @@
  */
 package mame056;
 
-import arcadeflex.v078.generic.funcPtr.setopbase;
-import static arcadeflex056.fucPtr.*;
-import static common.ptr.*;
-import static mame056.cpuintrfH.*;
-import static mame056.memory.*;
+import static arcadeflex.v078.mame.memory.OP_RAM;
+import static arcadeflex.v078.mame.memory.OP_ROM;
+import static arcadeflex.v078.mame.memory.mem_amask;
 
 public class memoryH {
  
