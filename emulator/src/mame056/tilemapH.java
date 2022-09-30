@@ -3,7 +3,7 @@
  */
 package mame056;
 
-import static arcadeflex056.fucPtr.*;
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static common.ptr.*;
 import static common.subArrays.*;
 import static mame056.commonH.*;

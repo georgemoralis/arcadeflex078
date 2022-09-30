@@ -6,12 +6,12 @@
 package mame037b11.mame;
 
 //import static mame037b11.mame.tilemapH.*;
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static mame056.tilemapH.*;
 import static mame056.common.*;
 import static mame056.commonH.*;
 // refactor
 import static arcadeflex036.osdepend.logerror;
-import static arcadeflex056.fucPtr.*;
 import static common.libc.cstring.*;
 import static common.ptr.*;
 import static common.subArrays.*;
@@ -19,7 +19,6 @@ import static mame056.drawgfxH.*;
 import static mame056.driverH.*;
 import static mame056.mame.*;
 
-import static mame056.tilemapC.priority_bitmap;
 
 public class tilemapC {
     /*TODO*///#define SWAP(X,Y) {UINT32 temp=X; X=Y; Y=temp; }

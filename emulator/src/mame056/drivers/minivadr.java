@@ -4,6 +4,17 @@
  */
 package mame056.drivers;
 
+import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_READ;
+import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_WRITE;
+import static arcadeflex.v078.mame.memoryH.MEMPORT_MARKER;
+import static arcadeflex.v078.mame.memoryH.MEMPORT_TYPE_MEM;
+import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_8;
+import static arcadeflex.v078.mame.memoryH.MRA_RAM;
+import static arcadeflex.v078.mame.memoryH.MRA_ROM;
+import static arcadeflex.v078.mame.memoryH.MWA_NOP;
+import static arcadeflex.v078.mame.memoryH.MWA_ROM;
+import arcadeflex.v078.mame.memoryH.Memory_ReadAddress;
+import arcadeflex.v078.mame.memoryH.Memory_WriteAddress;
 import static arcadeflex056.fucPtr.*;
 
 import static mame056.commonH.*;
@@ -12,7 +23,6 @@ import static mame056.inptportH.*;
 import static mame056.cpuexecH.*;
 import static mame056.cpuintrfH.*;
 import static mame056.driverH.*;
-import static mame056.memoryH.*;
 import static mame056.inptport.*;
 import static mame056.drawgfxH.*;
 import static mame056.vidhrdw.minivadr.*;

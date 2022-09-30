@@ -3,7 +3,8 @@
  */
 package mame056;
 
-import static arcadeflex056.fucPtr.*;
+import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 
 import static mame056.sndintrfH.*;
 import static mame056.common.*;

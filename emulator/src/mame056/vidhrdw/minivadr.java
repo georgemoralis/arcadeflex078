@@ -5,6 +5,7 @@
  */
 package mame056.vidhrdw;
 
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static arcadeflex056.fucPtr.*;
 
 import static common.ptr.*;

@@ -8,6 +8,7 @@
  */
 package mame056.cpu.z80;
 
+import static arcadeflex.v078.mame.memoryH.change_pc16;
 import static mame056.cpu.z80.z80H.*;
 import static mame056.cpuexecH.*;
 import static mame056.cpuintrfH.*;

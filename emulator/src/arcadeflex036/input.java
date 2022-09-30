@@ -1,10 +1,10 @@
 
 package arcadeflex036;
 
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import java.awt.event.KeyEvent;
 
 import static arcadeflex056.video.screen;
-import static arcadeflex056.fucPtr.WriteHandlerPtr;
 import static mame056.inputH.*;
 
 public class input {

@@ -5,17 +5,7 @@ import static mame056.sndintrfH.*;
 import static mame056.commonH.*;
 
 public class fucPtr {
-
-    public static abstract interface ReadHandlerPtr {
-
-        public abstract int handler(int offset);
-    }
-
-    public static abstract interface WriteHandlerPtr {
-
-        public abstract void handler(int offset, int data);
-    }
-    
+ 
     public static abstract interface ReadHandlerPtr16 {
 
         public abstract int handler(int offset, int d2);

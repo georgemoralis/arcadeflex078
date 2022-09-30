@@ -3,7 +3,6 @@
  */
 package mame056;
 
-import static arcadeflex056.fucPtr.ReadHandlerPtr;
 import static common.libc.cstring.*;
 import static common.ptr.*;
 import static common.subArrays.*;

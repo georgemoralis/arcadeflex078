@@ -3,6 +3,8 @@
  */
 package mame056;
 
+import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static arcadeflex056.video.osd_allocate_colors;
 import static arcadeflex056.video.osd_modify_pen;
 import static common.subArrays.*;

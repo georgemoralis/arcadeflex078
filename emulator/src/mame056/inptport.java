@@ -17,12 +17,11 @@ package mame056;
  * <p>
  * *************************************************************************
  */
+import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import java.util.HashMap;
-import static common.libc.cstdio.*;
 import static arcadeflex036.osdepend.logerror;
 import static mame056.common.*;
 import static mame056.commonH.*;
-import static arcadeflex056.fucPtr.ReadHandlerPtr;
 import static mame056.inptportH.*;
 import static mame056.input.*;
 import static mame056.inputH.*;
