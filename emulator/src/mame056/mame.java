@@ -3,13 +3,14 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.memory.memory_init;
+import static arcadeflex.v078.mame.memory.memory_shutdown;
 import static mame056.mameH.*;
 import static mame056.common.*;
 import static mame056.commonH.*;
 import static mame056.cpuexec.*;
 import static mame056.drawgfxH.*;
 import static mame056.driverH.*;
-import static mame056.memory.*;
 import static mame056.input.*;
 import static mame056.drawgfx.*;
 import static mame056.inptport.*;
@@ -37,7 +38,6 @@ import static mame056.driver.*;
 import static arcadeflex056.fileio.*;
 import common.subArrays.IntArray;
 import static mame056.common.bitmap_alloc_depth;
-import static mame056.tilemapH.*;
 //import static mame056.tilemapC.*;
 import static mame037b11.mame.tilemapC.*;
 //import static mame037b11.mame.tilemapH.*;

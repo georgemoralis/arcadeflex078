@@ -5,12 +5,10 @@ package mame056;
 
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
-import arcadeflex.v078.generic.funcPtr.setopbase;
 import static arcadeflex.v078.mame.memory.*;
 import static arcadeflex.v078.mame.memoryH.*;
 import static common.ptr.*;
 import static common.libc.cstring.*;
-import static arcadeflex036.osdepend.*;
 import static mame056.cpuintrfH.*;
 import static mame056.cpuintrf.*;
 import static mame056.cpuexecH.*;
@@ -18,81 +16,8 @@ import static mame056.common.*;
 import static mame056.commonH.*;
 import static mame056.driverH.*;
 import static mame056.mame.Machine;
-import static common.libc.cstdio.*;
 
 public class memory {
-
-
-    /*-------------------------------------------------
-	memory_init - initialize the memory system
-    -------------------------------------------------*/
-    public static int memory_init() {
-        /* init the static handlers */
-        if (init_static() == 0) {
-            return 0;
-        }
-
-        /* init the CPUs */
-        if (init_cpudata() == 0) {
-            return 0;
-        }
-
-        /* verify the memory handlers and check banks */
-        if (verify_memory() == 0) {
-            return 0;
-        }
-        if (verify_ports() == 0) {
-            return 0;
-        }
-
-        /* allocate memory for sparse address spaces */
-        if (allocate_memory() == 0) {
-            return 0;
-        }
-
-        /* then fill in the tables */
-        if (populate_memory() == 0) {
-            return 0;
-        }
-        if (populate_ports() == 0) {
-            return 0;
-        }
-        /*TODO*///	register_banks();
-        /* dump the final memory configuration */
-        mem_dump();
-        return 1;
-    }
-
-    /*-------------------------------------------------
-	memory_shutdown - free memory
-    -------------------------------------------------*/
-    public static void memory_shutdown() {
-        /*TODO*///	struct ExtMemory *ext;
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* free all the tables */
-/*TODO*///	for (cpunum = 0; cpunum < MAX_CPU; cpunum++ )
-/*TODO*///	{
-/*TODO*///		if (cpudata[cpunum].mem.read.table)
-/*TODO*///			free(cpudata[cpunum].mem.read.table);
-/*TODO*///		if (cpudata[cpunum].mem.write.table)
-/*TODO*///			free(cpudata[cpunum].mem.write.table);
-/*TODO*///		if (cpudata[cpunum].port.read.table)
-/*TODO*///			free(cpudata[cpunum].port.read.table);
-/*TODO*///		if (cpudata[cpunum].port.write.table)
-/*TODO*///			free(cpudata[cpunum].port.write.table);
-/*TODO*///	}
-/*TODO*///	memset(&cpudata, 0, sizeof(cpudata));
-/*TODO*///
-/*TODO*///	/* free all the external memory */
-/*TODO*///	for (ext = ext_memory; ext->data; ext++)
-/*TODO*///		free(ext->data);
-/*TODO*///	memset(ext_memory, 0, sizeof(ext_memory));
-    }
-
-
-
-  
     /*-------------------------------------------------
             memory_set_bankhandler_r - set readmemory
             handler for bank memory (8-bit only!)
@@ -947,114 +872,4 @@ public class memory {
         return 1;
     }
 
-    /*-------------------------------------------------
-    	debugging
-    -------------------------------------------------*/
-    static void dump_map(FILE file, memport_data memport, table_data table) {
-        String strings[]
-                = {
-                    "invalid", "bank 1", "bank 2", "bank 3",
-                    "bank 4", "bank 5", "bank 6", "bank 7",
-                    "bank 8", "bank 9", "bank 10", "bank 11",
-                    "bank 12", "bank 13", "bank 14", "bank 15",
-                    "bank 16", "bank 17", "bank 18", "bank 19",
-                    "bank 20", "bank 21", "bank 22", "bank 23",
-                    "bank 24", "RAM", "ROM", "RAMROM",
-                    "nop", "unused 1", "unused 2", "unmapped"
-                };
-
-        int minbits = DATABITS_TO_SHIFT(memport.dbits);
-        int l1bits = LEVEL1_BITS(memport.ebits);
-        int l2bits = LEVEL2_BITS(memport.ebits);
-        int l1count = 1 << l1bits;
-        int l2count = 1 << l2bits;
-        int i, j;
-
-        fprintf(file, "  Address bits = %d\n", memport.abits);
-        fprintf(file, "     Data bits = %d\n", memport.dbits);
-        fprintf(file, "Effective bits = %d\n", memport.ebits);
-        fprintf(file, "       L1 bits = %d\n", l1bits);
-        fprintf(file, "       L2 bits = %d\n", l2bits);
-        fprintf(file, "  Address mask = %X\n", memport.mask);
-        fprintf(file, "\n");
-
-        for (i = 0; i < l1count; i++) {
-            char entry = table.table.read(i);
-            if (entry != STATIC_UNMAP) {
-                fprintf(file, "%05X  %08X-%08X    = %02X: ", i,
-                        i << (l2bits + minbits),
-                        ((i + 1) << (l2bits + minbits)) - 1, (int) entry);
-                if (entry < STATIC_COUNT) {
-                    fprintf(file, "%s [offset=%08X]\n", strings[entry], table.handlers[entry].offset);
-                } else if (entry < SUBTABLE_BASE) {
-                    fprintf(file, "handler(%08X) [offset=%08X]\n", table.handlers[entry].handler.hashCode(), table.handlers[entry].offset);
-                } else {
-                    fprintf(file, "subtable %d\n", entry & SUBTABLE_MASK);
-                    entry &= SUBTABLE_MASK;
-
-                    for (j = 0; j < l2count; j++) {
-                        char/*UINT8*/ entry2 = table.table.read((1 << l1bits) + (entry << l2bits) + j);
-                        if (entry2 != STATIC_UNMAP) {
-                            fprintf(file, "   %05X  %08X-%08X = %02X: ", j,
-                                    (i << (l2bits + minbits)) | (j << minbits),
-                                    ((i << (l2bits + minbits)) | ((j + 1) << minbits)) - 1, (int) entry2);
-                            if (entry2 < STATIC_COUNT) {
-                                fprintf(file, "%s [offset=%08X]\n", strings[entry2], table.handlers[entry2].offset);
-                            } else if (entry2 < SUBTABLE_BASE) {
-                                fprintf(file, "handler(%08X) [offset=%08X]\n", table.handlers[entry2].handler.hashCode(), table.handlers[entry2].offset);
-                            } else {
-                                fprintf(file, "subtable %d???????????\n", entry2 & SUBTABLE_MASK);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public static void mem_dump() {
-        FILE file = fopen("memdump.log", "w");
-        int cpunum;
-
-        /* skip if we can't open the file */
-        if (file == null) {
-            return;
-        }
-
-        /* loop over CPUs */
-        for (cpunum
-                = 0; cpunum
-                < cpu_gettotalcpu(); cpunum++) {
-            /* memory handlers */
-            if (cpudata[cpunum].mem.abits != 0) {
-                fprintf(file, "\n\n"
-                        + "===============================\n"
-                        + "CPU %d read memory handler dump\n"
-                        + "===============================\n", cpunum);
-                dump_map(file, cpudata[cpunum].mem, cpudata[cpunum].mem.read);
-
-                fprintf(file, "\n\n"
-                        + "================================\n"
-                        + "CPU %d write memory handler dump\n"
-                        + "================================\n", cpunum);
-                dump_map(file, cpudata[cpunum].mem, cpudata[cpunum].mem.write);
-            }
-
-            /* port handlers */
-            if (cpudata[cpunum].port.abits != 0) {
-                fprintf(file, "\n\n"
-                        + "=============================\n"
-                        + "CPU %d read port handler dump\n"
-                        + "=============================\n", cpunum);
-                dump_map(file, cpudata[cpunum].port, cpudata[cpunum].port.read);
-
-                fprintf(file, "\n\n"
-                        + "==============================\n"
-                        + "CPU %d write port handler dump\n"
-                        + "==============================\n", cpunum);
-                dump_map(file, cpudata[cpunum].port, cpudata[cpunum].port.write);
-            }
-        }
-        fclose(file);
-    }
 }
