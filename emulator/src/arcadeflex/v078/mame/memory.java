@@ -29,8 +29,6 @@ import static mame056.memory.populate_ports;
 import static mame056.memory.verify_memory;
 import static mame056.memory.verify_ports;
 
-
-
 public class memory {
 
     public static final boolean MEM_DUMP = false;
@@ -947,7 +945,7 @@ public class memory {
         }
     }
 
-/*TODO*///
+    /*TODO*///
 /*TODO*////*-------------------------------------------------
 /*TODO*///	assign_dynamic_bank - finds a free or exact
 /*TODO*///	matching bank
@@ -1283,7 +1281,7 @@ public class memory {
             needs_ram - returns true if a given type
             of memory needs RAM backing it
     -------------------------------------------------*/
-    static boolean needs_ram(int cpunum, int handler, Object _handler) {
+    public static boolean needs_ram(int cpunum, int handler, Object _handler) {
         /* RAM, ROM, and banks always need RAM */
         if (HANDLER_IS_RAM(handler) || HANDLER_IS_ROM(handler) || HANDLER_IS_RAMROM(handler) || HANDLER_IS_BANK(handler)) {
             return true;
@@ -2319,11 +2317,47 @@ public class memory {
 /*TODO*///	the handlers needed for a given memory type
 /*TODO*///-------------------------------------------------*/
 /*TODO*///
-/*TODO*///#define GENERATE_HANDLERS_8BIT(type, abits) \
-/*TODO*///	    READBYTE8(cpu_read##type##abits,             abits, read##type##_lookup,  r##type##handler8,  type##_amask) \
-/*TODO*///	   WRITEBYTE8(cpu_write##type##abits,            abits, write##type##_lookup, w##type##handler8,  type##_amask)
-/*TODO*///
-/*TODO*///#define GENERATE_HANDLERS_16BIT_BE(type, abits) \
+    public static int cpu_readmem16(int address) {
+        int entry;
+        /* perform lookup */
+        address &= mem_amask;
+        entry = readmem_lookup.read(LEVEL1_INDEX(address, 16, 0));
+        if (entry >= SUBTABLE_BASE) {
+            entry = readmem_lookup.read(LEVEL2_INDEX(entry, address, 16, 0));
+        }
+
+        /* for compatibility with setbankhandler, 8-bit systems */
+ /* must call handlers for banks */
+        if (entry == STATIC_RAM) {
+            return cpu_bankbase[STATIC_RAM].read(address);
+        } /* fall back to the handler */ else {
+            ReadHandlerPtr handler = (ReadHandlerPtr) rmemhandler8[entry].handler;
+            return handler.handler(address - rmemhandler8[entry].offset);
+        }
+        //return 0;
+    }
+
+    public static void cpu_writemem16(int address, int data) {
+        int entry;
+
+        /* perform lookup */
+        address &= mem_amask;
+        entry = writemem_lookup.read(LEVEL1_INDEX(address, 16, 0));
+        if (entry >= SUBTABLE_BASE) {
+            entry = writemem_lookup.read(LEVEL2_INDEX(entry, address, 16, 0));
+        }
+
+        /* for compatibility with setbankhandler, 8-bit systems */
+ /* must call handlers for banks */
+        if (entry == MRA_RAM) {
+            cpu_bankbase[STATIC_RAM].write(address, data);
+        } /* fall back to the handler */ else {
+            WriteHandlerPtr handler = (WriteHandlerPtr) wmemhandler8[entry].handler;
+            handler.handler(address - wmemhandler8[entry].offset, data);
+        }
+    }
+
+    /*TODO*///#define GENERATE_HANDLERS_16BIT_BE(type, abits) \
 /*TODO*///	 READBYTE16BE(cpu_read##type##abits##bew,        abits, read##type##_lookup,  r##type##handler16, type##_amask) \
 /*TODO*///	   READWORD16(cpu_read##type##abits##bew_word,   abits, read##type##_lookup,  r##type##handler16, type##_amask) \
 /*TODO*///	WRITEBYTE16BE(cpu_write##type##abits##bew,       abits, write##type##_lookup, w##type##handler16, type##_amask) \
@@ -2351,17 +2385,56 @@ public class memory {
 /*TODO*///	WRITEWORD32LE(cpu_write##type##abits##ledw_word, abits, write##type##_lookup, w##type##handler32, type##_amask) \
 /*TODO*///	  WRITELONG32(cpu_write##type##abits##ledw_dword,abits, write##type##_lookup, w##type##handler32, type##_amask)
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	GENERATE_MEM_HANDLERS - memory handler
-/*TODO*///	variants of the GENERATE_HANDLERS
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define GENERATE_MEM_HANDLERS_8BIT(abits) \
-/*TODO*///GENERATE_HANDLERS_8BIT(mem, abits) \
-/*TODO*///SETOPBASE(cpu_setopbase##abits,           abits, 0, rmemhandler8)
-/*TODO*///
-/*TODO*///#define GENERATE_MEM_HANDLERS_16BIT_BE(abits) \
+
+    /*-------------------------------------------------
+            GENERATE_MEM_HANDLERS - memory handler
+            variants of the GENERATE_HANDLERS
+    -------------------------------------------------*/
+    public static setopbase cpu_setOPbase16 = new setopbase() {
+        public void handler(int pc) {
+            UBytePtr base = null;
+            int entry;
+
+            /* allow overrides */
+            if (opbasefunc != null) {
+                throw new UnsupportedOperationException("Unsupported");
+                /*TODO*///		pc = (*opbasefunc)(pc);															
+/*TODO*///		if (pc == ~0)																	
+/*TODO*///			return; 
+            }
+
+            /* perform the lookup */
+            pc &= mem_amask;
+            entry = readmem_lookup.read(LEVEL1_INDEX(pc, 16, 0));
+            if (entry >= SUBTABLE_BASE) {
+                entry = readmem_lookup.read(LEVEL2_INDEX(entry, pc, 16, 0));
+            }
+            opcode_entry = entry;
+
+            /* RAM/ROM/RAMROM */
+            if (entry >= STATIC_RAM && entry <= STATIC_RAMROM) {
+                base = new UBytePtr(cpu_bankbase[STATIC_RAM]);
+            } /* banked memory */ else if (entry >= STATIC_BANK1 && entry <= STATIC_RAM) {
+                if (cpu_bankbase[entry] != null) {
+                    base = new UBytePtr(cpu_bankbase[entry]);
+                }
+            } /* other memory -- could be very slow! */ else {
+                logerror("cpu #%d (PC=%08X): warning - op-code execute on mapped I/O\n", cpu_getactivecpu(), activecpu_get_pc());
+                /*base = memory_find_base(cpu_getactivecpu(), pc);*/
+                return;
+            }
+
+            /* compute the adjusted base */
+            OP_ROM = new UBytePtr(base, -rmemhandler8[entry].offset + (OP_ROM.offset - OP_RAM.offset));
+            OP_RAM = new UBytePtr(base, -rmemhandler8[entry].offset);
+            OP_MEM_MIN = rmemhandler8[entry].offset;
+            OP_MEM_MAX = (entry >= STATIC_RAM && entry <= STATIC_RAMROM)
+                    ? cpudata[cpu_getactivecpu()].ramlength - 1
+                    : rmemhandler8[entry].top;
+        }
+    };
+
+    /*TODO*///#define GENERATE_MEM_HANDLERS_16BIT_BE(abits) \
 /*TODO*///GENERATE_HANDLERS_16BIT_BE(mem, abits) \
 /*TODO*///SETOPBASE(cpu_setopbase##abits##bew,      abits, 1, rmemhandler16)
 /*TODO*///
@@ -2377,15 +2450,50 @@ public class memory {
 /*TODO*///GENERATE_HANDLERS_32BIT_LE(mem, abits) \
 /*TODO*///SETOPBASE(cpu_setopbase##abits##ledw,     abits, 2, rmemhandler32)
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	GENERATE_PORT_HANDLERS - port handler
-/*TODO*///	variants of the GENERATE_HANDLERS
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define GENERATE_PORT_HANDLERS_8BIT(abits) \
-/*TODO*///GENERATE_HANDLERS_8BIT(port, abits)
-/*TODO*///
+
+    /*-------------------------------------------------
+            GENERATE_PORT_HANDLERS - port handler
+            variants of the GENERATE_HANDLERS
+    -------------------------------------------------*/
+    public static int cpu_readport16(int address) {
+        int entry;
+        /* perform lookup */
+        address &= port_amask;
+        entry = readport_lookup.read(LEVEL1_INDEX(address, 16, 0));
+        if (entry >= SUBTABLE_BASE) {
+            entry = readport_lookup.read(LEVEL2_INDEX(entry, address, 16, 0));
+        }
+
+        /* for compatibility with setbankhandler, 8-bit systems */
+ /* must call handlers for banks */
+        if (entry == STATIC_RAM) {
+            return cpu_bankbase[STATIC_RAM].read(address);
+        } /* fall back to the handler */ else {
+            ReadHandlerPtr handler = (ReadHandlerPtr) rporthandler8[entry].handler;
+            return handler.handler(address - rporthandler8[entry].offset);
+        }
+    }
+
+    public static void cpu_writeport16(int address, int data) {
+        int entry;
+        /* perform lookup */
+        address &= port_amask;
+        entry = writeport_lookup.read(LEVEL1_INDEX(address, 16, 0));
+        if (entry >= SUBTABLE_BASE) {
+            entry = writeport_lookup.read(LEVEL2_INDEX(entry, address, 16, 0));
+        }
+
+        /* for compatibility with setbankhandler, 8-bit systems */
+ /* must call handlers for banks */
+        if (entry == MRA_RAM) {
+            cpu_bankbase[STATIC_RAM].write(address, data);
+        } /* fall back to the handler */ else {
+            WriteHandlerPtr handler = (WriteHandlerPtr) wporthandler8[entry].handler;
+            handler.handler(address - wporthandler8[entry].offset, data);
+        }
+    }
+
+    /*TODO*///
 /*TODO*///#define GENERATE_PORT_HANDLERS_16BIT_BE(abits) \
 /*TODO*///GENERATE_HANDLERS_16BIT_BE(port, abits)
 /*TODO*///
