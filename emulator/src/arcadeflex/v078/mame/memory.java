@@ -27,10 +27,9 @@ import static mame056.cpuintrfH.CPU_V60;
 import static mame056.cpuintrfH.activecpu_get_pc;
 import static mame056.cpuintrfH.cpu_getactivecpu;
 import static mame056.cpuintrfH.cpu_gettotalcpu;
+import static mame056.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
-import static mame056.memory.init_cpudata;
-import static mame056.memory.memory_find_base;
 
 public class memory {
 
@@ -726,32 +725,30 @@ public class memory {
         return 0;
     }
 
-    /*TODO*////*-------------------------------------------------
-/*TODO*///	memory_find_base - return a pointer to the
-/*TODO*///	base of RAM associated with the given CPU
-/*TODO*///	and offset
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void *memory_find_base(int cpunum, offs_t offset)
-/*TODO*///{
-/*TODO*///	int ext_entry;
-/*TODO*///	int region = REGION_CPU1 + cpunum;
-/*TODO*///	struct ExtMemory *ext;
-/*TODO*///
-/*TODO*///	/* look in external memory first */
-/*TODO*///	ext = ext_memory;
-/*TODO*///	for( ext_entry = 0; ext_entry < ext_entries; ext_entry++ )
-/*TODO*///	{
-/*TODO*///		if (ext->region == region && ext->start <= offset && ext->end >= offset)
-/*TODO*///		{
-/*TODO*///			return (void *)((UINT8 *)ext->data + (offset - ext->start));
-/*TODO*///		}
-/*TODO*///		ext++;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	return (UINT8 *)cpudata[cpunum].rambase + offset;
-/*TODO*///}
-/*TODO*///
+    /*-------------------------------------------------
+            memory_find_base - return a pointer to the
+            base of RAM associated with the given CPU
+            and offset
+    -------------------------------------------------*/
+    public static UBytePtr memory_find_base(int cpunum, int offset) {
+        int ext_entry;
+        int region = REGION_CPU1 + cpunum;
+        int ext_ptr;//struct ExtMemory *ext;
+
+        /* look in external memory first */
+        ext_ptr = 0;//ext_memory;
+        for (ext_entry = 0; ext_entry < ext_entries; ext_entry++) {
+            if (ext_memory[ext_ptr].region == region && ext_memory[ext_ptr].start <= offset && ext_memory[ext_ptr].end >= offset) {
+                throw new UnsupportedOperationException("Unsupported");
+                /*TODO*///			return (void *)((UINT8 *)ext->data + (offset - ext->start));
+            }
+            ext_ptr++;
+        }
+
+        return new UBytePtr(cpudata[cpunum].rambase, offset);
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*////*-------------------------------------------------
 /*TODO*///	memory_get_read_ptr - return a pointer to the
@@ -1044,58 +1041,56 @@ public class memory {
 /*TODO*///	wporthandler32[idx].handler = (void *)w32handler;
     }
 
-    /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	init_cpudata - initialize the cpudata
-/*TODO*///	structure for each CPU
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int init_cpudata(void)
-/*TODO*///{
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* zap the cpudata structure */
-/*TODO*///	memset(&cpudata, 0, sizeof(cpudata));
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		int cputype = Machine->drv->cpu[cpunum].cpu_type;
-/*TODO*///
-/*TODO*///		/* set the RAM/ROM base */
-/*TODO*///		cpudata[cpunum].rambase = cpudata[cpunum].op_ram = cpudata[cpunum].op_rom = memory_region(REGION_CPU1 + cpunum);
-/*TODO*///		cpudata[cpunum].op_mem_max = cpudata[cpunum].ramlength = memory_region_length(REGION_CPU1 + cpunum);
-/*TODO*///		cpudata[cpunum].op_mem_min = 0;
-/*TODO*///		cpudata[cpunum].opcode_entry = STATIC_ROM;
-/*TODO*///		cpudata[cpunum].opbase = NULL;
-/*TODO*///		encrypted_opcode_start[cpunum] = 0;
+    /*-------------------------------------------------
+            init_cpudata - initialize the cpudata
+            structure for each CPU
+    -------------------------------------------------*/
+    public static int init_cpudata() {
+        int cpunum;
+
+        /* zap the cpudata structure */
+        for (int i = 0; i < MAX_CPU; i++) {
+            cpudata[i] = new cpu_data();
+        }
+        /* loop over CPUs */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+            int cputype = Machine.drv.cpu[cpunum].cpu_type;
+
+            /* set the RAM/ROM base */
+            cpudata[cpunum].rambase = cpudata[cpunum].op_ram = cpudata[cpunum].op_rom = memory_region(REGION_CPU1 + cpunum);
+            cpudata[cpunum].op_mem_max = cpudata[cpunum].ramlength = memory_region_length(REGION_CPU1 + cpunum);
+            cpudata[cpunum].op_mem_min = 0;
+            cpudata[cpunum].opcode_entry = STATIC_ROM;
+            cpudata[cpunum].opbase = null;
+            /*TODO*///		encrypted_opcode_start[cpunum] = 0;
 /*TODO*///		encrypted_opcode_end[cpunum] = 0;
-/*TODO*///
-/*TODO*///		/* initialize the readmem and writemem tables */
-/*TODO*///		if (!init_memport(cpunum, &cpudata[cpunum].mem, mem_address_bits_of_cpu(cputype), cpunum_databus_width(cpunum), 1))
-/*TODO*///			return 0;
-/*TODO*///
-/*TODO*///		/* initialize the readport and writeport tables */
-/*TODO*///		if (!init_memport(cpunum, &cpudata[cpunum].port, port_address_bits_of_cpu(cputype), cpunum_databus_width(cpunum), 0))
-/*TODO*///			return 0;
-/*TODO*///
-/*TODO*///#if HAS_Z80
-/*TODO*///		/* Z80 port mask kludge */
-/*TODO*///		if (cputype == CPU_Z80)
-/*TODO*///			if (!(Machine->drv->cpu[cpunum].cpu_flags & CPU_16BIT_PORT))
-/*TODO*///				cpudata[cpunum].port.mask = 0xff;
-/*TODO*///#endif
-/*TODO*///#if HAS_Z180
-/*TODO*///		/* Z180 port mask kludge */
-/*TODO*///		if (cputype == CPU_Z180)
-/*TODO*///			if (!(Machine->drv->cpu[cpunum].cpu_flags & CPU_16BIT_PORT))
-/*TODO*///				cpudata[cpunum].port.mask = 0xff;
-/*TODO*///#endif
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
+
+            /* initialize the readmem and writemem tables */
+            if (init_memport(cpunum, cpudata[cpunum].mem, mem_address_bits_of_cpu(cputype), cpunum_databus_width(cpunum), 1) == 0) {
+                return 0;
+            }
+
+            /* initialize the readport and writeport tables */
+            if (init_memport(cpunum, cpudata[cpunum].port, port_address_bits_of_cpu(cputype), cpunum_databus_width(cpunum), 0) == 0) {
+                return 0;
+            }
+            /* Z80 port mask kludge */
+ /*    if (cputype == CPU_Z80) {
+                if ((Machine.drv.cpu[cpunum].cpu_flags & CPU_16BIT_PORT) == 0) {
+                    cpudata[cpunum].port.mask = 0xff;
+                }
+            }
+            /* Z180 port mask kludge */
+ /*    if (cputype == CPU_Z180) {
+                if ((Machine.drv.cpu[cpunum].cpu_flags & CPU_16BIT_PORT) == 0) {
+                    cpudata[cpunum].port.mask = 0xff;
+                }
+            }*/
+
+        }
+        return 1;
+    }
+
 
     /*-------------------------------------------------
 	init_memport - initialize the mem/port data
@@ -2892,6 +2887,8 @@ public class memory {
 /*TODO*///	get address bits from a read handler
 /*TODO*///-------------------------------------------------*/
 /*TODO*///
+    public static int mem_address_bits_of_cpu(int cputype) {
+        return cputype_get_interface(cputype).mem_address_bits_of_cpu();//temp solution
 /*TODO*///int mem_address_bits_of_cpu(int cputype)
 /*TODO*///{
 /*TODO*///	read8_handler handler = cputype_get_interface(cputype)->memory_read;
@@ -2906,8 +2903,8 @@ public class memory {
 /*TODO*///	fatalerror("CPU #%d memory handlers don't have a table entry in readmem_to_bits!\n");
 /*TODO*///	exit(1);
 /*TODO*///	return 0;
-/*TODO*///}
-/*TODO*///
+    }
+
 
     /*-------------------------------------------------
 	get address bits from a read handler
