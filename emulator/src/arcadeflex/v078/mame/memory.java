@@ -17,6 +17,9 @@ import static common.libc.cstdio.printf;
 import static common.libc.cstring.memset;
 import common.ptr.UBytePtr;
 import static java.lang.System.exit;
+import static mame056.common.memory_region;
+import static mame056.common.memory_region_length;
+import static mame056.commonH.REGION_CPU1;
 import static mame056.cpuintrf.activecpu_address_bits;
 import static mame056.cpuintrf.activecpu_address_shift;
 import static mame056.cpuintrfH.CPU_V60;
@@ -24,12 +27,10 @@ import static mame056.cpuintrfH.activecpu_get_pc;
 import static mame056.cpuintrfH.cpu_getactivecpu;
 import static mame056.cpuintrfH.cpu_gettotalcpu;
 import static mame056.driverH.MAX_CPU;
-import static mame056.memory.allocate_memory;
+import static mame056.mame.Machine;
 import static mame056.memory.init_cpudata;
 import static mame056.memory.init_static;
 import static mame056.memory.memory_find_base;
-import static mame056.memory.populate_memory;
-import static mame056.memory.populate_ports;
 import static mame056.memory.verify_memory;
 import static mame056.memory.verify_ports;
 
@@ -1296,117 +1297,213 @@ public class memory {
         }
     }
 
-    /*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	allocate_memory - allocate memory for
-/*TODO*///	sparse CPU address spaces
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int allocate_memory(void)
-/*TODO*///{
-/*TODO*///	struct ExtMemory *ext = ext_memory;
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	ext_entries = 0;
-/*TODO*///
-/*TODO*///	/* don't do it for drivers that don't have ROM (MESS needs this) */
-/*TODO*///	if (Machine->gamedrv->rom == 0)
-/*TODO*///		return 1;
-/*TODO*///
-/*TODO*///	/* loop over all CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		int region = REGION_CPU1 + cpunum;
-/*TODO*///		int region_length = memory_region(region) ? memory_region_length(region) : 0;
-/*TODO*///		int size = region_length;
-/*TODO*///
-/*TODO*///		/* keep going until we break out */
-/*TODO*///		while (1)
-/*TODO*///		{
-/*TODO*///			const struct Memory_ReadAddress *mra = Machine->drv->cpu[cpunum].memory_read;
-/*TODO*///			const struct Memory_WriteAddress *mwa = Machine->drv->cpu[cpunum].memory_write;
-/*TODO*///			offs_t lowest = ~0, end, lastend;
-/*TODO*///
-/*TODO*///			/* find the base of the lowest memory region that extends past the end */
-/*TODO*///			for (mra = Machine->drv->cpu[cpunum].memory_read; !IS_MEMPORT_END(mra); mra++)
-/*TODO*///				if (!IS_MEMPORT_MARKER(mra))
-/*TODO*///					if (mra->end >= size && mra->start < lowest && needs_ram(cpunum, (void *)mra->handler))
-/*TODO*///						lowest = mra->start;
-/*TODO*///
-/*TODO*///			for (mwa = Machine->drv->cpu[cpunum].memory_write; !IS_MEMPORT_END(mwa); mwa++)
-/*TODO*///				if (!IS_MEMPORT_MARKER(mwa))
-/*TODO*///					if (mwa->end >= size && mwa->start < lowest && (mwa->base || needs_ram(cpunum, (void *)mwa->handler)))
-/*TODO*///						lowest = mwa->start;
-/*TODO*///
-/*TODO*///			/* done if nothing found */
-/*TODO*///			if (lowest == ~0)
-/*TODO*///				break;
-/*TODO*///
-/*TODO*///			/* now loop until we find the end of this contiguous block of memory */
-/*TODO*///			lastend = ~0;
-/*TODO*///			end = lowest;
-/*TODO*///			while (end != lastend)
-/*TODO*///			{
-/*TODO*///				lastend = end;
-/*TODO*///
-/*TODO*///				/* find the end of the contiguous block of memory */
-/*TODO*///				for (mra = Machine->drv->cpu[cpunum].memory_read; !IS_MEMPORT_END(mra); mra++)
-/*TODO*///					if (!IS_MEMPORT_MARKER(mra))
-/*TODO*///						if (mra->start <= end+1 && mra->end > end && needs_ram(cpunum, (void *)mra->handler))
-/*TODO*///							end = mra->end;
-/*TODO*///
-/*TODO*///				for (mwa = Machine->drv->cpu[cpunum].memory_write; !IS_MEMPORT_END(mwa); mwa++)
-/*TODO*///					if (!IS_MEMPORT_MARKER(mwa))
-/*TODO*///						if (mwa->start <= end+1 && mwa->end > end && (mwa->base || needs_ram(cpunum, (void *)mwa->handler)))
-/*TODO*///							end = mwa->end;
-/*TODO*///			}
-/*TODO*///
-/*TODO*///			ext_entries++;
-/*TODO*///			if( ext_entries > MAX_EXT_MEMORY )
-/*TODO*///			{
-/*TODO*///				return fatalerror("MAX_EXT_MEMORY too small (%d)\n", ext_entries);
-/*TODO*///			}
-/*TODO*///
-/*TODO*///			/* fill in the data structure */
-/*TODO*///			ext->start = lowest;
-/*TODO*///			ext->end = end;
-/*TODO*///			ext->region = region;
-/*TODO*///
-/*TODO*///			/* allocate memory */
-/*TODO*///			ext->data = malloc(end+1 - lowest);
-/*TODO*///			if (!ext->data)
-/*TODO*///				fatalerror("malloc(%d) failed (lowest: %x - end: %x)\n", end + 1 - lowest, lowest, end);
-/*TODO*///
-/*TODO*///			/* reset the memory */
-/*TODO*///			memset(ext->data, 0, end+1 - lowest);
-/*TODO*///
-/*TODO*///			/* prepare for the next loop */
-/*TODO*///			size = ext->end + 1;
-/*TODO*///
-/*TODO*///			/* check for wraparound */
-/*TODO*///			if (size < ext->end)
-/*TODO*///				break;
-/*TODO*///
-/*TODO*///			ext++;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	populate_memory - populate the memory mapping
-/*TODO*///	tables with entries
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int populate_memory(void)
-/*TODO*///{
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		const struct Memory_ReadAddress *mra, *mra_start = Machine->drv->cpu[cpunum].memory_read;
+    /*-------------------------------------------------
+    	allocate_memory - allocate memory for
+    	sparse CPU address spaces
+    -------------------------------------------------*/
+    public static int allocate_memory() {
+        int ext = 0;//struct ExtMemory *ext = ext_memory;
+        int cpunum;
+
+        ext_entries = 0;
+
+        /* don't do it for drivers that don't have ROM (MESS needs this) */
+        if (Machine.gamedrv.rom == null) {
+            return 1;
+        }
+
+        /* loop over all CPUs */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+            int region = REGION_CPU1 + cpunum;
+            int region_length = memory_region(region) != null ? memory_region_length(region) : 0;
+            int size = region_length;
+
+            /* keep going until we break out */
+            while (true) {
+                int lowest = Integer.MAX_VALUE, end = 0, lastend;
+                Object mra_obj = Machine.drv.cpu[cpunum].memory_read;
+                Object mwa_obj = Machine.drv.cpu[cpunum].memory_write;
+                if (mra_obj instanceof Memory_ReadAddress[]) {
+                    Memory_ReadAddress[] mra = (Memory_ReadAddress[]) mra_obj;
+                    int mra_ptr = 0;
+                    /* find the base of the lowest memory region that extends past the end */
+                    for (mra_ptr = 0; !IS_MEMPORT_END(mra[mra_ptr]); mra_ptr++) {
+                        if (!IS_MEMPORT_MARKER(mra[mra_ptr])) {
+                            if (mra[mra_ptr].end >= size && mra[mra_ptr].start < lowest && needs_ram(cpunum, mra[mra_ptr].handler, mra[mra_ptr]._handler)) {
+                                lowest = mra[mra_ptr].start;
+                            }
+                        }
+                    }
+                    Memory_WriteAddress[] mwa = (Memory_WriteAddress[]) mwa_obj;
+                    int mwa_ptr = 0;
+
+                    for (mwa_ptr = 0; !IS_MEMPORT_END(mwa[mwa_ptr]); mwa_ptr++) {
+                        if (!IS_MEMPORT_MARKER(mwa[mwa_ptr])) {
+                            if (mwa[mwa_ptr].end >= size && mwa[mwa_ptr].start < lowest && (mwa[mwa_ptr].base != null || needs_ram(cpunum, mwa[mwa_ptr].handler, mwa[mwa_ptr]._handler))) {
+                                lowest = mwa[mwa_ptr].start;
+                            }
+                        }
+                    }
+
+                    /* done if nothing found */
+                    if (lowest == Integer.MAX_VALUE) {
+                        break;
+                    }
+                    throw new UnsupportedOperationException("Unimplemented");
+
+                    /*TODO*///			/* now loop until we find the end of this contiguous block of memory */
+                    /*TODO*///			lastend = ~0;
+                    /*TODO*///			end = lowest;
+                    /*TODO*///			while (end != lastend)
+                    /*TODO*///			{
+                    /*TODO*///				lastend = end;
+                    /*TODO*///
+                    /*TODO*///				/* find the end of the contiguous block of memory */
+                    /*TODO*///				for (mra = Machine->drv->cpu[cpunum].memory_read; !IS_MEMPORT_END(mra); mra++)
+                    /*TODO*///					if (!IS_MEMPORT_MARKER(mra))
+                    /*TODO*///						if (mra->start <= end+1 && mra->end > end && needs_ram(cpunum, (void *)mra->handler))
+                    /*TODO*///							end = mra->end;
+                    /*TODO*///
+                    /*TODO*///				for (mwa = Machine->drv->cpu[cpunum].memory_write; !IS_MEMPORT_END(mwa); mwa++)
+                    /*TODO*///					if (!IS_MEMPORT_MARKER(mwa))
+                    /*TODO*///						if (mwa->start <= end+1 && mwa->end > end && (mwa->base || needs_ram(cpunum, (void *)mwa->handler)))
+                    /*TODO*///							end = mwa->end;
+                    /*TODO*///			}
+                }
+                /*TODO*///			/* find the base of the lowest memory region that extends past the end */
+                /*TODO*///			for (mra = Machine->drv->cpu[cpunum].memory_read; !IS_MEMPORT_END(mra); mra++)
+                /*TODO*///				if (!IS_MEMPORT_MARKER(mra))
+                /*TODO*///					if (mra->end >= size && mra->start < lowest && needs_ram(cpunum, (void *)mra->handler))
+                /*TODO*///						lowest = mra->start;
+                /*TODO*///
+                /*TODO*///			for (mwa = Machine->drv->cpu[cpunum].memory_write; !IS_MEMPORT_END(mwa); mwa++)
+                /*TODO*///				if (!IS_MEMPORT_MARKER(mwa))
+                /*TODO*///					if (mwa->end >= size && mwa->start < lowest && (mwa->base || needs_ram(cpunum, (void *)mwa->handler)))
+                /*TODO*///						lowest = mwa->start;
+                /*TODO*///
+                /*TODO*///			/* done if nothing found */
+                /*TODO*///			if (lowest == ~0)
+                /*TODO*///				break;
+                /*TODO*///
+                /*TODO*///			/* now loop until we find the end of this contiguous block of memory */
+                /*TODO*///			lastend = ~0;
+                /*TODO*///			end = lowest;
+                /*TODO*///			while (end != lastend)
+                /*TODO*///			{
+                /*TODO*///				lastend = end;
+                /*TODO*///
+                /*TODO*///				/* find the end of the contiguous block of memory */
+                /*TODO*///				for (mra = Machine->drv->cpu[cpunum].memory_read; !IS_MEMPORT_END(mra); mra++)
+                /*TODO*///					if (!IS_MEMPORT_MARKER(mra))
+                /*TODO*///						if (mra->start <= end+1 && mra->end > end && needs_ram(cpunum, (void *)mra->handler))
+                /*TODO*///							end = mra->end;
+                /*TODO*///
+                /*TODO*///				for (mwa = Machine->drv->cpu[cpunum].memory_write; !IS_MEMPORT_END(mwa); mwa++)
+                /*TODO*///					if (!IS_MEMPORT_MARKER(mwa))
+                /*TODO*///						if (mwa->start <= end+1 && mwa->end > end && (mwa->base || needs_ram(cpunum, (void *)mwa->handler)))
+                /*TODO*///							end = mwa->end;
+                /*TODO*///			}
+                /*TODO*///
+                /*TODO*///			ext_entries++;
+                /*TODO*///			if( ext_entries > MAX_EXT_MEMORY )
+                /*TODO*///			{
+                /*TODO*///				return fatalerror("MAX_EXT_MEMORY too small (%d)\n", ext_entries);
+                /*TODO*///			}
+                /*TODO*///			/* fill in the data structure */
+                /*TODO*///			ext->start = lowest;
+                /*TODO*///			ext->end = end;
+                /*TODO*///			ext->region = region;
+                /*TODO*///
+                /*TODO*///			/* allocate memory */
+                /*TODO*///			ext->data = malloc(end+1 - lowest);
+                /*TODO*///			if (!ext->data)
+                /*TODO*///				fatalerror("malloc(%d) failed (lowest: %x - end: %x)\n", end + 1 - lowest, lowest, end);
+                /*TODO*///
+                /*TODO*///			/* reset the memory */
+                /*TODO*///			memset(ext->data, 0, end+1 - lowest);
+                /*TODO*///
+                /*TODO*///			/* prepare for the next loop */
+                /*TODO*///			size = ext->end + 1;
+                /*TODO*///
+                /*TODO*///			/* check for wraparound */
+                /*TODO*///			if (size < ext->end)
+                /*TODO*///				break;
+                /*TODO*///
+                /*TODO*///			ext++;
+            }
+        }
+        return 1;
+    }
+
+    /*-------------------------------------------------
+    	populate_memory - populate the memory mapping
+    	tables with entries
+    -------------------------------------------------*/
+    public static int populate_memory() {
+        int cpunum;
+
+        /* loop over CPUs */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+            Object mra_obj = Machine.drv.cpu[cpunum].memory_read;
+            Object mwa_obj = Machine.drv.cpu[cpunum].memory_write;
+
+            /* install the read handlers */
+            if (mra_obj != null) {
+                if (mra_obj instanceof Memory_ReadAddress[]) {
+                    Memory_ReadAddress[] mra = (Memory_ReadAddress[]) mra_obj;
+                    int mra_ptr = 0;
+                    /* first find the end and check for address bits */
+                    for (mra_ptr = 0; !IS_MEMPORT_END(mra[mra_ptr]); mra_ptr++) {
+                        if (IS_MEMPORT_MARKER(mra[mra_ptr]) && ((mra[mra_ptr].end & MEMPORT_ABITS_MASK) != 0)) {
+                            cpudata[cpunum].mem.mask = 0xffffffff >>> (32 - (mra[mra_ptr].end & MEMPORT_ABITS_VAL_MASK));
+                        }
+                    }
+
+                    /* then work backwards */
+                    for (mra_ptr--; mra_ptr >= 0; mra_ptr--) {
+                        if (!IS_MEMPORT_MARKER(mra[mra_ptr])) {
+                            install_mem_handler(cpudata[cpunum].mem, 0, mra[mra_ptr].start, mra[mra_ptr].end, mra[mra_ptr].handler, (Object) mra[mra_ptr]._handler);
+                        }
+                    }
+                } else {
+                    //16,32bit handling
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+
+            /* install the write handlers */
+            if (mwa_obj != null) {
+                if (mwa_obj instanceof Memory_WriteAddress[]) {
+                    Memory_WriteAddress[] mwa = (Memory_WriteAddress[]) mwa_obj;
+                    int mwa_ptr = 0;
+                    /* first find the end and check for address bits */
+                    for (mwa_ptr = 0; !IS_MEMPORT_END(mwa[mwa_ptr]); mwa_ptr++) {
+                        if (IS_MEMPORT_MARKER(mwa[mwa_ptr]) && (mwa[mwa_ptr].end & MEMPORT_ABITS_MASK) != 0) {
+                            cpudata[cpunum].mem.mask = 0xffffffff >>> (32 - (mwa[mwa_ptr].end & MEMPORT_ABITS_VAL_MASK));
+                        }
+                    }
+
+                    /* then work backwards */
+                    for (mwa_ptr--; mwa_ptr >= 0; mwa_ptr--) {
+                        if (!IS_MEMPORT_MARKER(mwa[mwa_ptr])) {
+                            install_mem_handler(cpudata[cpunum].mem, 1, mwa[mwa_ptr].start, mwa[mwa_ptr].end, mwa[mwa_ptr].handler, mwa[mwa_ptr]._handler);
+                            if (mwa[mwa_ptr].base != null) {
+                                UBytePtr p = memory_find_base(cpunum, mwa[mwa_ptr].start);
+                                mwa[mwa_ptr].base.memory = p.memory;
+                                mwa[mwa_ptr].base.offset = p.offset;
+                            }
+                            if (mwa[mwa_ptr].size != null) {
+                                mwa[mwa_ptr].size[0] = mwa[mwa_ptr].end - mwa[mwa_ptr].start + 1;
+                            }
+                        }
+                    }
+                } else {
+                    //16,32bit handling
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+
+            /*TODO*///		const struct Memory_ReadAddress *mra, *mra_start = Machine->drv->cpu[cpunum].memory_read;
 /*TODO*///		const struct Memory_WriteAddress *mwa, *mwa_start = Machine->drv->cpu[cpunum].memory_write;
 /*TODO*///
 /*TODO*///		/* install the read handlers */
@@ -1440,27 +1537,71 @@ public class memory {
 /*TODO*///					if (mwa->size) *mwa->size = mwa->end - mwa->start + 1;
 /*TODO*///				}
 /*TODO*///		}
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	populate_ports - populate the port mapping
-/*TODO*///	tables with entries
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int populate_ports(void)
-/*TODO*///{
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		const struct IO_ReadPort *mra, *mra_start = Machine->drv->cpu[cpunum].port_read;
-/*TODO*///		const struct IO_WritePort *mwa, *mwa_start = Machine->drv->cpu[cpunum].port_write;
-/*TODO*///
-/*TODO*///		/* install the read handlers */
+        }
+        return 1;
+    }
+
+    /*-------------------------------------------------
+            populate_ports - populate the port mapping
+            tables with entries
+    -------------------------------------------------*/
+    public static int populate_ports() {
+        int cpunum;
+
+        /* loop over CPUs */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+            Object mra_obj = Machine.drv.cpu[cpunum].port_read;
+            Object mwa_obj = Machine.drv.cpu[cpunum].port_write;
+
+
+            /* install the read handlers */
+            if (mra_obj != null) {
+                if (mra_obj instanceof IO_ReadPort[]) {
+                    IO_ReadPort[] mra = (IO_ReadPort[]) mra_obj;
+                    int mra_ptr = 0;
+                    /* first find the end and check for address bits */
+                    for (mra_ptr = 0; !IS_MEMPORT_END(mra[mra_ptr]); mra_ptr++) {
+                        if (IS_MEMPORT_MARKER(mra[mra_ptr]) && (mra[mra_ptr].end & MEMPORT_ABITS_MASK) != 0) {
+                            cpudata[cpunum].port.mask = 0xffffffff >>> (32 - (mra[mra_ptr].end & MEMPORT_ABITS_VAL_MASK));
+                        }
+                    }
+
+                    /* then work backwards */
+                    for (mra_ptr--; mra_ptr >= 0; mra_ptr--) {
+                        if (!IS_MEMPORT_MARKER(mra[mra_ptr])) {
+                            install_port_handler(cpudata[cpunum].port, 0, mra[mra_ptr].start, mra[mra_ptr].end, mra[mra_ptr].handler, mra[mra_ptr]._handler);
+                        }
+                    }
+                } else {
+                    //16bit -32 bit support
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+
+            /* install the write handlers */
+            if (mwa_obj != null) {
+                if (mwa_obj instanceof IO_WritePort[]) {
+                    IO_WritePort[] mwa = (IO_WritePort[]) mwa_obj;
+                    int mwa_ptr = 0;
+                    /* first find the end and check for address bits */
+                    for (mwa_ptr = 0; !IS_MEMPORT_END(mwa[mwa_ptr]); mwa_ptr++) {
+                        if (IS_MEMPORT_MARKER(mwa[mwa_ptr]) && (mwa[mwa_ptr].end & MEMPORT_ABITS_MASK) != 0) {
+                            cpudata[cpunum].port.mask = 0xffffffff >>> (32 - (mwa[mwa_ptr].end & MEMPORT_ABITS_VAL_MASK));
+                        }
+                    }
+
+                    /* then work backwards */
+                    for (mwa_ptr--; mwa_ptr >= 0; mwa_ptr--) {
+                        if (!IS_MEMPORT_MARKER(mwa[mwa_ptr])) {
+                            install_port_handler(cpudata[cpunum].port, 1, mwa[mwa_ptr].start, mwa[mwa_ptr].end, mwa[mwa_ptr].handler, mwa[mwa_ptr]._handler);
+                        }
+                    }
+                } else {
+                    //16bit -32 bit support
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+            /*TODO*///		/* install the read handlers */
 /*TODO*///		if (mra_start)
 /*TODO*///		{
 /*TODO*///			/* first find the end and check for address bits */
@@ -1487,840 +1628,841 @@ public class memory {
 /*TODO*///				if (!IS_MEMPORT_MARKER(mwa))
 /*TODO*///					install_port_handler(&cpudata[cpunum].port, 1, mwa->start, mwa->end, (void *)mwa->handler);
 /*TODO*///		}
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	register_banks - Registers all memory banks
-/*TODO*///    into the state save system
-/*TODO*///-------------------------------------------------*/
-/*TODO*///typedef struct rg_map_entry {
-/*TODO*///	struct rg_map_entry *next;
-/*TODO*///	UINT32 start;
-/*TODO*///	UINT32 end;
-/*TODO*///	int flags;
-/*TODO*///} rg_map_entry;
-/*TODO*///
-/*TODO*///static rg_map_entry *rg_map = 0;
-/*TODO*///
-/*TODO*///enum {
-/*TODO*///	RG_SAVE_READ  = 0x0001,
-/*TODO*///	RG_DROP_READ  = 0x0002,
-/*TODO*///	RG_READ_MASK  = 0x00ff,
-/*TODO*///
-/*TODO*///	RG_SAVE_WRITE = 0x0100,
-/*TODO*///	RG_DROP_WRITE = 0x0200,
-/*TODO*///	RG_WRITE_MASK = 0xff00
-/*TODO*///};
-/*TODO*///
-/*TODO*///static void rg_add_entry(UINT32 start, UINT32 end, int mode)
-/*TODO*///{
-/*TODO*///	rg_map_entry **cur;
-/*TODO*///	cur = &rg_map;
-/*TODO*///	while(*cur && ((*cur)->end < start))
-/*TODO*///		cur = &(*cur)->next;
-/*TODO*///
-/*TODO*///	while(start <= end)
-/*TODO*///	{
-/*TODO*///		int mask;
-/*TODO*///		if(!*cur || ((*cur)->start > start))
-/*TODO*///		{
-/*TODO*///			rg_map_entry *e = malloc(sizeof(rg_map_entry));
-/*TODO*///			e->start = start;
-/*TODO*///			e->end = *cur && (*cur)->start <= end ? (*cur)->start - 1 : end;
-/*TODO*///			e->flags = mode;
-/*TODO*///			e->next = *cur;
-/*TODO*///			*cur = e;
-/*TODO*///			cur = &(*cur)->next;
-/*TODO*///			start = e->end + 1;
-/*TODO*///
-/*TODO*///			/* check for wraparound */
-/*TODO*///			if(start == 0 || start > end)
-/*TODO*///				return;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		if((*cur)->start < start)
-/*TODO*///		{
-/*TODO*///			rg_map_entry *e = malloc(sizeof(rg_map_entry));
-/*TODO*///			e->start = (*cur)->start;
-/*TODO*///			e->end = start - 1;
-/*TODO*///			e->flags = (*cur)->flags;
-/*TODO*///			e->next = *cur;
-/*TODO*///			(*cur)->start = start;
-/*TODO*///			*cur = e;
-/*TODO*///			cur = &(*cur)->next;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		if((*cur)->end > end)
-/*TODO*///		{
-/*TODO*///			rg_map_entry *e = malloc(sizeof(rg_map_entry));
-/*TODO*///			e->start = start;
-/*TODO*///			e->end = end;
-/*TODO*///			e->flags = (*cur)->flags;
-/*TODO*///			e->next = *cur;
-/*TODO*///			(*cur)->start = end+1;
-/*TODO*///			*cur = e;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		mask = 0;
-/*TODO*///
-/*TODO*///		if (mode & RG_READ_MASK)
-/*TODO*///			mask |= RG_READ_MASK;
-/*TODO*///		if (mode & RG_WRITE_MASK)
-/*TODO*///			mask |= RG_WRITE_MASK;
-/*TODO*///
-/*TODO*///		(*cur)->flags = ((*cur)->flags & ~mask) | mode;
-/*TODO*///		start = (*cur)->end + 1;
-/*TODO*///		cur = &(*cur)->next;
-/*TODO*///
-/*TODO*///		/* check for wraparound */
-/*TODO*///		if (start == 0)
-/*TODO*///			break;
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///static void rg_map_clear(void)
-/*TODO*///{
-/*TODO*///	rg_map_entry *e = rg_map;
-/*TODO*///	while(e)
-/*TODO*///	{
-/*TODO*///		rg_map_entry *n = e->next;
-/*TODO*///		free(e);
-/*TODO*///		e = n;
-/*TODO*///	}
-/*TODO*///	rg_map = 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*///static void register_zone(int cpunum, UINT32 start, UINT32 end)
-/*TODO*///{
-/*TODO*///	char name[256];
-/*TODO*///	sprintf (name, "%08x-%08x", start, end);
-/*TODO*///	switch (cpunum_databus_width(cpunum))
-/*TODO*///	{
-/*TODO*///	case 8:
-/*TODO*///		state_save_register_UINT8 ("memory", cpunum, name, memory_find_base(cpunum, start), end-start+1);
-/*TODO*///		break;
-/*TODO*///	case 16:
-/*TODO*///		state_save_register_UINT16("memory", cpunum, name, memory_find_base(cpunum, start), (end-start+1)/2);
-/*TODO*///		break;
-/*TODO*///	case 32:
-/*TODO*///		state_save_register_UINT32("memory", cpunum, name, memory_find_base(cpunum, start), (end-start+1)/4);
-/*TODO*///		break;
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///void register_banks(void)
-/*TODO*///{
-/*TODO*///	int cpunum, i;
-/*TODO*///	int banksize[MAX_BANKS];
-/*TODO*///	int bankcpu[MAX_BANKS];
-/*TODO*///
-/*TODO*///	for (i=0; i<MAX_BANKS; i++)
-/*TODO*///	{
-/*TODO*///		banksize[i] = 0;
-/*TODO*///		bankcpu[i] = -1;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		const struct Memory_ReadAddress *mra, *mra_start = Machine->drv->cpu[cpunum].memory_read;
-/*TODO*///		const struct Memory_WriteAddress *mwa, *mwa_start = Machine->drv->cpu[cpunum].memory_write;
-/*TODO*///		int bits = cpudata[cpunum].mem.abits;
-/*TODO*/////		int width = cpunum_databus_width(cpunum);
-/*TODO*///
-/*TODO*///		if (!IS_SPARSE(bits))
-/*TODO*///		{
-/*TODO*///			UINT32 size = memory_region_length(REGION_CPU1 + cpunum);
-/*TODO*///			if (size > (1<<bits))
-/*TODO*///				size = 1 << bits;
-/*TODO*///			rg_add_entry(0, size-1, RG_SAVE_READ|RG_SAVE_WRITE);
-/*TODO*///		}
-/*TODO*///
-/*TODO*///
-/*TODO*///		if (mra_start)
-/*TODO*///		{
-/*TODO*///			for (mra = mra_start; !IS_MEMPORT_END(mra); mra++);
-/*TODO*///			mra--;
-/*TODO*///			for (;mra != mra_start; mra--)
-/*TODO*///			{
-/*TODO*///				if (!IS_MEMPORT_MARKER (mra))
-/*TODO*///				{
-/*TODO*///					int mode;
-/*TODO*///					mem_read_handler h = mra->handler;
-/*TODO*///					if (!HANDLER_IS_STATIC (h))
-/*TODO*///						mode = RG_DROP_READ;
-/*TODO*///					else if (HANDLER_IS_RAM(h))
-/*TODO*///						mode = RG_SAVE_READ;
-/*TODO*///					else if (HANDLER_IS_ROM(h))
-/*TODO*///						mode = RG_DROP_READ;
-/*TODO*///					else if (HANDLER_IS_RAMROM(h))
-/*TODO*///						mode = RG_SAVE_READ;
-/*TODO*///					else if (HANDLER_IS_NOP(h))
-/*TODO*///						mode = RG_DROP_READ;
-/*TODO*///					else if (HANDLER_IS_BANK(h))
-/*TODO*///					{
-/*TODO*///						int size = mra->end-mra->start+1;
-/*TODO*///						if (banksize[HANDLER_TO_BANK(h)] < size)
-/*TODO*///							banksize[HANDLER_TO_BANK(h)] = size;
-/*TODO*///						bankcpu[HANDLER_TO_BANK(h)] = cpunum;
-/*TODO*///						mode = RG_DROP_READ;
-/*TODO*///					}
-/*TODO*///					else
-/*TODO*///						abort();
-/*TODO*///					rg_add_entry(mra->start, mra->end, mode);
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///		if (mwa_start)
-/*TODO*///		{
-/*TODO*///			for (mwa = mwa_start; !IS_MEMPORT_END(mwa); mwa++);
-/*TODO*///			mwa--;
-/*TODO*///			for (;mwa != mwa_start; mwa--)
-/*TODO*///			{
-/*TODO*///				if (!IS_MEMPORT_MARKER (mwa))
-/*TODO*///				{
-/*TODO*///					int mode;
-/*TODO*///					mem_write_handler h = mwa->handler;
-/*TODO*///					if (!HANDLER_IS_STATIC (h))
-/*TODO*///						mode = mwa->base ? RG_SAVE_WRITE : RG_DROP_WRITE;
-/*TODO*///					else if (HANDLER_IS_RAM(h))
-/*TODO*///						mode = RG_SAVE_WRITE;
-/*TODO*///					else if (HANDLER_IS_ROM(h))
-/*TODO*///						mode = RG_DROP_WRITE;
-/*TODO*///					else if (HANDLER_IS_RAMROM(h))
-/*TODO*///						mode = RG_SAVE_WRITE;
-/*TODO*///					else if (HANDLER_IS_NOP(h))
-/*TODO*///						mode = RG_DROP_WRITE;
-/*TODO*///					else if (HANDLER_IS_BANK(h))
-/*TODO*///					{
-/*TODO*///						int size = mwa->end-mwa->start+1;
-/*TODO*///						if (banksize[HANDLER_TO_BANK(h)] < size)
-/*TODO*///							banksize[HANDLER_TO_BANK(h)] = size;
-/*TODO*///						bankcpu[HANDLER_TO_BANK(h)] = cpunum;
-/*TODO*///						mode = RG_DROP_WRITE;;
-/*TODO*///					}
-/*TODO*///					else
-/*TODO*///						abort();
-/*TODO*///					rg_add_entry(mwa->start, mwa->end, mode);
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		{
-/*TODO*///			rg_map_entry *e = rg_map;
-/*TODO*///			UINT32 start = 0, end = 0;
-/*TODO*///			int active = 0;
-/*TODO*///			while (e)
-/*TODO*///			{
-/*TODO*///				if(e && (e->flags & (RG_SAVE_READ|RG_SAVE_WRITE)))
-/*TODO*///				{
-/*TODO*///					if (!active)
-/*TODO*///					{
-/*TODO*///						active = 1;
-/*TODO*///						start = e->start;
-/*TODO*///					}
-/*TODO*///					end = e->end;
-/*TODO*///				}
-/*TODO*///				else if (active)
-/*TODO*///				{
-/*TODO*///					register_zone (cpunum, start, end);
-/*TODO*///					active = 0;
-/*TODO*///				}
-/*TODO*///
-/*TODO*///				if (active && (!e->next || (e->end+1 != e->next->start)))
-/*TODO*///				{
-/*TODO*///					register_zone (cpunum, start, end);
-/*TODO*///					active = 0;
-/*TODO*///				}
-/*TODO*///				e = e->next;
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		rg_map_clear();
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	for (i=0; i<MAX_BANKS; i++)
-/*TODO*///		if (banksize[i])
-/*TODO*///			switch (cpunum_databus_width(bankcpu[i]))
-/*TODO*///			{
-/*TODO*///			case 8:
-/*TODO*///				state_save_register_UINT8 ("bank", i, "ram",           cpu_bankbase[i], banksize[i]);
-/*TODO*///				break;
-/*TODO*///			case 16:
-/*TODO*///				state_save_register_UINT16("bank", i, "ram", (UINT16 *)cpu_bankbase[i], banksize[i]/2);
-/*TODO*///				break;
-/*TODO*///			case 32:
-/*TODO*///				state_save_register_UINT32("bank", i, "ram", (UINT32 *)cpu_bankbase[i], banksize[i]/4);
-/*TODO*///				break;
-/*TODO*///			}
-/*TODO*///
-/*TODO*///}
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	READBYTE - generic byte-sized read handler
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define READBYTE8(name,abits,lookup,handlist,mask)										\
-/*TODO*///data8_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,0)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,0)];							\
-/*TODO*///																						\
-/*TODO*///	/* for compatibility with setbankhandler, 8-bit systems */							\
-/*TODO*///	/* must call handlers for banks */													\
-/*TODO*///	if (entry == STATIC_RAM)															\
-/*TODO*///		MEMREADEND(cpu_bankbase[STATIC_RAM][address])									\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		read8_handler handler = (read8_handler)handlist[entry].handler;					\
-/*TODO*///		MEMREADEND((*handler)(address - handlist[entry].offset))						\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define READBYTE16BE(name,abits,lookup,handlist,mask)									\
-/*TODO*///data8_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE_XOR_BE(address)])							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (~address & 1);													\
-/*TODO*///		read16_handler handler = (read16_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 1, ~(0xff << shift)) >> shift)					\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define READBYTE16LE(name,abits,lookup,handlist,mask)									\
-/*TODO*///data8_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE_XOR_LE(address)])							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (address & 1);													\
-/*TODO*///		read16_handler handler = (read16_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 1, ~(0xff << shift)) >> shift)					\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define READBYTE32BE(name,abits,lookup,handlist,mask)									\
-/*TODO*///data8_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE4_XOR_BE(address)])							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (~address & 3);													\
-/*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xff << shift)) >> shift) 				\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define READBYTE32LE(name,abits,lookup,handlist,mask)									\
-/*TODO*///data8_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE4_XOR_LE(address)])							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (address & 3);													\
-/*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xff << shift)) >> shift) 				\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	READWORD - generic word-sized read handler
-/*TODO*///	(16-bit and 32-bit aligned only!)
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define READWORD16(name,abits,lookup,handlist,mask)										\
-/*TODO*///data16_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~1;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(*(data16_t *)&cpu_bankbase[entry][address])							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		read16_handler handler = (read16_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 1,0))										 	\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define READWORD32BE(name,abits,lookup,handlist,mask)									\
-/*TODO*///data16_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~1;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_BE(address)])				\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (~address & 2);													\
-/*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xffff << shift)) >> shift)				\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define READWORD32LE(name,abits,lookup,handlist,mask)									\
-/*TODO*///data16_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~1;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_LE(address)])				\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (address & 2);													\
-/*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xffff << shift)) >> shift)				\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	READLONG - generic dword-sized read handler
-/*TODO*///	(32-bit aligned only!)
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define READLONG32(name,abits,lookup,handlist,mask)										\
-/*TODO*///data32_t name(offs_t address)															\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMREADSTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~3;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMREADEND(*(data32_t *)&cpu_bankbase[entry][address])							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMREADEND((*handler)(address >> 2,0))										 	\
-/*TODO*///	}																					\
-/*TODO*///	return 0;																			\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	WRITEBYTE - generic byte-sized write handler
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define WRITEBYTE8(name,abits,lookup,handlist,mask)										\
-/*TODO*///void name(offs_t address, data8_t data)													\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,0)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,0)];							\
-/*TODO*///																						\
-/*TODO*///	/* for compatibility with setbankhandler, 8-bit systems */							\
-/*TODO*///	/* must call handlers for banks */													\
-/*TODO*///	if (entry == (FPTR)MRA_RAM)															\
-/*TODO*///		MEMWRITEEND(cpu_bankbase[STATIC_RAM][address] = data)							\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		write8_handler handler = (write8_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address - handlist[entry].offset, data))					\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define WRITEBYTE16BE(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data8_t data)													\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE_XOR_BE(address)] = data)					\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (~address & 1);													\
-/*TODO*///		write16_handler handler = (write16_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 1, data << shift, ~(0xff << shift))) 			\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define WRITEBYTE16LE(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data8_t data)													\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE_XOR_LE(address)] = data)					\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (address & 1);													\
-/*TODO*///		write16_handler handler = (write16_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 1, data << shift, ~(0xff << shift)))			\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define WRITEBYTE32BE(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data8_t data)													\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE4_XOR_BE(address)] = data)					\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (~address & 3);													\
-/*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xff << shift))) 			\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define WRITEBYTE32LE(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data8_t data)													\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask;																	\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE4_XOR_LE(address)] = data)					\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (address & 3);													\
-/*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xff << shift))) 			\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	WRITEWORD - generic word-sized write handler
-/*TODO*///	(16-bit and 32-bit aligned only!)
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define WRITEWORD16(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data16_t data)												\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~1;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(*(data16_t *)&cpu_bankbase[entry][address] = data)					\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		write16_handler handler = (write16_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 1, data, 0))								 	\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define WRITEWORD32BE(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data16_t data)												\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~1;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_BE(address)] = data)		\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (~address & 2);													\
-/*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xffff << shift))) 		\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///#define WRITEWORD32LE(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data16_t data)												\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~1;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_LE(address)] = data)		\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		int shift = 8 * (address & 2);													\
-/*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xffff << shift))) 		\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	WRITELONG - dword-sized write handler
-/*TODO*///	(32-bit aligned only!)
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define WRITELONG32(name,abits,lookup,handlist,mask)									\
-/*TODO*///void name(offs_t address, data32_t data)												\
-/*TODO*///{																						\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///	MEMWRITESTART																		\
-/*TODO*///																						\
-/*TODO*///	/* perform lookup */																\
-/*TODO*///	address &= mask & ~3;																\
-/*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
-/*TODO*///																						\
-/*TODO*///	/* handle banks inline */															\
-/*TODO*///	address -= handlist[entry].offset;													\
-/*TODO*///	if (entry <= STATIC_RAM)															\
-/*TODO*///		MEMWRITEEND(*(data32_t *)&cpu_bankbase[entry][address] = data)					\
-/*TODO*///																						\
-/*TODO*///	/* fall back to the handler */														\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
-/*TODO*///		MEMWRITEEND((*handler)(address >> 2, data, 0))								 	\
-/*TODO*///	}																					\
-/*TODO*///}																						\
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	SETOPBASE - generic opcode base changer
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define SETOPBASE(name,abits,minbits,table)												\
-/*TODO*///void name(offs_t pc)																	\
-/*TODO*///{																						\
-/*TODO*///	UINT8 *base;																		\
-/*TODO*///	UINT8 entry;																		\
-/*TODO*///																						\
-/*TODO*///	/* allow overrides */																\
-/*TODO*///	if (opbasefunc) 																	\
-/*TODO*///	{																					\
-/*TODO*///		pc = (*opbasefunc)(pc);															\
-/*TODO*///		if (pc == ~0)																	\
-/*TODO*///			return; 																	\
-/*TODO*///	}																					\
-/*TODO*///																						\
-/*TODO*///	/* perform the lookup */															\
-/*TODO*///	pc &= mem_amask;																	\
-/*TODO*///	entry = readmem_lookup[LEVEL1_INDEX(pc,abits,minbits)];								\
-/*TODO*///	if (entry >= SUBTABLE_BASE)															\
-/*TODO*///		entry = readmem_lookup[LEVEL2_INDEX(entry,pc,abits,minbits)];					\
-/*TODO*///	opcode_entry = entry;																\
-/*TODO*///																						\
-/*TODO*///	/* RAM/ROM/RAMROM */																\
-/*TODO*///	if (entry >= STATIC_RAM && entry <= STATIC_RAMROM)									\
-/*TODO*///		base = cpu_bankbase[STATIC_RAM];												\
-/*TODO*///																						\
-/*TODO*///	/* banked memory */																	\
-/*TODO*///	else if (entry >= STATIC_BANK1 && entry <= STATIC_RAM)								\
-/*TODO*///		base = cpu_bankbase[entry];														\
-/*TODO*///																						\
-/*TODO*///	/* other memory -- could be very slow! */											\
-/*TODO*///	else																				\
-/*TODO*///	{																					\
-/*TODO*///		logerror("cpu #%d (PC=%08X): warning - op-code execute on mapped I/O\n",		\
-/*TODO*///					cpu_getactivecpu(), activecpu_get_pc());							\
-/*TODO*///		/*base = memory_find_base(cpu_getactivecpu(), pc);*/							\
-/*TODO*///		return;																			\
-/*TODO*///	}																					\
-/*TODO*///																						\
-/*TODO*///	/* compute the adjusted base */														\
-/*TODO*///	OP_ROM = base - table[entry].offset + (OP_ROM - OP_RAM);							\
-/*TODO*///	OP_RAM = base - table[entry].offset;												\
-/*TODO*///	OP_MEM_MIN = table[entry].offset;													\
-/*TODO*///	OP_MEM_MAX = (entry >= STATIC_RAM && entry <= STATIC_RAMROM)						\
-/*TODO*///		? cpudata[cpu_getactivecpu()].ramlength - 1										\
-/*TODO*///		: table[entry].top;																\
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	GENERATE_HANDLERS - macros to spew out all
-/*TODO*///	the handlers needed for a given memory type
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
+        }
+        return 1;
+    }
+
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	register_banks - Registers all memory banks
+    /*TODO*///    into the state save system
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///typedef struct rg_map_entry {
+    /*TODO*///	struct rg_map_entry *next;
+    /*TODO*///	UINT32 start;
+    /*TODO*///	UINT32 end;
+    /*TODO*///	int flags;
+    /*TODO*///} rg_map_entry;
+    /*TODO*///
+    /*TODO*///static rg_map_entry *rg_map = 0;
+    /*TODO*///
+    /*TODO*///enum {
+    /*TODO*///	RG_SAVE_READ  = 0x0001,
+    /*TODO*///	RG_DROP_READ  = 0x0002,
+    /*TODO*///	RG_READ_MASK  = 0x00ff,
+    /*TODO*///
+    /*TODO*///	RG_SAVE_WRITE = 0x0100,
+    /*TODO*///	RG_DROP_WRITE = 0x0200,
+    /*TODO*///	RG_WRITE_MASK = 0xff00
+    /*TODO*///};
+    /*TODO*///
+    /*TODO*///static void rg_add_entry(UINT32 start, UINT32 end, int mode)
+    /*TODO*///{
+    /*TODO*///	rg_map_entry **cur;
+    /*TODO*///	cur = &rg_map;
+    /*TODO*///	while(*cur && ((*cur)->end < start))
+    /*TODO*///		cur = &(*cur)->next;
+    /*TODO*///
+    /*TODO*///	while(start <= end)
+    /*TODO*///	{
+    /*TODO*///		int mask;
+    /*TODO*///		if(!*cur || ((*cur)->start > start))
+    /*TODO*///		{
+    /*TODO*///			rg_map_entry *e = malloc(sizeof(rg_map_entry));
+    /*TODO*///			e->start = start;
+    /*TODO*///			e->end = *cur && (*cur)->start <= end ? (*cur)->start - 1 : end;
+    /*TODO*///			e->flags = mode;
+    /*TODO*///			e->next = *cur;
+    /*TODO*///			*cur = e;
+    /*TODO*///			cur = &(*cur)->next;
+    /*TODO*///			start = e->end + 1;
+    /*TODO*///
+    /*TODO*///			/* check for wraparound */
+    /*TODO*///			if(start == 0 || start > end)
+    /*TODO*///				return;
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		if((*cur)->start < start)
+    /*TODO*///		{
+    /*TODO*///			rg_map_entry *e = malloc(sizeof(rg_map_entry));
+    /*TODO*///			e->start = (*cur)->start;
+    /*TODO*///			e->end = start - 1;
+    /*TODO*///			e->flags = (*cur)->flags;
+    /*TODO*///			e->next = *cur;
+    /*TODO*///			(*cur)->start = start;
+    /*TODO*///			*cur = e;
+    /*TODO*///			cur = &(*cur)->next;
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		if((*cur)->end > end)
+    /*TODO*///		{
+    /*TODO*///			rg_map_entry *e = malloc(sizeof(rg_map_entry));
+    /*TODO*///			e->start = start;
+    /*TODO*///			e->end = end;
+    /*TODO*///			e->flags = (*cur)->flags;
+    /*TODO*///			e->next = *cur;
+    /*TODO*///			(*cur)->start = end+1;
+    /*TODO*///			*cur = e;
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		mask = 0;
+    /*TODO*///
+    /*TODO*///		if (mode & RG_READ_MASK)
+    /*TODO*///			mask |= RG_READ_MASK;
+    /*TODO*///		if (mode & RG_WRITE_MASK)
+    /*TODO*///			mask |= RG_WRITE_MASK;
+    /*TODO*///
+    /*TODO*///		(*cur)->flags = ((*cur)->flags & ~mask) | mode;
+    /*TODO*///		start = (*cur)->end + 1;
+    /*TODO*///		cur = &(*cur)->next;
+    /*TODO*///
+    /*TODO*///		/* check for wraparound */
+    /*TODO*///		if (start == 0)
+    /*TODO*///			break;
+    /*TODO*///	}
+    /*TODO*///}
+    /*TODO*///
+    /*TODO*///static void rg_map_clear(void)
+    /*TODO*///{
+    /*TODO*///	rg_map_entry *e = rg_map;
+    /*TODO*///	while(e)
+    /*TODO*///	{
+    /*TODO*///		rg_map_entry *n = e->next;
+    /*TODO*///		free(e);
+    /*TODO*///		e = n;
+    /*TODO*///	}
+    /*TODO*///	rg_map = 0;
+    /*TODO*///}
+    /*TODO*///
+    /*TODO*///static void register_zone(int cpunum, UINT32 start, UINT32 end)
+    /*TODO*///{
+    /*TODO*///	char name[256];
+    /*TODO*///	sprintf (name, "%08x-%08x", start, end);
+    /*TODO*///	switch (cpunum_databus_width(cpunum))
+    /*TODO*///	{
+    /*TODO*///	case 8:
+    /*TODO*///		state_save_register_UINT8 ("memory", cpunum, name, memory_find_base(cpunum, start), end-start+1);
+    /*TODO*///		break;
+    /*TODO*///	case 16:
+    /*TODO*///		state_save_register_UINT16("memory", cpunum, name, memory_find_base(cpunum, start), (end-start+1)/2);
+    /*TODO*///		break;
+    /*TODO*///	case 32:
+    /*TODO*///		state_save_register_UINT32("memory", cpunum, name, memory_find_base(cpunum, start), (end-start+1)/4);
+    /*TODO*///		break;
+    /*TODO*///	}
+    /*TODO*///}
+    /*TODO*///
+    /*TODO*///void register_banks(void)
+    /*TODO*///{
+    /*TODO*///	int cpunum, i;
+    /*TODO*///	int banksize[MAX_BANKS];
+    /*TODO*///	int bankcpu[MAX_BANKS];
+    /*TODO*///
+    /*TODO*///	for (i=0; i<MAX_BANKS; i++)
+    /*TODO*///	{
+    /*TODO*///		banksize[i] = 0;
+    /*TODO*///		bankcpu[i] = -1;
+    /*TODO*///	}
+    /*TODO*///
+    /*TODO*///	/* loop over CPUs */
+    /*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
+    /*TODO*///	{
+    /*TODO*///		const struct Memory_ReadAddress *mra, *mra_start = Machine->drv->cpu[cpunum].memory_read;
+    /*TODO*///		const struct Memory_WriteAddress *mwa, *mwa_start = Machine->drv->cpu[cpunum].memory_write;
+    /*TODO*///		int bits = cpudata[cpunum].mem.abits;
+    /*TODO*/////		int width = cpunum_databus_width(cpunum);
+    /*TODO*///
+    /*TODO*///		if (!IS_SPARSE(bits))
+    /*TODO*///		{
+    /*TODO*///			UINT32 size = memory_region_length(REGION_CPU1 + cpunum);
+    /*TODO*///			if (size > (1<<bits))
+    /*TODO*///				size = 1 << bits;
+    /*TODO*///			rg_add_entry(0, size-1, RG_SAVE_READ|RG_SAVE_WRITE);
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///
+    /*TODO*///		if (mra_start)
+    /*TODO*///		{
+    /*TODO*///			for (mra = mra_start; !IS_MEMPORT_END(mra); mra++);
+    /*TODO*///			mra--;
+    /*TODO*///			for (;mra != mra_start; mra--)
+    /*TODO*///			{
+    /*TODO*///				if (!IS_MEMPORT_MARKER (mra))
+    /*TODO*///				{
+    /*TODO*///					int mode;
+    /*TODO*///					mem_read_handler h = mra->handler;
+    /*TODO*///					if (!HANDLER_IS_STATIC (h))
+    /*TODO*///						mode = RG_DROP_READ;
+    /*TODO*///					else if (HANDLER_IS_RAM(h))
+    /*TODO*///						mode = RG_SAVE_READ;
+    /*TODO*///					else if (HANDLER_IS_ROM(h))
+    /*TODO*///						mode = RG_DROP_READ;
+    /*TODO*///					else if (HANDLER_IS_RAMROM(h))
+    /*TODO*///						mode = RG_SAVE_READ;
+    /*TODO*///					else if (HANDLER_IS_NOP(h))
+    /*TODO*///						mode = RG_DROP_READ;
+    /*TODO*///					else if (HANDLER_IS_BANK(h))
+    /*TODO*///					{
+    /*TODO*///						int size = mra->end-mra->start+1;
+    /*TODO*///						if (banksize[HANDLER_TO_BANK(h)] < size)
+    /*TODO*///							banksize[HANDLER_TO_BANK(h)] = size;
+    /*TODO*///						bankcpu[HANDLER_TO_BANK(h)] = cpunum;
+    /*TODO*///						mode = RG_DROP_READ;
+    /*TODO*///					}
+    /*TODO*///					else
+    /*TODO*///						abort();
+    /*TODO*///					rg_add_entry(mra->start, mra->end, mode);
+    /*TODO*///				}
+    /*TODO*///			}
+    /*TODO*///		}
+    /*TODO*///		if (mwa_start)
+    /*TODO*///		{
+    /*TODO*///			for (mwa = mwa_start; !IS_MEMPORT_END(mwa); mwa++);
+    /*TODO*///			mwa--;
+    /*TODO*///			for (;mwa != mwa_start; mwa--)
+    /*TODO*///			{
+    /*TODO*///				if (!IS_MEMPORT_MARKER (mwa))
+    /*TODO*///				{
+    /*TODO*///					int mode;
+    /*TODO*///					mem_write_handler h = mwa->handler;
+    /*TODO*///					if (!HANDLER_IS_STATIC (h))
+    /*TODO*///						mode = mwa->base ? RG_SAVE_WRITE : RG_DROP_WRITE;
+    /*TODO*///					else if (HANDLER_IS_RAM(h))
+    /*TODO*///						mode = RG_SAVE_WRITE;
+    /*TODO*///					else if (HANDLER_IS_ROM(h))
+    /*TODO*///						mode = RG_DROP_WRITE;
+    /*TODO*///					else if (HANDLER_IS_RAMROM(h))
+    /*TODO*///						mode = RG_SAVE_WRITE;
+    /*TODO*///					else if (HANDLER_IS_NOP(h))
+    /*TODO*///						mode = RG_DROP_WRITE;
+    /*TODO*///					else if (HANDLER_IS_BANK(h))
+    /*TODO*///					{
+    /*TODO*///						int size = mwa->end-mwa->start+1;
+    /*TODO*///						if (banksize[HANDLER_TO_BANK(h)] < size)
+    /*TODO*///							banksize[HANDLER_TO_BANK(h)] = size;
+    /*TODO*///						bankcpu[HANDLER_TO_BANK(h)] = cpunum;
+    /*TODO*///						mode = RG_DROP_WRITE;;
+    /*TODO*///					}
+    /*TODO*///					else
+    /*TODO*///						abort();
+    /*TODO*///					rg_add_entry(mwa->start, mwa->end, mode);
+    /*TODO*///				}
+    /*TODO*///			}
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		{
+    /*TODO*///			rg_map_entry *e = rg_map;
+    /*TODO*///			UINT32 start = 0, end = 0;
+    /*TODO*///			int active = 0;
+    /*TODO*///			while (e)
+    /*TODO*///			{
+    /*TODO*///				if(e && (e->flags & (RG_SAVE_READ|RG_SAVE_WRITE)))
+    /*TODO*///				{
+    /*TODO*///					if (!active)
+    /*TODO*///					{
+    /*TODO*///						active = 1;
+    /*TODO*///						start = e->start;
+    /*TODO*///					}
+    /*TODO*///					end = e->end;
+    /*TODO*///				}
+    /*TODO*///				else if (active)
+    /*TODO*///				{
+    /*TODO*///					register_zone (cpunum, start, end);
+    /*TODO*///					active = 0;
+    /*TODO*///				}
+    /*TODO*///
+    /*TODO*///				if (active && (!e->next || (e->end+1 != e->next->start)))
+    /*TODO*///				{
+    /*TODO*///					register_zone (cpunum, start, end);
+    /*TODO*///					active = 0;
+    /*TODO*///				}
+    /*TODO*///				e = e->next;
+    /*TODO*///			}
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		rg_map_clear();
+    /*TODO*///	}
+    /*TODO*///
+    /*TODO*///	for (i=0; i<MAX_BANKS; i++)
+    /*TODO*///		if (banksize[i])
+    /*TODO*///			switch (cpunum_databus_width(bankcpu[i]))
+    /*TODO*///			{
+    /*TODO*///			case 8:
+    /*TODO*///				state_save_register_UINT8 ("bank", i, "ram",           cpu_bankbase[i], banksize[i]);
+    /*TODO*///				break;
+    /*TODO*///			case 16:
+    /*TODO*///				state_save_register_UINT16("bank", i, "ram", (UINT16 *)cpu_bankbase[i], banksize[i]/2);
+    /*TODO*///				break;
+    /*TODO*///			case 32:
+    /*TODO*///				state_save_register_UINT32("bank", i, "ram", (UINT32 *)cpu_bankbase[i], banksize[i]/4);
+    /*TODO*///				break;
+    /*TODO*///			}
+    /*TODO*///
+    /*TODO*///}
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	READBYTE - generic byte-sized read handler
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define READBYTE8(name,abits,lookup,handlist,mask)										\
+    /*TODO*///data8_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,0)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,0)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* for compatibility with setbankhandler, 8-bit systems */							\
+    /*TODO*///	/* must call handlers for banks */													\
+    /*TODO*///	if (entry == STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(cpu_bankbase[STATIC_RAM][address])									\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		read8_handler handler = (read8_handler)handlist[entry].handler;					\
+    /*TODO*///		MEMREADEND((*handler)(address - handlist[entry].offset))						\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define READBYTE16BE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///data8_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE_XOR_BE(address)])							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (~address & 1);													\
+    /*TODO*///		read16_handler handler = (read16_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 1, ~(0xff << shift)) >> shift)					\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define READBYTE16LE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///data8_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE_XOR_LE(address)])							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (address & 1);													\
+    /*TODO*///		read16_handler handler = (read16_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 1, ~(0xff << shift)) >> shift)					\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define READBYTE32BE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///data8_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE4_XOR_BE(address)])							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (~address & 3);													\
+    /*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xff << shift)) >> shift) 				\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define READBYTE32LE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///data8_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(cpu_bankbase[entry][BYTE4_XOR_LE(address)])							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (address & 3);													\
+    /*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xff << shift)) >> shift) 				\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	READWORD - generic word-sized read handler
+    /*TODO*///	(16-bit and 32-bit aligned only!)
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define READWORD16(name,abits,lookup,handlist,mask)										\
+    /*TODO*///data16_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~1;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(*(data16_t *)&cpu_bankbase[entry][address])							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		read16_handler handler = (read16_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 1,0))										 	\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define READWORD32BE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///data16_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~1;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_BE(address)])				\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (~address & 2);													\
+    /*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xffff << shift)) >> shift)				\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define READWORD32LE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///data16_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~1;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_LE(address)])				\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (address & 2);													\
+    /*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 2, ~(0xffff << shift)) >> shift)				\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	READLONG - generic dword-sized read handler
+    /*TODO*///	(32-bit aligned only!)
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define READLONG32(name,abits,lookup,handlist,mask)										\
+    /*TODO*///data32_t name(offs_t address)															\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMREADSTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~3;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMREADEND(*(data32_t *)&cpu_bankbase[entry][address])							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		read32_handler handler = (read32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMREADEND((*handler)(address >> 2,0))										 	\
+    /*TODO*///	}																					\
+    /*TODO*///	return 0;																			\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	WRITEBYTE - generic byte-sized write handler
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define WRITEBYTE8(name,abits,lookup,handlist,mask)										\
+    /*TODO*///void name(offs_t address, data8_t data)													\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,0)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,0)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* for compatibility with setbankhandler, 8-bit systems */							\
+    /*TODO*///	/* must call handlers for banks */													\
+    /*TODO*///	if (entry == (FPTR)MRA_RAM)															\
+    /*TODO*///		MEMWRITEEND(cpu_bankbase[STATIC_RAM][address] = data)							\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		write8_handler handler = (write8_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address - handlist[entry].offset, data))					\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define WRITEBYTE16BE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data8_t data)													\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE_XOR_BE(address)] = data)					\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (~address & 1);													\
+    /*TODO*///		write16_handler handler = (write16_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 1, data << shift, ~(0xff << shift))) 			\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define WRITEBYTE16LE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data8_t data)													\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE_XOR_LE(address)] = data)					\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (address & 1);													\
+    /*TODO*///		write16_handler handler = (write16_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 1, data << shift, ~(0xff << shift)))			\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define WRITEBYTE32BE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data8_t data)													\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE4_XOR_BE(address)] = data)					\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (~address & 3);													\
+    /*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xff << shift))) 			\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define WRITEBYTE32LE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data8_t data)													\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask;																	\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(cpu_bankbase[entry][BYTE4_XOR_LE(address)] = data)					\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (address & 3);													\
+    /*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xff << shift))) 			\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	WRITEWORD - generic word-sized write handler
+    /*TODO*///	(16-bit and 32-bit aligned only!)
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define WRITEWORD16(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data16_t data)												\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~1;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,1)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,1)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(*(data16_t *)&cpu_bankbase[entry][address] = data)					\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		write16_handler handler = (write16_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 1, data, 0))								 	\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define WRITEWORD32BE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data16_t data)												\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~1;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_BE(address)] = data)		\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (~address & 2);													\
+    /*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xffff << shift))) 		\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///#define WRITEWORD32LE(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data16_t data)												\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~1;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(*(data16_t *)&cpu_bankbase[entry][WORD_XOR_LE(address)] = data)		\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		int shift = 8 * (address & 2);													\
+    /*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 2, data << shift, ~(0xffff << shift))) 		\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	WRITELONG - dword-sized write handler
+    /*TODO*///	(32-bit aligned only!)
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define WRITELONG32(name,abits,lookup,handlist,mask)									\
+    /*TODO*///void name(offs_t address, data32_t data)												\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///	MEMWRITESTART																		\
+    /*TODO*///																						\
+    /*TODO*///	/* perform lookup */																\
+    /*TODO*///	address &= mask & ~3;																\
+    /*TODO*///	entry = lookup[LEVEL1_INDEX(address,abits,2)];										\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = lookup[LEVEL2_INDEX(entry,address,abits,2)];							\
+    /*TODO*///																						\
+    /*TODO*///	/* handle banks inline */															\
+    /*TODO*///	address -= handlist[entry].offset;													\
+    /*TODO*///	if (entry <= STATIC_RAM)															\
+    /*TODO*///		MEMWRITEEND(*(data32_t *)&cpu_bankbase[entry][address] = data)					\
+    /*TODO*///																						\
+    /*TODO*///	/* fall back to the handler */														\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		write32_handler handler = (write32_handler)handlist[entry].handler;				\
+    /*TODO*///		MEMWRITEEND((*handler)(address >> 2, data, 0))								 	\
+    /*TODO*///	}																					\
+    /*TODO*///}																						\
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	SETOPBASE - generic opcode base changer
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
+    /*TODO*///#define SETOPBASE(name,abits,minbits,table)												\
+    /*TODO*///void name(offs_t pc)																	\
+    /*TODO*///{																						\
+    /*TODO*///	UINT8 *base;																		\
+    /*TODO*///	UINT8 entry;																		\
+    /*TODO*///																						\
+    /*TODO*///	/* allow overrides */																\
+    /*TODO*///	if (opbasefunc) 																	\
+    /*TODO*///	{																					\
+    /*TODO*///		pc = (*opbasefunc)(pc);															\
+    /*TODO*///		if (pc == ~0)																	\
+    /*TODO*///			return; 																	\
+    /*TODO*///	}																					\
+    /*TODO*///																						\
+    /*TODO*///	/* perform the lookup */															\
+    /*TODO*///	pc &= mem_amask;																	\
+    /*TODO*///	entry = readmem_lookup[LEVEL1_INDEX(pc,abits,minbits)];								\
+    /*TODO*///	if (entry >= SUBTABLE_BASE)															\
+    /*TODO*///		entry = readmem_lookup[LEVEL2_INDEX(entry,pc,abits,minbits)];					\
+    /*TODO*///	opcode_entry = entry;																\
+    /*TODO*///																						\
+    /*TODO*///	/* RAM/ROM/RAMROM */																\
+    /*TODO*///	if (entry >= STATIC_RAM && entry <= STATIC_RAMROM)									\
+    /*TODO*///		base = cpu_bankbase[STATIC_RAM];												\
+    /*TODO*///																						\
+    /*TODO*///	/* banked memory */																	\
+    /*TODO*///	else if (entry >= STATIC_BANK1 && entry <= STATIC_RAM)								\
+    /*TODO*///		base = cpu_bankbase[entry];														\
+    /*TODO*///																						\
+    /*TODO*///	/* other memory -- could be very slow! */											\
+    /*TODO*///	else																				\
+    /*TODO*///	{																					\
+    /*TODO*///		logerror("cpu #%d (PC=%08X): warning - op-code execute on mapped I/O\n",		\
+    /*TODO*///					cpu_getactivecpu(), activecpu_get_pc());							\
+    /*TODO*///		/*base = memory_find_base(cpu_getactivecpu(), pc);*/							\
+    /*TODO*///		return;																			\
+    /*TODO*///	}																					\
+    /*TODO*///																						\
+    /*TODO*///	/* compute the adjusted base */														\
+    /*TODO*///	OP_ROM = base - table[entry].offset + (OP_ROM - OP_RAM);							\
+    /*TODO*///	OP_RAM = base - table[entry].offset;												\
+    /*TODO*///	OP_MEM_MIN = table[entry].offset;													\
+    /*TODO*///	OP_MEM_MAX = (entry >= STATIC_RAM && entry <= STATIC_RAMROM)						\
+    /*TODO*///		? cpudata[cpu_getactivecpu()].ramlength - 1										\
+    /*TODO*///		: table[entry].top;																\
+    /*TODO*///}
+    /*TODO*///
+    /*TODO*///
+    /*TODO*////*-------------------------------------------------
+    /*TODO*///	GENERATE_HANDLERS - macros to spew out all
+    /*TODO*///	the handlers needed for a given memory type
+    /*TODO*///-------------------------------------------------*/
+    /*TODO*///
     public static int cpu_readmem16(int address) {
         int entry;
         /* perform lookup */
