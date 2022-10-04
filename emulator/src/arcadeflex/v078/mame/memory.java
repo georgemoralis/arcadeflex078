@@ -22,6 +22,7 @@ import static mame056.common.memory_region_length;
 import static mame056.commonH.REGION_CPU1;
 import static mame056.cpuintrf.activecpu_address_bits;
 import static mame056.cpuintrf.activecpu_address_shift;
+import static mame056.cpuintrf.cpunum_databus_width;
 import static mame056.cpuintrfH.CPU_V60;
 import static mame056.cpuintrfH.activecpu_get_pc;
 import static mame056.cpuintrfH.cpu_getactivecpu;
@@ -29,10 +30,7 @@ import static mame056.cpuintrfH.cpu_gettotalcpu;
 import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
 import static mame056.memory.init_cpudata;
-import static mame056.memory.init_static;
 import static mame056.memory.memory_find_base;
-import static mame056.memory.verify_memory;
-import static mame056.memory.verify_ports;
 
 public class memory {
 
@@ -1098,76 +1096,141 @@ public class memory {
 /*TODO*///	return 1;
 /*TODO*///}
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	init_memport - initialize the mem/port data
-/*TODO*///	structure
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int init_memport(int cpunum, struct memport_data *data, int abits, int dbits, int ismemory)
-/*TODO*///{
-/*TODO*///	/* determine the address and data bits */
-/*TODO*///	data->cpunum = cpunum;
-/*TODO*///	data->abits = abits;
-/*TODO*///	data->dbits = dbits;
-/*TODO*///	data->ebits = abits - DATABITS_TO_SHIFT(dbits);
-/*TODO*///	data->mask = 0xffffffffUL >> (32 - abits);
-/*TODO*///
-/*TODO*///	/* allocate memory */
-/*TODO*///	data->read.table = malloc(1 << LEVEL1_BITS(data->ebits));
-/*TODO*///	data->write.table = malloc(1 << LEVEL1_BITS(data->ebits));
-/*TODO*///	if (!data->read.table)
-/*TODO*///		return fatalerror("cpu #%d couldn't allocate read table\n", cpunum);
-/*TODO*///	if (!data->write.table)
-/*TODO*///		return fatalerror("cpu #%d couldn't allocate write table\n", cpunum);
-/*TODO*///
-/*TODO*///	/* initialize everything to unmapped */
-/*TODO*///	memset(data->read.table, STATIC_UNMAP, 1 << LEVEL1_BITS(data->ebits));
-/*TODO*///	memset(data->write.table, STATIC_UNMAP, 1 << LEVEL1_BITS(data->ebits));
-/*TODO*///
-/*TODO*///	/* initialize the pointers to the handlers */
-/*TODO*///	if (ismemory)
-/*TODO*///	{
-/*TODO*///		data->read.handlers = (dbits == 32) ? rmemhandler32 : (dbits == 16) ? rmemhandler16 : rmemhandler8;
-/*TODO*///		data->write.handlers = (dbits == 32) ? wmemhandler32 : (dbits == 16) ? wmemhandler16 : wmemhandler8;
-/*TODO*///	}
-/*TODO*///	else
-/*TODO*///	{
-/*TODO*///		data->read.handlers = (dbits == 32) ? rporthandler32 : (dbits == 16) ? rporthandler16 : rporthandler8;
-/*TODO*///		data->write.handlers = (dbits == 32) ? wporthandler32 : (dbits == 16) ? wporthandler16 : wporthandler8;
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	verify_memory - verify the memory structs
-/*TODO*///	and track which banks are referenced
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int verify_memory(void)
-/*TODO*///{
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* zap the bank data */
-/*TODO*///	memset(&bankdata, 0, sizeof(bankdata));
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		const struct Memory_ReadAddress *mra = Machine->drv->cpu[cpunum].memory_read;
+
+    /*-------------------------------------------------
+	init_memport - initialize the mem/port data
+	structure
+    -------------------------------------------------*/
+    public static int init_memport(int cpunum, memport_data data, int abits, int dbits, int ismemory) {
+        /* determine the address and data bits */
+        data.cpunum = cpunum;
+        data.abits = abits;
+        data.dbits = dbits;
+        data.ebits = abits - DATABITS_TO_SHIFT(dbits);
+        data.mask = 0xffffffff >>> (32 - abits);
+
+        /* allocate memory */
+        data.read.table = new UBytePtr(1 << LEVEL1_BITS(data.ebits));
+        data.write.table = new UBytePtr(1 << LEVEL1_BITS(data.ebits));
+
+        /* initialize everything to unmapped */
+        memset(data.read.table, STATIC_UNMAP, 1 << LEVEL1_BITS(data.ebits));
+        memset(data.write.table, STATIC_UNMAP, 1 << LEVEL1_BITS(data.ebits));
+
+        /* initialize the pointers to the handlers */
+        if (ismemory != 0) {
+            data.read.handlers = (dbits == 32) ? rmemhandler32 : (dbits == 16) ? rmemhandler16 : rmemhandler8;
+            data.write.handlers = (dbits == 32) ? wmemhandler32 : (dbits == 16) ? wmemhandler16 : wmemhandler8;
+        } else {
+            data.read.handlers = (dbits == 32) ? rporthandler32 : (dbits == 16) ? rporthandler16 : rporthandler8;
+            data.write.handlers = (dbits == 32) ? wporthandler32 : (dbits == 16) ? wporthandler16 : wporthandler8;
+        }
+        return 1;
+    }
+
+    /*-------------------------------------------------
+            verify_memory - verify the memory structs
+            and track which banks are referenced
+    -------------------------------------------------*/
+    public static int verify_memory() {
+        int cpunum;
+
+        /* zap the bank data */
+        for (int i = 0; i < MAX_BANKS; i++) {
+            bankdata[i] = new bank_data();//memset(&bankdata, 0, sizeof(bankdata));
+        }
+
+        /* loop over CPUs */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+
+            int width;
+            int bank;
+
+            /* determine the desired width */
+            switch (cpunum_databus_width(cpunum)) {
+                case 8:
+                    width = MEMPORT_WIDTH_8;
+                    break;
+                case 16:
+                    width = MEMPORT_WIDTH_16;
+                    break;
+                case 32:
+                    width = MEMPORT_WIDTH_32;
+                    break;
+                default:
+                    return fatalerror("cpu #%d has invalid memory width!\n", cpunum);
+            }
+            Object mra_obj = Machine.drv.cpu[cpunum].memory_read;
+            Object mwa_obj = Machine.drv.cpu[cpunum].memory_write;
+
+            /* verify the read handlers */
+            if (mra_obj != null) {
+                if (mra_obj instanceof Memory_ReadAddress[]) {
+                    Memory_ReadAddress[] mra = (Memory_ReadAddress[]) mra_obj;
+                    int mra_ptr = 0;
+                    /* verify the MEMPORT_READ_START header */
+                    if (mra[mra_ptr].start == MEMPORT_MARKER && mra[mra_ptr].end != 0) {
+                        if ((mra[mra_ptr].end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_MEM) {
+                            return fatalerror("cpu #%d has port handlers in place of memory read handlers!\n", cpunum);
+                        }
+                        if ((mra[mra_ptr].end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_READ) {
+                            return fatalerror("cpu #%d has memory write handlers in place of memory read handlers!\n", cpunum);
+                        }
+                        if ((mra[mra_ptr].end & MEMPORT_WIDTH_MASK) != width) {
+                            return fatalerror("cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n", cpunum, cpunum_databus_width(cpunum), mra[mra_ptr].end);
+                        }
+                        mra_ptr++;
+                    }
+
+                    /* track banks used */
+                    for (; !IS_MEMPORT_END(mra[mra_ptr]); mra_ptr++) {
+                        if (!IS_MEMPORT_MARKER(mra[mra_ptr]) && HANDLER_IS_BANK(mra[mra_ptr].handler)) {
+                            bank = HANDLER_TO_BANK(mra[mra_ptr].handler);
+                            bankdata[bank].used = 1;
+                            bankdata[bank].cpunum = -1;
+                        }
+                    }
+                } else {
+                    //do the same for 16,32bit handlers
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+            /* verify the write handlers */
+            if (mwa_obj != null) {
+                if (mwa_obj instanceof Memory_WriteAddress[]) {
+                    Memory_WriteAddress[] mwa = (Memory_WriteAddress[]) mwa_obj;
+                    int mwa_ptr = 0;
+                    /* verify the MEMPORT_WRITE_START header */
+                    if (mwa[mwa_ptr].start == MEMPORT_MARKER && mwa[mwa_ptr].end != 0) {
+                        if ((mwa[mwa_ptr].end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_MEM) {
+                            return fatalerror("cpu #%d has port handlers in place of memory write handlers!\n", cpunum);
+                        }
+                        if ((mwa[mwa_ptr].end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_WRITE) {
+                            return fatalerror("cpu #%d has memory read handlers in place of memory write handlers!\n", cpunum);
+                        }
+                        if ((mwa[mwa_ptr].end & MEMPORT_WIDTH_MASK) != width) {
+                            return fatalerror("cpu #%d uses wrong data width memory handlers! (width = %d, memory = %08x)\n", cpunum, cpunum_databus_width(cpunum), mwa[mwa_ptr].end);
+                        }
+                        mwa_ptr++;
+                    }
+
+                    /* track banks used */
+                    for (; !IS_MEMPORT_END(mwa[mwa_ptr]); mwa_ptr++) {
+                        if (!IS_MEMPORT_MARKER(mwa[mwa_ptr]) && HANDLER_IS_BANK(mwa[mwa_ptr].handler)) {
+                            bank = HANDLER_TO_BANK(mwa[mwa_ptr].handler);
+                            bankdata[bank].used = 1;
+                            bankdata[bank].cpunum = -1;
+                        }
+                        //mwa++;
+                    }
+                } else {
+                    //do the same for 16,32bit handlers
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+
+            /*TODO*///		const struct Memory_ReadAddress *mra = Machine->drv->cpu[cpunum].memory_read;
 /*TODO*///		const struct Memory_WriteAddress *mwa = Machine->drv->cpu[cpunum].memory_write;
-/*TODO*///		UINT32 width;
-/*TODO*///		int bank;
-/*TODO*///
-/*TODO*///		/* determine the desired width */
-/*TODO*///		switch (cpunum_databus_width(cpunum))
-/*TODO*///		{
-/*TODO*///			case 8:		width = MEMPORT_WIDTH_8;	break;
-/*TODO*///			case 16:	width = MEMPORT_WIDTH_16;	break;
-/*TODO*///			case 32:	width = MEMPORT_WIDTH_32;	break;
-/*TODO*///			default:	return fatalerror("cpu #%d has invalid memory width!\n", cpunum);
-/*TODO*///		}
 /*TODO*///
 /*TODO*///		/* verify the read handlers */
 /*TODO*///		if (mra)
@@ -1219,68 +1282,118 @@ public class memory {
 /*TODO*///				}
 /*TODO*///				mwa++;
 /*TODO*///		}
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	verify_ports - verify the port structs
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int verify_ports(void)
-/*TODO*///{
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		const struct IO_ReadPort *mra = Machine->drv->cpu[cpunum].port_read;
-/*TODO*///		const struct IO_WritePort *mwa = Machine->drv->cpu[cpunum].port_write;
-/*TODO*///		UINT32 width;
-/*TODO*///
-/*TODO*///		/* determine the desired width */
-/*TODO*///		switch (cpunum_databus_width(cpunum))
-/*TODO*///		{
-/*TODO*///			case 8:		width = MEMPORT_WIDTH_8;	break;
-/*TODO*///			case 16:	width = MEMPORT_WIDTH_16;	break;
-/*TODO*///			case 32:	width = MEMPORT_WIDTH_32;	break;
-/*TODO*///			default:	return fatalerror("cpu #%d has invalid memory width!\n", cpunum);
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		/* verify the read handlers */
-/*TODO*///		if (mra)
-/*TODO*///		{
-/*TODO*///			/* verify the PORT_READ_START header */
-/*TODO*///			if (mra->start == MEMPORT_MARKER && mra->end != 0)
-/*TODO*///			{
-/*TODO*///				if ((mra->end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_IO)
-/*TODO*///					return fatalerror("cpu #%d has memory handlers in place of I/O read handlers!\n", cpunum);
-/*TODO*///				if ((mra->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_READ)
-/*TODO*///					return fatalerror("cpu #%d has port write handlers in place of port read handlers!\n", cpunum);
-/*TODO*///				if ((mra->end & MEMPORT_WIDTH_MASK) != width)
-/*TODO*///					return fatalerror("cpu #%d uses wrong data width port handlers! (width = %d, memory = %08x)\n", cpunum,cpunum_databus_width(cpunum),mra->end);
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		/* verify the write handlers */
-/*TODO*///		if (mwa)
-/*TODO*///		{
-/*TODO*///			/* verify the PORT_WRITE_START header */
-/*TODO*///			if (mwa->start == MEMPORT_MARKER && mwa->end != 0)
-/*TODO*///			{
-/*TODO*///				if ((mwa->end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_IO)
-/*TODO*///					return fatalerror("cpu #%d has memory handlers in place of I/O write handlers!\n", cpunum);
-/*TODO*///				if ((mwa->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_WRITE)
-/*TODO*///					return fatalerror("cpu #%d has port read handlers in place of port write handlers!\n", cpunum);
-/*TODO*///				if ((mwa->end & MEMPORT_WIDTH_MASK) != width)
-/*TODO*///					return fatalerror("cpu #%d uses wrong data width port handlers! (width = %d, memory = %08x)\n", cpunum,cpunum_databus_width(cpunum),mwa->end);
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
+        }
+        return 1;
+    }
+
+    /*-------------------------------------------------
+    	verify_ports - verify the port structs
+    -------------------------------------------------*/
+    public static int verify_ports() {
+        int cpunum;
+
+        /* loop over CPUs */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+            int/*UINT32*/ width;
+
+            /* determine the desired width */
+            switch (cpunum_databus_width(cpunum)) {
+                case 8:
+                    width = MEMPORT_WIDTH_8;
+                    break;
+                case 16:
+                    width = MEMPORT_WIDTH_16;
+                    break;
+                case 32:
+                    width = MEMPORT_WIDTH_32;
+                    break;
+                default:
+                    return fatalerror("cpu #%d has invalid memory width!\n", cpunum);
+            }
+            Object mra_obj = Machine.drv.cpu[cpunum].port_read;
+            Object mwa_obj = Machine.drv.cpu[cpunum].port_write;
+
+            /* verify the read handlers */
+            if (mra_obj != null) {
+                if (mra_obj instanceof IO_ReadPort[]) {
+                    IO_ReadPort[] mra = (IO_ReadPort[]) mra_obj;
+                    int mra_ptr = 0;
+                    /* verify the PORT_READ_START header */
+                    if (mra[mra_ptr].start == MEMPORT_MARKER && mra[mra_ptr].end != 0) {
+                        if ((mra[mra_ptr].end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_IO) {
+                            return fatalerror("cpu #%d has memory handlers in place of I/O read handlers!\n", cpunum);
+                        }
+                        if ((mra[mra_ptr].end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_READ) {
+                            return fatalerror("cpu #%d has port write handlers in place of port read handlers!\n", cpunum);
+                        }
+                        if ((mra[mra_ptr].end & MEMPORT_WIDTH_MASK) != width) {
+                            return fatalerror("cpu #%d uses wrong data width port handlers! (width = %d, memory = %08x)\n", cpunum, cpunum_databus_width(cpunum), mra[mra_ptr].end);
+                        }
+                    }
+                } else {
+                    //do the same for 16,32bit handlers
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+
+            /* verify the write handlers */
+            if (mwa_obj != null) {
+                if (mwa_obj instanceof IO_WritePort[]) {
+                    IO_WritePort[] mwa = (IO_WritePort[]) mwa_obj;
+                    int mwa_ptr = 0;
+                    /* verify the PORT_WRITE_START header */
+                    if (mwa[mwa_ptr].start == MEMPORT_MARKER && mwa[mwa_ptr].end != 0) {
+                        if ((mwa[mwa_ptr].end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_IO) {
+                            return fatalerror("cpu #%d has memory handlers in place of I/O write handlers!\n", cpunum);
+                        }
+                        if ((mwa[mwa_ptr].end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_WRITE) {
+                            return fatalerror("cpu #%d has port read handlers in place of port write handlers!\n", cpunum);
+                        }
+                        if ((mwa[mwa_ptr].end & MEMPORT_WIDTH_MASK) != width) {
+                            return fatalerror("cpu #%d uses wrong data width port handlers! (width = %d, memory = %08x)\n", cpunum, cpunum_databus_width(cpunum), mwa[mwa_ptr].end);
+                        }
+                    }
+                } else {
+                    //do the same for 16,32bit handlers
+                    throw new UnsupportedOperationException("Unsupported");
+                }
+            }
+
+            /*TODO*///		const struct IO_ReadPort *mra = Machine->drv->cpu[cpunum].port_read;
+            /*TODO*///		const struct IO_WritePort *mwa = Machine->drv->cpu[cpunum].port_write;
+            /*TODO*///
+            /*TODO*///		/* verify the read handlers */
+            /*TODO*///		if (mra)
+            /*TODO*///		{
+            /*TODO*///			/* verify the PORT_READ_START header */
+            /*TODO*///			if (mra->start == MEMPORT_MARKER && mra->end != 0)
+            /*TODO*///			{
+            /*TODO*///				if ((mra->end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_IO)
+            /*TODO*///					return fatalerror("cpu #%d has memory handlers in place of I/O read handlers!\n", cpunum);
+            /*TODO*///				if ((mra->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_READ)
+            /*TODO*///					return fatalerror("cpu #%d has port write handlers in place of port read handlers!\n", cpunum);
+            /*TODO*///				if ((mra->end & MEMPORT_WIDTH_MASK) != width)
+            /*TODO*///					return fatalerror("cpu #%d uses wrong data width port handlers! (width = %d, memory = %08x)\n", cpunum,cpunum_databus_width(cpunum),mra->end);
+            /*TODO*///			}
+            /*TODO*///		}
+            /*TODO*///
+            /*TODO*///		/* verify the write handlers */
+            /*TODO*///		if (mwa)
+            /*TODO*///		{
+            /*TODO*///			/* verify the PORT_WRITE_START header */
+            /*TODO*///			if (mwa->start == MEMPORT_MARKER && mwa->end != 0)
+            /*TODO*///			{
+            /*TODO*///				if ((mwa->end & MEMPORT_TYPE_MASK) != MEMPORT_TYPE_IO)
+            /*TODO*///					return fatalerror("cpu #%d has memory handlers in place of I/O write handlers!\n", cpunum);
+            /*TODO*///				if ((mwa->end & MEMPORT_DIRECTION_MASK) != MEMPORT_DIRECTION_WRITE)
+            /*TODO*///					return fatalerror("cpu #%d has port read handlers in place of port write handlers!\n", cpunum);
+            /*TODO*///				if ((mwa->end & MEMPORT_WIDTH_MASK) != width)
+            /*TODO*///					return fatalerror("cpu #%d uses wrong data width port handlers! (width = %d, memory = %08x)\n", cpunum,cpunum_databus_width(cpunum),mwa->end);
+            /*TODO*///			}
+            /*TODO*///		}
+        }
+        return 1;
+    }
 
     /*-------------------------------------------------
             needs_ram - returns true if a given type
@@ -3175,72 +3288,67 @@ public class memory {
         }
     };
 
-    /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	init_static - sets up the static memory
-/*TODO*///	handlers
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static int init_static(void)
-/*TODO*///{
-/*TODO*///	memset(rmemhandler8,  0, sizeof(rmemhandler8));
-/*TODO*///	memset(rmemhandler8s, 0, sizeof(rmemhandler8s));
-/*TODO*///	memset(rmemhandler16, 0, sizeof(rmemhandler16));
-/*TODO*///	memset(rmemhandler32, 0, sizeof(rmemhandler32));
-/*TODO*///	memset(wmemhandler8,  0, sizeof(wmemhandler8));
-/*TODO*///	memset(wmemhandler8s, 0, sizeof(wmemhandler8s));
-/*TODO*///	memset(wmemhandler16, 0, sizeof(wmemhandler16));
-/*TODO*///	memset(wmemhandler32, 0, sizeof(wmemhandler32));
-/*TODO*///
-/*TODO*///	memset(rporthandler8,  0, sizeof(rporthandler8));
-/*TODO*///	memset(rporthandler16, 0, sizeof(rporthandler16));
-/*TODO*///	memset(rporthandler32, 0, sizeof(rporthandler32));
-/*TODO*///	memset(wporthandler8,  0, sizeof(wporthandler8));
-/*TODO*///	memset(wporthandler16, 0, sizeof(wporthandler16));
-/*TODO*///	memset(wporthandler32, 0, sizeof(wporthandler32));
-/*TODO*///
-/*TODO*///	set_static_handler(STATIC_BANK1,  mrh8_bank1,  NULL,         NULL,         mwh8_bank1,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK2,  mrh8_bank2,  NULL,         NULL,         mwh8_bank2,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK3,  mrh8_bank3,  NULL,         NULL,         mwh8_bank3,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK4,  mrh8_bank4,  NULL,         NULL,         mwh8_bank4,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK5,  mrh8_bank5,  NULL,         NULL,         mwh8_bank5,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK6,  mrh8_bank6,  NULL,         NULL,         mwh8_bank6,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK7,  mrh8_bank7,  NULL,         NULL,         mwh8_bank7,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK8,  mrh8_bank8,  NULL,         NULL,         mwh8_bank8,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK9,  mrh8_bank9,  NULL,         NULL,         mwh8_bank9,  NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK10, mrh8_bank10, NULL,         NULL,         mwh8_bank10, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK11, mrh8_bank11, NULL,         NULL,         mwh8_bank11, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK12, mrh8_bank12, NULL,         NULL,         mwh8_bank12, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK13, mrh8_bank13, NULL,         NULL,         mwh8_bank13, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK14, mrh8_bank14, NULL,         NULL,         mwh8_bank14, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK15, mrh8_bank15, NULL,         NULL,         mwh8_bank15, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK16, mrh8_bank16, NULL,         NULL,         mwh8_bank16, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK17, mrh8_bank17, NULL,         NULL,         mwh8_bank17, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK18, mrh8_bank18, NULL,         NULL,         mwh8_bank18, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK19, mrh8_bank19, NULL,         NULL,         mwh8_bank19, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK20, mrh8_bank20, NULL,         NULL,         mwh8_bank20, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK21, mrh8_bank21, NULL,         NULL,         mwh8_bank21, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK22, mrh8_bank22, NULL,         NULL,         mwh8_bank22, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK23, mrh8_bank23, NULL,         NULL,         mwh8_bank23, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_BANK24, mrh8_bank24, NULL,         NULL,         mwh8_bank24, NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_UNMAP,  mrh8_bad,    mrh16_bad,    mrh32_bad,    mwh8_bad,    mwh16_bad,    mwh32_bad);
-/*TODO*///	set_static_handler(STATIC_NOP,    mrh8_nop,    mrh16_nop,    mrh32_nop,    mwh8_nop,    mwh16_nop,    mwh32_nop);
-/*TODO*///	set_static_handler(STATIC_RAM,    mrh8_ram,    NULL,         NULL,         mwh8_ram,    NULL,         NULL);
-/*TODO*///	set_static_handler(STATIC_ROM,    NULL,        NULL,         NULL,         mwh8_rom,    mwh16_rom,    mwh32_rom);
-/*TODO*///	set_static_handler(STATIC_RAMROM, NULL,        NULL,         NULL,         mwh8_ramrom, mwh16_ramrom, mwh32_ramrom);
-/*TODO*///
-/*TODO*///	/* override port unmapped handlers */
-/*TODO*///	rporthandler8 [STATIC_UNMAP].handler = (void *)prh8_bad;
-/*TODO*///	rporthandler16[STATIC_UNMAP].handler = (void *)prh16_bad;
-/*TODO*///	rporthandler32[STATIC_UNMAP].handler = (void *)prh32_bad;
-/*TODO*///	wporthandler8 [STATIC_UNMAP].handler = (void *)pwh8_bad;
-/*TODO*///	wporthandler16[STATIC_UNMAP].handler = (void *)pwh16_bad;
-/*TODO*///	wporthandler32[STATIC_UNMAP].handler = (void *)pwh32_bad;
-/*TODO*///
-/*TODO*///	return 1;
-/*TODO*///}
-/*TODO*///
+    /*-------------------------------------------------
+    	init_static - sets up the static memory
+    	handlers
+    -------------------------------------------------*/
+    public static int init_static() {
+        /*TODO*///	memset(rmemhandler8,  0, sizeof(rmemhandler8));
+        /*TODO*///	memset(rmemhandler8s, 0, sizeof(rmemhandler8s));
+        /*TODO*///	memset(rmemhandler16, 0, sizeof(rmemhandler16));
+        /*TODO*///	memset(rmemhandler32, 0, sizeof(rmemhandler32));
+        /*TODO*///	memset(wmemhandler8,  0, sizeof(wmemhandler8));
+        /*TODO*///	memset(wmemhandler8s, 0, sizeof(wmemhandler8s));
+        /*TODO*///	memset(wmemhandler16, 0, sizeof(wmemhandler16));
+        /*TODO*///	memset(wmemhandler32, 0, sizeof(wmemhandler32));
+        /*TODO*///
+        /*TODO*///	memset(rporthandler8,  0, sizeof(rporthandler8));
+        /*TODO*///	memset(rporthandler16, 0, sizeof(rporthandler16));
+        /*TODO*///	memset(rporthandler32, 0, sizeof(rporthandler32));
+        /*TODO*///	memset(wporthandler8,  0, sizeof(wporthandler8));
+        /*TODO*///	memset(wporthandler16, 0, sizeof(wporthandler16));
+        /*TODO*///	memset(wporthandler32, 0, sizeof(wporthandler32));
+        /*TODO*///
+        set_static_handler(STATIC_BANK1, mrh8_bank1, mwh8_bank1);/*TODO*///	set_static_handler(STATIC_BANK1,  mrh8_bank1,  NULL,         NULL,         mwh8_bank1,  NULL,         NULL);
+        set_static_handler(STATIC_BANK2, mrh8_bank2, mwh8_bank2);/*TODO*///	set_static_handler(STATIC_BANK2,  mrh8_bank2,  NULL,         NULL,         mwh8_bank2,  NULL,         NULL);
+        set_static_handler(STATIC_BANK3, mrh8_bank3, mwh8_bank3);/*TODO*///	set_static_handler(STATIC_BANK3,  mrh8_bank3,  NULL,         NULL,         mwh8_bank3,  NULL,         NULL);
+        set_static_handler(STATIC_BANK4, mrh8_bank4, mwh8_bank4);/*TODO*///	set_static_handler(STATIC_BANK4,  mrh8_bank4,  NULL,         NULL,         mwh8_bank4,  NULL,         NULL);
+        set_static_handler(STATIC_BANK5, mrh8_bank5, mwh8_bank5);/*TODO*///	set_static_handler(STATIC_BANK5,  mrh8_bank5,  NULL,         NULL,         mwh8_bank5,  NULL,         NULL);
+        set_static_handler(STATIC_BANK6, mrh8_bank6, mwh8_bank6);/*TODO*///	set_static_handler(STATIC_BANK6,  mrh8_bank6,  NULL,         NULL,         mwh8_bank6,  NULL,         NULL);
+        set_static_handler(STATIC_BANK7, mrh8_bank7, mwh8_bank7);/*TODO*///	set_static_handler(STATIC_BANK7,  mrh8_bank7,  NULL,         NULL,         mwh8_bank7,  NULL,         NULL);
+        set_static_handler(STATIC_BANK8, mrh8_bank8, mwh8_bank8);/*TODO*///	set_static_handler(STATIC_BANK8,  mrh8_bank8,  NULL,         NULL,         mwh8_bank8,  NULL,         NULL);
+        set_static_handler(STATIC_BANK9, mrh8_bank9, mwh8_bank9);/*TODO*///	set_static_handler(STATIC_BANK9,  mrh8_bank9,  NULL,         NULL,         mwh8_bank9,  NULL,         NULL);
+        set_static_handler(STATIC_BANK10, mrh8_bank10, mwh8_bank10);/*TODO*///	set_static_handler(STATIC_BANK10, mrh8_bank10, NULL,         NULL,         mwh8_bank10, NULL,         NULL);
+        set_static_handler(STATIC_BANK11, mrh8_bank11, mwh8_bank11);/*TODO*///	set_static_handler(STATIC_BANK11, mrh8_bank11, NULL,         NULL,         mwh8_bank11, NULL,         NULL);
+        set_static_handler(STATIC_BANK12, mrh8_bank12, mwh8_bank12);/*TODO*///	set_static_handler(STATIC_BANK12, mrh8_bank12, NULL,         NULL,         mwh8_bank12, NULL,         NULL);
+        set_static_handler(STATIC_BANK13, mrh8_bank13, mwh8_bank13);/*TODO*///	set_static_handler(STATIC_BANK13, mrh8_bank13, NULL,         NULL,         mwh8_bank13, NULL,         NULL);
+        set_static_handler(STATIC_BANK14, mrh8_bank14, mwh8_bank14);/*TODO*///	set_static_handler(STATIC_BANK14, mrh8_bank14, NULL,         NULL,         mwh8_bank14, NULL,         NULL);
+        set_static_handler(STATIC_BANK15, mrh8_bank15, mwh8_bank15);/*TODO*///	set_static_handler(STATIC_BANK15, mrh8_bank15, NULL,         NULL,         mwh8_bank15, NULL,         NULL);
+        set_static_handler(STATIC_BANK16, mrh8_bank16, mwh8_bank16);/*TODO*///	set_static_handler(STATIC_BANK16, mrh8_bank16, NULL,         NULL,         mwh8_bank16, NULL,         NULL);
+        set_static_handler(STATIC_BANK17, mrh8_bank17, mwh8_bank17);/*TODO*///	set_static_handler(STATIC_BANK17, mrh8_bank17, NULL,         NULL,         mwh8_bank17, NULL,         NULL);
+        set_static_handler(STATIC_BANK18, mrh8_bank18, mwh8_bank18);/*TODO*///	set_static_handler(STATIC_BANK18, mrh8_bank18, NULL,         NULL,         mwh8_bank18, NULL,         NULL);
+        set_static_handler(STATIC_BANK19, mrh8_bank19, mwh8_bank19);/*TODO*///	set_static_handler(STATIC_BANK19, mrh8_bank19, NULL,         NULL,         mwh8_bank19, NULL,         NULL);
+        set_static_handler(STATIC_BANK20, mrh8_bank20, mwh8_bank20);/*TODO*///	set_static_handler(STATIC_BANK20, mrh8_bank20, NULL,         NULL,         mwh8_bank20, NULL,         NULL);
+        set_static_handler(STATIC_BANK21, mrh8_bank21, mwh8_bank21);/*TODO*///	set_static_handler(STATIC_BANK21, mrh8_bank21, NULL,         NULL,         mwh8_bank21, NULL,         NULL);
+        set_static_handler(STATIC_BANK22, mrh8_bank22, mwh8_bank22);/*TODO*///	set_static_handler(STATIC_BANK22, mrh8_bank22, NULL,         NULL,         mwh8_bank22, NULL,         NULL);
+        set_static_handler(STATIC_BANK23, mrh8_bank23, mwh8_bank23);/*TODO*///	set_static_handler(STATIC_BANK23, mrh8_bank23, NULL,         NULL,         mwh8_bank23, NULL,         NULL);
+        set_static_handler(STATIC_BANK24, mrh8_bank24, mwh8_bank24);/*TODO*///	set_static_handler(STATIC_BANK24, mrh8_bank24, NULL,         NULL,         mwh8_bank24, NULL,         NULL);
+        set_static_handler(STATIC_UNMAP, mrh8_bad, mwh8_bad);/*TODO*///	set_static_handler(STATIC_UNMAP,  mrh8_bad,    mrh16_bad,    mrh32_bad,    mwh8_bad,    mwh16_bad,    mwh32_bad);
+        set_static_handler(STATIC_NOP, mrh8_nop, mwh8_nop);/*TODO*///	set_static_handler(STATIC_NOP,    mrh8_nop,    mrh16_nop,    mrh32_nop,    mwh8_nop,    mwh16_nop,    mwh32_nop);
+        set_static_handler(STATIC_RAM, mrh8_ram, mwh8_ram);/*TODO*///	set_static_handler(STATIC_RAM,    mrh8_ram,    NULL,         NULL,         mwh8_ram,    NULL,         NULL);
+        set_static_handler(STATIC_ROM, null, mwh8_rom);/*TODO*///	set_static_handler(STATIC_ROM,    NULL,        NULL,         NULL,         mwh8_rom,    mwh16_rom,    mwh32_rom);
+        set_static_handler(STATIC_RAMROM, null, mwh8_ramrom);/*TODO*///	set_static_handler(STATIC_RAMROM, NULL,        NULL,         NULL,         mwh8_ramrom, mwh16_ramrom, mwh32_ramrom);
+
+        /* override port unmapped handlers */
+        rporthandler8[STATIC_UNMAP].handler = prh8_bad;
+        /*TODO*///	rporthandler16[STATIC_UNMAP].handler = (void *)prh16_bad;
+        /*TODO*///	rporthandler32[STATIC_UNMAP].handler = (void *)prh32_bad;
+        wporthandler8[STATIC_UNMAP].handler = pwh8_bad;
+        /*TODO*///	wporthandler16[STATIC_UNMAP].handler = (void *)pwh16_bad;
+        /*TODO*///	wporthandler32[STATIC_UNMAP].handler = (void *)pwh32_bad;
+        /*TODO*///
+        return 1;
+    }
 
     /*-------------------------------------------------
             debugging
