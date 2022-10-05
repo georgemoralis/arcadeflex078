@@ -7,7 +7,6 @@ import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
 import static arcadeflex.v078.mame.cpuint.drv_irq_callbacks;
-import static arcadeflex056.fucPtr.*;
 
 import static mame056.cpuexecH.*;
 import static mame056.driverH.*;
@@ -1061,80 +1060,6 @@ public class cpuexec {
     /**
      * ***********************************
      *
-     * Interrupt generation callbacks
-     *
-     ************************************
-     */
-    public static InterruptPtr interrupt = new InterruptPtr() {
-        public int handler() {
-            int val = 0;
-            int activecpu = cpu_getactivecpu();
-            if (activecpu < 0) {
-                logerror("interrupt() called with no active cpu!\n");
-                return INTERRUPT_NONE;
-            }
-            if (interrupt_enable[activecpu] == 0) {
-                return INTERRUPT_NONE;
-            }
-
-            val = activecpu_default_irq_line();
-            return (val == -1000) ? interrupt_vector[activecpu] : val;
-        }
-    };
-    public static InterruptPtr nmi_interrupt = new InterruptPtr() {
-        public int handler() {
-            int activecpu = cpu_getactivecpu();
-            if (activecpu < 0) {
-                logerror("nmi_interrupt() called with no active cpu!\n");
-                return INTERRUPT_NONE;
-            }
-            //LOG(("nmi_interrupt: interrupt_enable[%d]=%d\n", activecpu, interrupt_enable[activecpu]));
-            if (interrupt_enable[activecpu] != 0) {
-                cpu_set_nmi_line(activecpu, PULSE_LINE);
-            }
-            return INTERRUPT_NONE;
-        }
-    };
-    public static InterruptPtr ignore_interrupt = new InterruptPtr() {
-        public int handler() {
-            int activecpu = cpu_getactivecpu();
-            if (activecpu < 0) {
-                logerror("ignore_interrupt() called with no active cpu!\n");
-                return INTERRUPT_NONE;
-            }
-            return INTERRUPT_NONE;
-        }
-    };
-
-    /*TODO*///
-/*TODO*///
-/*TODO*///#if (HAS_M68000 || HAS_M68010 || HAS_M68020 || HAS_M68EC020)
-/*TODO*///
-/*TODO*///INLINE int m68_irq(int level)
-/*TODO*///{
-/*TODO*///	VERIFY_ACTIVECPU(INTERRUPT_NONE, m68_irq);
-/*TODO*///	if (interrupt_enable[activecpu])
-/*TODO*///	{
-/*TODO*///		cpu_irq_line_vector_w(activecpu, level, MC68000_INT_ACK_AUTOVECTOR);
-/*TODO*///		cpu_set_irq_line(activecpu, level, HOLD_LINE);
-/*TODO*///	}
-/*TODO*///	return INTERRUPT_NONE;
-/*TODO*///}
-/*TODO*///
-/*TODO*///int m68_level1_irq(void) { return m68_irq(1); }
-/*TODO*///int m68_level2_irq(void) { return m68_irq(2); }
-/*TODO*///int m68_level3_irq(void) { return m68_irq(3); }
-/*TODO*///int m68_level4_irq(void) { return m68_irq(4); }
-/*TODO*///int m68_level5_irq(void) { return m68_irq(5); }
-/*TODO*///int m68_level6_irq(void) { return m68_irq(6); }
-/*TODO*///int m68_level7_irq(void) { return m68_irq(7); }
-/*TODO*///
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///
-    /**
-     * ***********************************
-     *
      * Generate a specific trigger
      *
      ************************************
@@ -1340,7 +1265,8 @@ public class cpuexec {
                             /* if the CPU has a VBLANK handler, call it */
                             if (Machine.drv.cpu[cpunum].vblank_interrupt != null && cpu_getstatus(cpunum) != 0) {
                                 cpuintrf_push_context(cpunum);
-                                cpu_cause_interrupt(cpunum, Machine.drv.cpu[cpunum].vblank_interrupt.handler());
+                                //cpu_cause_interrupt(cpunum, Machine.drv.cpu[cpunum].vblank_interrupt.handler());
+                                Machine.drv.cpu[cpunum].vblank_interrupt.handler();
                                 cpuintrf_pop_context();
                             }
 
@@ -1422,7 +1348,8 @@ public class cpuexec {
             /* bail if there is no routine */
             if (Machine.drv.cpu[param].timed_interrupt != null && cpu_getstatus(param) != 0) {
                 cpuintrf_push_context(param);
-                cpu_cause_interrupt(param, Machine.drv.cpu[param].timed_interrupt.handler());
+                //cpu_cause_interrupt(param, Machine.drv.cpu[param].timed_interrupt.handler());
+                Machine.drv.cpu[param].timed_interrupt.handler();
                 cpuintrf_pop_context();
             }
         }

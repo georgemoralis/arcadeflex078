@@ -26,11 +26,6 @@ public class fucPtr {
         public abstract void handler();
     }
 
-    public static abstract interface InterruptPtr {
-
-        public abstract int handler();
-    }
-
     public static abstract interface VhConvertColorPromPtr {
 
         public abstract void handler(char[] palette, char[] colortable, UBytePtr color_prom);

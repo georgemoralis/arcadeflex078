@@ -4,6 +4,7 @@
  */
 package mame056.drivers;
 
+import static arcadeflex.v078.mame.cpuint.irq0_line_hold;
 import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_READ;
 import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_WRITE;
 import static arcadeflex.v078.mame.memoryH.MEMPORT_MARKER;
@@ -18,7 +19,6 @@ import arcadeflex.v078.mame.memoryH.Memory_WriteAddress;
 import static arcadeflex056.fucPtr.*;
 
 import static mame056.commonH.*;
-import static mame056.cpuexec.*;
 import static mame056.inptportH.*;
 import static mame056.cpuexecH.*;
 import static mame056.cpuintrfH.*;
@@ -68,7 +68,7 @@ public class minivadr {
                         CPU_Z80,
                         24000000 / 6, /* 4 MHz ? */
                         readmem, writemem, null, null,
-                        interrupt, 1
+                        irq0_line_hold, 1
                 )
             },
             60, DEFAULT_60HZ_VBLANK_DURATION, /* frames per second, vblank duration */
