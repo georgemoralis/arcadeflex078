@@ -3,9 +3,12 @@
  */
 package mame056;
 
-import arcadeflex.v078.generic.funcPtr.InterruptPtr;
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuint.*;
 
-import static mame056.cpuexec.*;
+//TODO
 import static mame056.cpuintrfH.*;
 
 

@@ -6,7 +6,8 @@ package mame056;
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
-import static arcadeflex.v078.mame.cpuint.drv_irq_callbacks;
+import static arcadeflex.v078.mame.cpuint.cpuint_init;
+import static arcadeflex.v078.mame.cpuint.cpuint_reset_cpu;
 
 import static mame056.cpuexecH.*;
 import static mame056.driverH.*;
@@ -123,11 +124,11 @@ public class cpuexec {
      *
      ************************************
      */
-    static int[]/*UINT8*/ interrupt_enable = new int[MAX_CPU];
-    static int[] interrupt_vector = new int[MAX_CPU];
+    //static int[]/*UINT8*/ interrupt_enable = new int[MAX_CPU];
+    //static int[] interrupt_vector = new int[MAX_CPU];
 
-    static int[][]/*UINT8*/ irq_line_state = new int[MAX_CPU][MAX_IRQ_LINES];
-    static int[][] irq_line_vector = new int[MAX_CPU][MAX_IRQ_LINES];
+    //static int[][]/*UINT8*/ irq_line_state = new int[MAX_CPU][MAX_IRQ_LINES];
+    //static int[][] irq_line_vector = new int[MAX_CPU][MAX_IRQ_LINES];
 
     /**
      * ***********************************
@@ -169,7 +170,6 @@ public class cpuexec {
         /* count how many CPUs we have to emulate */
         for (cpunum = 0; cpunum < MAX_CPU; cpunum++) {
             int cputype = Machine.drv.cpu[cpunum].cpu_type & ~CPU_FLAGS_MASK;
-            int irqline;
 
             /* stop when we hit a dummy */
             if (cputype == CPU_DUMMY) {
@@ -184,21 +184,8 @@ public class cpuexec {
                 return 1;
             }
 
-            /* reset the IRQ lines */
-            for (irqline = 0; irqline < MAX_IRQ_LINES; irqline++) {
-                irq_line_state[cpunum][irqline] = CLEAR_LINE;
-                irq_line_vector[cpunum][irqline] = cpunum_default_irq_vector(cpunum);
-            }
         }
-        /*TODO*///
-/*TODO*///	/* save some stuff in tag 0 */
-/*TODO*///	state_save_set_current_tag(0);
-/*TODO*///	state_save_register_UINT8("cpu", 0, "irq enable",     interrupt_enable,  cpunum);
-/*TODO*///	state_save_register_INT32("cpu", 0, "irq vector",     interrupt_vector,  cpunum);
-/*TODO*///	state_save_register_UINT8("cpu", 0, "irqline state",  &irq_line_state[0][0],  cpunum * MAX_IRQ_LINES);
-/*TODO*///	state_save_register_INT32("cpu", 0, "irqline vector", &irq_line_vector[0][0], cpunum * MAX_IRQ_LINES);
-/*TODO*///	state_save_register_INT32("cpu", 0, "watchdog count", &watchdog_counter, 1);
-
+        cpuint_init();
         /* init the timer system */
         timer_init();
         timeslice_timer = refresh_timer = vblank_timer = null;
@@ -238,13 +225,7 @@ public class cpuexec {
                 timer_suspendcpu(cpunum, 1, SUSPEND_REASON_DISABLE);
             }
 
-            /* start with interrupts enabled, so the generic routine will work even if */
- /* the machine doesn't have an interrupt enable port */
-            interrupt_enable[cpunum] = 1;
-            interrupt_vector[cpunum] = 0xff;
-
-            /* reset any driver hooks into the IRQ acknowledge callbacks */
-            drv_irq_callbacks[cpunum] = null;
+            cpuint_reset_cpu(cpunum);
 
             /* reset the total number of cycles */
             cpu_exec[cpunum].totalcycles = 0;
@@ -842,220 +823,6 @@ public class cpuexec {
     public static int cpu_getcurrentframe() {
         return current_frame;
     }
-
-    /**
-     * ***********************************
-     *
-     * Internal IRQ callbacks
-     *
-     ************************************
-     */
-    public static int cpu_irq_callback(int cpunum, int irqline) {
-        int vector = irq_line_vector[cpunum][irqline];
-        //LOG(("cpu_%d_irq_callback(%d) $%04xn", cpunum, irqline, vector));
-
-        /* if the IRQ state is HOLD_LINE, clear it */
-        if (irq_line_state[cpunum][irqline] == HOLD_LINE) {
-            //LOG(("->set_irq_line(%d,%d,%d)\n", cpunum, irqline, CLEAR_LINE));
-            activecpu_set_irq_line(irqline, INTERNAL_CLEAR_LINE);
-            irq_line_state[cpunum][irqline] = CLEAR_LINE;
-        }
-
-        /* if there's a driver callback, run it */
-        if (drv_irq_callbacks[cpunum] != null) {
-            vector = (drv_irq_callbacks[cpunum]).handler(irqline);
-        }
-
-        /* otherwise, just return the current vector */
-        return vector;
-    }
-
-    /**
-     * ***********************************
-     *
-     * Set the IRQ vector for a given IRQ line on a CPU
-     *
-     ************************************
-     */
-    public static void cpu_irq_line_vector_w(int cpunum, int irqline, int vector) {
-        if (cpunum < cpu_gettotalcpu() && irqline >= 0 && irqline < MAX_IRQ_LINES) {
-            //LOG(("cpu_irq_line_vector_w(%d,%d,$%04x)\n",cpunum,irqline,vector));
-            irq_line_vector[cpunum][irqline] = vector;
-            return;
-        }
-        //LOG(("cpu_irq_line_vector_w CPU#%d irqline %d > max irq lines\n", cpunum, irqline));
-    }
-
-    /**
-     * ***********************************
-     *
-     * Generate a IRQ interrupt
-     *
-     ************************************
-     */
-    public static timer_callback cpu_manualirqcallback = new timer_callback() {
-        public void handler(int param) {
-            int cpunum = param & 0x0f;
-            int state = (param >> 4) & 0x0f;
-            int irqline = (param >> 8) & 0x7f;
-            int set_vector = (param >> 15) & 0x01;
-            int vector = param >> 16;
-
-            //LOG(("cpu_manualirqcallback %d,%d,%d\n",cpunum,irqline,state));
-
-            /* swap to the CPU's context */
-            cpuintrf_push_context(cpunum);
-
-            /* set the IRQ line state and vector */
-            if (irqline >= 0 && irqline < MAX_IRQ_LINES) {
-                irq_line_state[cpunum][irqline] = state;
-                if (set_vector != 0) {
-                    irq_line_vector[cpunum][irqline] = vector;
-                }
-            }
-
-            /* switch off the requested state */
-            switch (state) {
-                case PULSE_LINE:
-                    activecpu_set_irq_line(irqline, INTERNAL_ASSERT_LINE);
-                    activecpu_set_irq_line(irqline, INTERNAL_CLEAR_LINE);
-                    break;
-
-                case HOLD_LINE:
-                case ASSERT_LINE:
-                    activecpu_set_irq_line(irqline, INTERNAL_ASSERT_LINE);
-                    break;
-
-                case CLEAR_LINE:
-                    activecpu_set_irq_line(irqline, INTERNAL_CLEAR_LINE);
-                    break;
-
-                default:
-                    logerror("cpu_manualirqcallback cpu #%d, line %d, unknown state %d\n", cpunum, irqline, state);
-            }
-            cpuintrf_pop_context();
-
-            /* generate a trigger to unsuspend any CPUs waiting on the interrupt */
-            if (state != CLEAR_LINE) {
-                cpu_triggerint(cpunum);
-            }
-        }
-    };
-
-    public static void cpu_set_irq_line(int cpunum, int irqline, int state) {
-        int vector = 0xff;
-
-        /* don't trigger interrupts on suspended CPUs */
-        if (cpu_getstatus(cpunum) == 0) {
-            return;
-        }
-
-        /* determine the current vector */
-        if (irqline >= 0 && irqline < MAX_IRQ_LINES) {
-            vector = irq_line_vector[cpunum][irqline];
-        }
-
-        //LOG(("cpu_set_irq_line(%d,%d,%d,%02x)\n", cpunum, irqline, state, vector));
-
-        /* set a timer to go off */
-        timer_set(TIME_NOW, (cpunum & 0x0f) | ((state & 0x0f) << 4) | ((irqline & 0x7f) << 8), cpu_manualirqcallback);
-    }
-
-    public static void cpu_set_irq_line_and_vector(int cpunum, int irqline, int state, int vector) {
-        /* don't trigger interrupts on suspended CPUs */
-        if (cpu_getstatus(cpunum) == 0) {
-            return;
-        }
-
-        //LOG(("cpu_set_irq_line(%d,%d,%d,%02x)\n", cpunum, irqline, state, vector));
-
-        /* set a timer to go off */
-        timer_set(TIME_NOW, (cpunum & 0x0f) | ((state & 0x0f) << 4) | ((irqline & 0x7f) << 8) | (1 << 15) | (vector << 16), cpu_manualirqcallback);
-    }
-
-    /**
-     * ***********************************
-     *
-     * Old-style interrupt generation
-     *
-     ************************************
-     */
-    public static void cpu_cause_interrupt(int cpunum, int type) {
-        /* special case for none */
-        if (type == INTERRUPT_NONE) {
-            return;
-        } /* special case for NMI type */ else if (type == INTERRUPT_NMI) {
-            cpu_set_irq_line(cpunum, IRQ_LINE_NMI, PULSE_LINE);
-        } /* otherwise, convert to an IRQ */ else {
-            int[] vector = new int[1];
-            int irqline;
-            irqline = convert_type_to_irq_line(cpunum, type, vector);
-            cpu_set_irq_line_and_vector(cpunum, irqline, HOLD_LINE, vector[0]);
-        }
-    }
-
-    /**
-     * ***********************************
-     *
-     * Interrupt enabling
-     *
-     ************************************
-     */
-    public static timer_callback cpu_clearintcallback = new timer_callback() {
-        public void handler(int cpunum) {
-            int irqcount = cputype_get_interface(Machine.drv.cpu[cpunum].cpu_type & ~CPU_FLAGS_MASK).num_irqs;
-            int irqline;
-
-            cpuintrf_push_context(cpunum);
-
-            /* clear NMI and all IRQs */
-            activecpu_set_irq_line(IRQ_LINE_NMI, INTERNAL_CLEAR_LINE);
-            for (irqline = 0; irqline < irqcount; irqline++) {
-                activecpu_set_irq_line(irqline, INTERNAL_CLEAR_LINE);
-            }
-
-            cpuintrf_pop_context();
-        }
-    };
-
-    public static void cpu_interrupt_enable(int cpunum, int enabled) {
-        interrupt_enable[cpunum] = enabled;
-
-        //LOG(("CPU#%d interrupt_enable=%d\n", cpunum, enabled));
-
-        /* make sure there are no queued interrupts */
-        if (enabled == 0) {
-            timer_set(TIME_NOW, cpunum, cpu_clearintcallback);
-        }
-    }
-
-    public static WriteHandlerPtr interrupt_enable_w = new WriteHandlerPtr() {
-        public void handler(int offset, int data) {
-            int activecpu = cpu_getactivecpu();
-            if (activecpu < 0) {
-                logerror("interrupt_enable_w() called with no active cpu!\n");
-                return;
-            }
-            cpu_interrupt_enable(activecpu, data);
-        }
-    };
-
-    public static WriteHandlerPtr interrupt_vector_w = new WriteHandlerPtr() {
-        public void handler(int offset, int data) {
-            int activecpu = cpu_getactivecpu();
-            if (activecpu < 0) {
-                logerror("interrupt_vector_w() called with no active cpu!\n");
-                return;
-            }
-            if (interrupt_vector[activecpu] != data) {
-                //LOG(("CPU#%d interrupt_vector_w $%02x\n", activecpu, data));
-                interrupt_vector[activecpu] = data;
-
-                /* make sure there are no queued interrupts */
-                timer_set(TIME_NOW, activecpu, cpu_clearintcallback);
-            }
-        }
-    };
 
     /**
      * ***********************************
