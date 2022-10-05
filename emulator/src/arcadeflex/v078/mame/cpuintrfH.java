@@ -4,6 +4,11 @@
  */
 package arcadeflex.v078.mame;
 
+import static mame056.cpuintrf.activecpu;
+import static mame056.cpuintrf.cpuintrf;
+import static mame056.cpuintrf.totalcpu;
+import mame056.cpuintrfH.cpu_interface;
+
 public class cpuintrfH {
 
     /*TODO*////***************************************************************************
@@ -789,27 +794,25 @@ public class cpuintrfH {
 /*TODO*///
 /*TODO*///
 /*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 CPU interface accessors
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* return a pointer to the interface struct for a given CPU type */
-/*TODO*///INLINE const struct cpu_interface *cputype_get_interface(int cputype)
-/*TODO*///{
-/*TODO*///	extern const struct cpu_interface cpuintrf[];
-/*TODO*///	return &cpuintrf[cputype];
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////* return a the index of the active CPU */
-/*TODO*///INLINE int cpu_getactivecpu(void)
-/*TODO*///{
-/*TODO*///	extern int activecpu;
-/*TODO*///	return activecpu;
-/*TODO*///}
-/*TODO*///
+    /**
+     * ***********************************
+     *
+     * CPU interface accessors
+     *
+     ************************************
+     */
+
+    /* return a pointer to the interface struct for a given CPU type */
+    public static cpu_interface cputype_get_interface(int cputype) {
+        return cpuintrf[cputype];
+    }
+
+    /* return a the index of the active CPU */
+    public static int cpu_getactivecpu() {
+        return activecpu;
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*////* return a the index of the executing CPU */
 /*TODO*///INLINE int cpu_getexecutingcpu(void)
@@ -819,13 +822,11 @@ public class cpuintrfH {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*////* return a the total number of registered CPUs */
-/*TODO*///INLINE int cpu_gettotalcpu(void)
-/*TODO*///{
-/*TODO*///	extern int totalcpu;
-/*TODO*///	return totalcpu;
-/*TODO*///}
-/*TODO*///
+    /* return a the total number of registered CPUs */
+    public static int cpu_gettotalcpu() {
+        return totalcpu;
+    }
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*///#ifdef __cplusplus

@@ -4,6 +4,7 @@
  */
 package mame037b7;
 
+import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
 import static common.libc.cstdio.sprintf;
 import arcadeflex037b7.util.cheatFileParser;
 import java.util.ArrayList;
@@ -16,7 +17,6 @@ import static mame056.mame.*;
 import static mame056.cpuintrf.cpunum_address_mask;
 import static mame056.cpuintrf.cpunum_read_byte;
 import static mame056.cpuintrf.cpunum_write_byte;
-import static mame056.cpuintrfH.cpu_gettotalcpu;
 import static mame056.input.*;
 import static mame056.inputH.*;
 import static mame056.usrintrf.*;
@@ -773,7 +773,7 @@ public class cheat {
                 if (!CheatTable[ed_tag[sel]].comment.isEmpty() && (CheatTable[ed_tag[sel]].comment.charAt(0) != 0x00)) {
                     ed_submenu_choice = 1;
                     /* tell updatescreen() to clean after us */
-                   schedule_full_refresh();
+                    schedule_full_refresh();
                 }
             }
         }

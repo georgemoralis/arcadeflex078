@@ -10,6 +10,7 @@ package mame056.cpu.z80;
 
 import static arcadeflex.v078.mame.cpuintrfH.CLEAR_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.IRQ_LINE_NMI;
+import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
 import static arcadeflex.v078.mame.memory.cpu_readmem16;
 import static arcadeflex.v078.mame.memory.cpu_readport16;
 import static arcadeflex.v078.mame.memory.cpu_setOPbase16;

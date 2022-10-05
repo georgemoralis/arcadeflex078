@@ -15,8 +15,6 @@ import static mame056.cpuintrf.activecpu_set_irq_line;
 import static mame056.cpuintrf.cpuintrf_pop_context;
 import static mame056.cpuintrf.cpuintrf_push_context;
 import static mame056.cpuintrf.cpunum_default_irq_vector;
-import static mame056.cpuintrfH.cpu_getactivecpu;
-import static mame056.cpuintrfH.cpu_gettotalcpu;
 import mame056.cpuintrfH.IrqcallbackPtr;
 import static mame056.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.MAX_CPU;

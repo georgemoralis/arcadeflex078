@@ -310,13 +310,4 @@ public class cpuintrfH {
         return cpuintrf[cputype];
     }
 
-    /* return a the index of the active CPU */
-    public static int cpu_getactivecpu() {
-        return activecpu;
-    }
-
-    /* return a the total number of registered CPUs */
-    public static int cpu_gettotalcpu() {
-        return totalcpu;
-    }
 }

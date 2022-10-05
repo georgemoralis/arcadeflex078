@@ -11,6 +11,8 @@ import static arcadeflex.v078.mame.cpuint.cpuint_reset_cpu;
 import static arcadeflex.v078.mame.cpuintrfH.ASSERT_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.CLEAR_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.PULSE_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
+import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
 
 import static mame056.cpuexecH.*;
 import static mame056.driverH.*;

@@ -305,7 +305,7 @@ public class cpuintrf {
      *
      ************************************
      */
-    static int activecpu;/* index of active CPU (or -1) */
+    public static int activecpu;/* index of active CPU (or -1) */
     public static int totalcpu;/* total number of CPUs */
 
     static cpuinfo[] cpu = new cpuinfo[MAX_CPU];
