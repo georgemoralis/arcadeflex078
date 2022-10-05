@@ -9,7 +9,7 @@ import static arcadeflex.v078.generic.funcPtr.*;
 import static arcadeflex.v078.mame.cpuint.*;
 
 //TODO
-import static mame056.cpuintrfH.*;
+import static arcadeflex.v078.mame.cpuintrfH.IRQ_LINE_NMI;
 
 
 public class cpuexecH {
@@ -119,20 +119,6 @@ public class cpuexecH {
     /**
      * ***********************************
      *
-     * Interrupt constants
-     *
-     ************************************
-     */
-
-    /* generic "none" vector */
-    public static final int INTERRUPT_NONE = 126;
-
-    /* generic NMI vector */
-    public static final int INTERRUPT_NMI = IRQ_LINE_NMI;
-
-    /**
-     * ***********************************
-     *
      * Save/restore
      *
      ************************************
@@ -142,18 +128,6 @@ public class cpuexecH {
     public static final int LOADSAVE_NONE = 0;
     public static final int LOADSAVE_SAVE = 1;
     public static final int LOADSAVE_LOAD = 2;
-
-    /**
-     * ***********************************
-     *
-     * Interrupt handling
-     *
-     ************************************
-     */
-    /* macro for handling NMI lines */
-    public static void cpu_set_nmi_line(int cpunum, int state) {
-        cpu_set_irq_line(cpunum, IRQ_LINE_NMI, state);
-    }
 
     /*TODO*///
 /*TODO*///
@@ -186,10 +160,6 @@ public class cpuexecH {
 /*TODO*///int m68_level6_irq(void);
 /*TODO*///int m68_level7_irq(void);
 /*TODO*///#endif
-/*TODO*///
-/* defines for backward compatibility */
-    public static final int Z80_NMI_INT = INTERRUPT_NMI;
-    public static final int Z80_IRQ_INT = -1000;
 
 //    public static final int M6502_INT_IRQ = M6502_IRQ_LINE;
 //    public static final int M6502_INT_NMI = INTERRUPT_NMI;

@@ -84,26 +84,6 @@ public class cpuintrfH {
 
     public static final int CPU_COUNT = 67;
 
-    /**
-     * ***********************************
-     *
-     * Interrupt line constants
-     *
-     ************************************
-     */
-    /* line states */
-    public static final int CLEAR_LINE = 0;/* clear (a fired, held or pulsed) line */
-    public static final int ASSERT_LINE = 1;/* assert an interrupt immediately */
-    public static final int HOLD_LINE = 2;/* hold interrupt line until acknowledged */
-    public static final int PULSE_LINE = 3;/* pulse interrupt line for one instruction */
-
- /* internal flags (not for use by drivers!) */
-    public static final int INTERNAL_CLEAR_LINE = 100 + CLEAR_LINE;
-    public static final int INTERNAL_ASSERT_LINE = 100 + ASSERT_LINE;
-
-    /* interrupt parameters */
-    public static final int MAX_IRQ_LINES = 8;/* maximum number of IRQ lines per CPU */
-    public static final int IRQ_LINE_NMI = 127;/* IRQ line for NMIs */
 
 
     /**

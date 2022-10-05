@@ -6,9 +6,7 @@ package arcadeflex.v078.mame;
 
 //mame imports
 import static arcadeflex.v078.mame.cpuint.*;
-
-//TODO
-import static mame056.cpuintrfH.IRQ_LINE_NMI;
+import static arcadeflex.v078.mame.cpuintrfH.*;
 
 public class cpuintH {
 

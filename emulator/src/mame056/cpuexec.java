@@ -3,13 +3,14 @@
  */
 package mame056;
 
-import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
-import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static arcadeflex.v078.mame.cpuexec.cpu_computerate;
 import static arcadeflex.v078.mame.cpuexec.cpu_timedintcallback;
 import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
 import static arcadeflex.v078.mame.cpuint.cpuint_init;
 import static arcadeflex.v078.mame.cpuint.cpuint_reset_cpu;
+import static arcadeflex.v078.mame.cpuintrfH.ASSERT_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.CLEAR_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.PULSE_LINE;
 
 import static mame056.cpuexecH.*;
 import static mame056.driverH.*;

@@ -6,6 +6,8 @@ package arcadeflex.v078.mame;
 
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuintrfH.*;
 
 import static arcadeflex036.osdepend.logerror;
 import static mame056.cpuexec.cpu_triggerint;
@@ -13,17 +15,9 @@ import static mame056.cpuintrf.activecpu_set_irq_line;
 import static mame056.cpuintrf.cpuintrf_pop_context;
 import static mame056.cpuintrf.cpuintrf_push_context;
 import static mame056.cpuintrf.cpunum_default_irq_vector;
-import static mame056.cpuintrfH.ASSERT_LINE;
-import static mame056.cpuintrfH.CLEAR_LINE;
-import static mame056.cpuintrfH.HOLD_LINE;
-import static mame056.cpuintrfH.INTERNAL_ASSERT_LINE;
-import static mame056.cpuintrfH.INTERNAL_CLEAR_LINE;
-import static mame056.cpuintrfH.IRQ_LINE_NMI;
-import static mame056.cpuintrfH.MAX_IRQ_LINES;
 import static mame056.cpuintrfH.cpu_getactivecpu;
 import static mame056.cpuintrfH.cpu_gettotalcpu;
 import mame056.cpuintrfH.IrqcallbackPtr;
-import static mame056.cpuintrfH.PULSE_LINE;
 import static mame056.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
