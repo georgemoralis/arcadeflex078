@@ -17,7 +17,6 @@ import static mame056.cpuintrf.activecpu_set_op_base;
 import static mame056.cpuintrfH.cpu_getactivecpu;
 //common imports
 
-
 public class memoryH {
 
     /*TODO*////***************************************************************************
@@ -1078,7 +1077,7 @@ public class memoryH {
 /*TODO*///INLINE data32_t cpu_readop_arg32(offs_t A)	{ if (address_is_unsafe(A)) { activecpu_set_op_base(A); } return cpu_readop_arg32_unsafe(A); }
 
     /* ----- bank switching for CPU cores ----- */
-    public static void change_pc_generic(int pc, int abits, int minbits, setopbase setop) {
+    public static void change_pc_generic(int pc, int abits, int minbits, SetOpbaseHandlerPtr setop) {
         if (readmem_lookup.read(LEVEL1_INDEX((pc) & mem_amask, abits, minbits)) != opcode_entry) {
             setop.handler(pc);
         }

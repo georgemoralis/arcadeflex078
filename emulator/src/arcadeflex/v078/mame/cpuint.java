@@ -7,7 +7,6 @@ package arcadeflex.v078.mame;
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
 
-
 import static arcadeflex036.osdepend.logerror;
 import static mame056.cpuexec.cpu_triggerint;
 import static mame056.cpuintrf.activecpu_set_irq_line;
@@ -338,7 +337,7 @@ public class cpuint {
      *
      ************************************
      */
-    public static InterruptPtr nmi_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr nmi_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             int cpunum = cpu_getactivecpu();
             if (interrupt_enable[cpunum] != 0) {
@@ -347,7 +346,7 @@ public class cpuint {
         }
     };
 
-    public static InterruptPtr nmi_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr nmi_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             int cpunum = cpu_getactivecpu();
             if (interrupt_enable[cpunum] != 0) {
@@ -394,129 +393,129 @@ public class cpuint {
      *
      ************************************
      */
-    public static InterruptPtr irq0_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq0_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(0);
         }
     };
-    public static InterruptPtr irq0_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq0_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(0);
         }
     };
-    public static InterruptPtr irq0_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq0_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(0);
         }
     };
 
-    public static InterruptPtr irq1_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq1_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(1);
         }
     };
-    public static InterruptPtr irq1_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq1_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(1);
         }
     };
-    public static InterruptPtr irq1_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq1_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(1);
         }
     };
 
-    public static InterruptPtr irq2_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq2_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(2);
         }
     };
-    public static InterruptPtr irq2_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq2_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(2);
         }
     };
-    public static InterruptPtr irq2_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq2_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(2);
         }
     };
 
-    public static InterruptPtr irq3_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq3_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(3);
         }
     };
-    public static InterruptPtr irq3_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq3_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(3);
         }
     };
-    public static InterruptPtr irq3_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq3_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(3);
         }
     };
 
-    public static InterruptPtr irq4_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq4_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(4);
         }
     };
-    public static InterruptPtr irq4_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq4_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(4);
         }
     };
-    public static InterruptPtr irq4_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq4_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(4);
         }
     };
 
-    public static InterruptPtr irq5_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq5_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(5);
         }
     };
-    public static InterruptPtr irq5_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq5_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(5);
         }
     };
-    public static InterruptPtr irq5_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq5_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(5);
         }
     };
 
-    public static InterruptPtr irq6_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq6_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(6);
         }
     };
-    public static InterruptPtr irq6_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq6_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(6);
         }
     };
-    public static InterruptPtr irq6_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq6_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(6);
         }
     };
 
-    public static InterruptPtr irq7_line_hold = new InterruptPtr() {
+    public static InterruptHandlerPtr irq7_line_hold = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_hold(7);
         }
     };
-    public static InterruptPtr irq7_line_pulse = new InterruptPtr() {
+    public static InterruptHandlerPtr irq7_line_pulse = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_pulse(7);
         }
     };
-    public static InterruptPtr irq7_line_assert = new InterruptPtr() {
+    public static InterruptHandlerPtr irq7_line_assert = new InterruptHandlerPtr() {
         public void handler() {
             irqn_line_assert(7);
         }

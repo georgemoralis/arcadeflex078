@@ -32,7 +32,7 @@ public class cpuexecH {
      */
     public static class MachineCPU {
 
-        public MachineCPU(int cpu_type, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptPtr vblank_interrupt, int vblank_interrupts_per_frame, InterruptPtr timed_interrupt, int timed_interrupts_per_second, Object reset_param) {
+        public MachineCPU(int cpu_type, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptHandlerPtr vblank_interrupt, int vblank_interrupts_per_frame, InterruptHandlerPtr timed_interrupt, int timed_interrupts_per_second, Object reset_param) {
             this.cpu_type = cpu_type;
             this.cpu_clock = cpu_clock;
             this.memory_read = memory_read;
@@ -46,7 +46,7 @@ public class cpuexecH {
             this.reset_param = reset_param;
         }
 
-        public MachineCPU(int cpu_type, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptPtr vblank_interrupt, int vblank_interrupts_per_frame, InterruptPtr timed_interrupt, int timed_interrupts_per_second) {
+        public MachineCPU(int cpu_type, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptHandlerPtr vblank_interrupt, int vblank_interrupts_per_frame, InterruptHandlerPtr timed_interrupt, int timed_interrupts_per_second) {
             this.cpu_type = cpu_type;
             this.cpu_clock = cpu_clock;
             this.memory_read = memory_read;
@@ -60,7 +60,7 @@ public class cpuexecH {
             this.reset_param = null;
         }
 
-        public MachineCPU(int cpu_type, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptPtr vblank_interrupt, int vblank_interrupts_per_frame) {
+        public MachineCPU(int cpu_type, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptHandlerPtr vblank_interrupt, int vblank_interrupts_per_frame) {
             this.cpu_type = cpu_type;
             this.cpu_clock = cpu_clock;
             this.memory_read = memory_read;
@@ -91,9 +91,9 @@ public class cpuexecH {
         public Object memory_write;/* struct Memory_WriteAddress */
         public Object port_read;
         public Object port_write;
-        public InterruptPtr vblank_interrupt;/* for interrupts tied to VBLANK */
+        public InterruptHandlerPtr vblank_interrupt;/* for interrupts tied to VBLANK */
         public int vblank_interrupts_per_frame;/* usually 1 */
-        public InterruptPtr timed_interrupt;/* for interrupts not tied to VBLANK */
+        public InterruptHandlerPtr timed_interrupt;/* for interrupts not tied to VBLANK */
         public int timed_interrupts_per_second;
         public Object reset_param;/* parameter for cpu_reset */
 

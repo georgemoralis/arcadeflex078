@@ -18,7 +18,7 @@ public class funcPtr {
         public abstract void handler(int offset, int data);
     }
 
-    public static abstract interface InterruptPtr {
+    public static abstract interface InterruptHandlerPtr {
 
         public abstract void handler();
     }
@@ -26,12 +26,12 @@ public class funcPtr {
     /**
      * memory related
      */
-    public static abstract interface opbase_handlerPtr {
+    public static abstract interface OpbaseHandlerPtr {
 
         public abstract int handler(int address);
     }
 
-    public static abstract interface setopbase {
+    public static abstract interface SetOpbaseHandlerPtr {
 
         public abstract void handler(int pc);
     }
