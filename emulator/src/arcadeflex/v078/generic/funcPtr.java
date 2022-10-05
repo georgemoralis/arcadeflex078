@@ -18,6 +18,11 @@ public class funcPtr {
         public abstract void handler(int offset, int data);
     }
 
+    public static abstract interface InterruptPtr {
+
+        public abstract void handler();
+    }
+
     /**
      * memory related
      */

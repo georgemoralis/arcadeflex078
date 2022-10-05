@@ -61,7 +61,7 @@ public class z80 extends cpu_interface {
         public int irq_state;/* irq line state */
         public int[] int_state = new int[Z80_MAXDAISY];
         public Z80_DaisyChain[] irq = new Z80_DaisyChain[Z80_MAXDAISY];
-        public irqcallbacksPtr irq_callback;
+        public IrqcallbackPtr irq_callback;
         public int extra_cycles;/* extra cycles for interrupts */
     }
 
@@ -4133,7 +4133,7 @@ public class z80 extends cpu_interface {
      * **************************************************************************
      */
     @Override
-    public void set_irq_callback(irqcallbacksPtr callback) {
+    public void set_irq_callback(IrqcallbackPtr callback) {
         //LOG(("Z80 #%d set_irq_callback $%08x\n",cpu_getactivecpu() , (int)callback));
         Z80.irq_callback = callback;
     }

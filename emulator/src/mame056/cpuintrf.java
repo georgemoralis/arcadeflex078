@@ -829,7 +829,7 @@ public class cpuintrf {
     /*--------------------------
  	Reset and set IRQ ack
     --------------------------*/
-    public static void cpunum_reset(int cpunum, Object param, irqcallbacksPtr irqack) {
+    public static void cpunum_reset(int cpunum, Object param, IrqcallbackPtr irqack) {
         if (cpunum < 0 || cpunum >= totalcpu) {
             logerror("cpunum_reset() called for invalid cpu num!\n");
             return;

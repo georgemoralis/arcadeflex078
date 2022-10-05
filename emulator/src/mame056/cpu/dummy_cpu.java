@@ -85,7 +85,7 @@ public class dummy_cpu extends cpu_interface {
     }
 
     @Override
-    public void set_irq_callback(irqcallbacksPtr callback) {
+    public void set_irq_callback(IrqcallbackPtr callback) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

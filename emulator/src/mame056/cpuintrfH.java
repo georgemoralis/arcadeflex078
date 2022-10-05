@@ -166,7 +166,7 @@ public class cpuintrfH {
         public abstract void handler(int cycles);
     }
 
-    public static abstract interface irqcallbacksPtr {
+    public static abstract interface IrqcallbackPtr {
 
         public abstract int handler(int irqline);
     }
@@ -203,7 +203,7 @@ public class cpuintrfH {
 
         public abstract void set_irq_line(int irqline, int linestate);
 
-        public abstract void set_irq_callback(irqcallbacksPtr callback);
+        public abstract void set_irq_callback(IrqcallbackPtr callback);
 
         public abstract String cpu_info(Object context, int regnum);
 

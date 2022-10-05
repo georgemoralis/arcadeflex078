@@ -5,6 +5,8 @@ package mame056;
 
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
+import static arcadeflex.v078.mame.cpuint.drv_irq_callbacks;
 import static arcadeflex056.fucPtr.*;
 
 import static mame056.cpuexecH.*;
@@ -149,63 +151,6 @@ public class cpuexec {
 
     static double scanline_period;
     static double scanline_period_inv;
-
-    /*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Save/load variables
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///static int loadsave_schedule;
-/*TODO*///static char loadsave_schedule_id;
-/*TODO*///
-    public static irqcallbacksPtr cpu_0_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(0, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_1_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(1, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_2_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(2, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_3_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(3, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_4_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(4, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_5_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(5, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_6_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(6, irqline);
-        }
-    };
-    public static irqcallbacksPtr cpu_7_irq_callback = new irqcallbacksPtr() {
-        public int handler(int irqline) {
-            return cpu_irq_callback(7, irqline);
-        }
-    };
-
-    public static irqcallbacksPtr[] cpu_irq_callbacks = {
-        cpu_0_irq_callback, cpu_1_irq_callback, cpu_2_irq_callback, cpu_3_irq_callback,
-        cpu_4_irq_callback, cpu_5_irq_callback, cpu_6_irq_callback, cpu_7_irq_callback
-    };
-
-    public static irqcallbacksPtr[] drv_irq_callbacks = new irqcallbacksPtr[MAX_CPU];
 
     /**
      * ***********************************
@@ -382,23 +327,22 @@ public class cpuexec {
         }
     }
 
-    
-
-
-    /*************************************
+    /**
+     * ***********************************
      *
-     *	Deinitialize all the CPUs
+     * Deinitialize all the CPUs
      *
-     *************************************/
+     ************************************
+     */
+    public static void cpu_exit() {
+        int cpunum;
 
-    public static void cpu_exit()
-    {
-            int cpunum;
-
-            /* shut down the CPU cores */
-            for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-                    cpuintrf_exit_cpu(cpunum);
+        /* shut down the CPU cores */
+        for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++) {
+            cpuintrf_exit_cpu(cpunum);
+        }
     }
+
     /**
      * ***********************************
      *
@@ -806,13 +750,15 @@ public class cpuexec {
         }
     }
 
-    /*************************************
-    *
-    *	Returns the current scanline
-    *
-    *************************************/
+    /**
+     * ***********************************
+     *
+     * Returns the current scanline
+     *
+     ************************************
+     */
 
-   /*--------------------------------------------------------------
+    /*--------------------------------------------------------------
 
            Note: cpu_getscanline() counts from 0, 0 being the first
            visible line. You might have to adjust this value to match
@@ -820,70 +766,61 @@ public class cpuexec {
            is >0.
 
    --------------------------------------------------------------*/
-
-   public static int cpu_getscanline()
-   {
-           return (int)(timer_timeelapsed(refresh_timer) * scanline_period_inv);
-   }
-
-
-
-    /*************************************
-     *
-     *	Returns time until given scanline
-     *
-     *************************************/
-
-    public static double cpu_getscanlinetime(int scanline)
-    {
-            double scantime = timer_starttime(refresh_timer) + (double)scanline * scanline_period;
-            double abstime = timer_get_time();
-            double result;
-
-            /* if we're already past the computed time, count it for the next frame */
-            if (abstime >= scantime)
-                    scantime += TIME_IN_HZ(Machine.drv.frames_per_second);
-
-            /* compute how long from now until that time */
-            result = scantime - abstime;
-
-            /* if it's small, just count a whole frame */
-            if (result < TIME_IN_NSEC(1))
-                    result = TIME_IN_HZ(Machine.drv.frames_per_second);
-            return result;
+    public static int cpu_getscanline() {
+        return (int) (timer_timeelapsed(refresh_timer) * scanline_period_inv);
     }
 
-
-
-    /*************************************
+    /**
+     * ***********************************
      *
-     *	Returns time for one scanline
+     * Returns time until given scanline
      *
-     *************************************/
+     ************************************
+     */
+    public static double cpu_getscanlinetime(int scanline) {
+        double scantime = timer_starttime(refresh_timer) + (double) scanline * scanline_period;
+        double abstime = timer_get_time();
+        double result;
 
-    public static double cpu_getscanlineperiod()
-    {
-            return scanline_period;
+        /* if we're already past the computed time, count it for the next frame */
+        if (abstime >= scantime) {
+            scantime += TIME_IN_HZ(Machine.drv.frames_per_second);
+        }
+
+        /* compute how long from now until that time */
+        result = scantime - abstime;
+
+        /* if it's small, just count a whole frame */
+        if (result < TIME_IN_NSEC(1)) {
+            result = TIME_IN_HZ(Machine.drv.frames_per_second);
+        }
+        return result;
     }
 
-
-
-    /*************************************
+    /**
+     * ***********************************
      *
-     *	Returns a crude approximation
-     *	of the horizontal position of the
-     *	bream
+     * Returns time for one scanline
      *
-     *************************************/
-
-    public static int cpu_gethorzbeampos()
-    {
-            double elapsed_time = timer_timeelapsed(refresh_timer);
-            int scanline = (int)(elapsed_time * scanline_period_inv);
-            double time_since_scanline = elapsed_time - (double)scanline * scanline_period;
-            return (int)(time_since_scanline * scanline_period_inv * (double)Machine.drv.screen_width);
+     ************************************
+     */
+    public static double cpu_getscanlineperiod() {
+        return scanline_period;
     }
 
+    /**
+     * ***********************************
+     *
+     * Returns a crude approximation of the horizontal position of the bream
+     *
+     ************************************
+     */
+    public static int cpu_gethorzbeampos() {
+        double elapsed_time = timer_timeelapsed(refresh_timer);
+        int scanline = (int) (elapsed_time * scanline_period_inv);
+        double time_since_scanline = elapsed_time - (double) scanline * scanline_period;
+        return (int) (time_since_scanline * scanline_period_inv * (double) Machine.drv.screen_width);
+    }
 
     /**
      * ***********************************
@@ -906,18 +843,6 @@ public class cpuexec {
     public static int cpu_getcurrentframe() {
         return current_frame;
     }
-
-    /*************************************
-    *
-    *	Set IRQ callback for drivers
-    *
-    *************************************/
-
-   public static void cpu_set_irq_callback(int cpunum, irqcallbacksPtr callback)
-   {
-           drv_irq_callbacks[cpunum] = callback;
-   }
-
 
     /**
      * ***********************************
@@ -1315,17 +1240,15 @@ public class cpuexec {
         timetrig_spinuntil_time = (timetrig_spinuntil_time + 1) & 255;
     }
 
-    
     static int timetrig = 0;
-    
-    public static void cpu_yielduntil_time(double duration)
-    {
-            
 
-            cpu_yielduntil_trigger(TRIGGER_YIELDTIME + timetrig);
-            cpu_triggertime(duration, TRIGGER_YIELDTIME + timetrig);
-            timetrig = (timetrig + 1) & 255;
+    public static void cpu_yielduntil_time(double duration) {
+
+        cpu_yielduntil_trigger(TRIGGER_YIELDTIME + timetrig);
+        cpu_triggertime(duration, TRIGGER_YIELDTIME + timetrig);
+        timetrig = (timetrig + 1) & 255;
     }
+
     /**
      * ***********************************
      *
