@@ -4,28 +4,31 @@
  */
 package arcadeflex.v078.mame;
 
+import static arcadeflex036.osdepend.*;
+import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
+import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import static mame056.cpuexec.cpu_getstatus;
+import static mame056.cpuexec.watchdog_counter;
+import static mame056.cpuintrf.cpuintrf_pop_context;
+import static mame056.cpuintrf.cpuintrf_push_context;
+import static mame056.mame.Machine;
+import mame056.timer.timer_callback;
+import static mame056.timerH.TIME_IN_HZ;
+import static mame056.timerH.TIME_IN_NSEC;
+
 public class cpuexec {
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///	cpuexec.c
-/*TODO*///
-/*TODO*///	Core multi-CPU execution engine.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#include <math.h>
-/*TODO*///#include "driver.h"
-/*TODO*///#include "timer.h"
-/*TODO*///#include "state.h"
-/*TODO*///#include "mamedbg.h"
-/*TODO*///#include "hiscore.h"
-/*TODO*///
-/*TODO*///#if (HAS_M68000 || HAS_M68010 || HAS_M68020 || HAS_M68EC020)
-/*TODO*///#include "cpu/m68000/m68000.h"
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
+
+    /**
+     * *************************************************************************
+     *
+     * cpuexec.c
+     *
+     * Core multi-CPU execution engine.
+     *
+     **************************************************************************
+     */
+
+    /*TODO*////*************************************
 /*TODO*/// *
 /*TODO*/// *	Debug logging
 /*TODO*/// *
@@ -667,26 +670,26 @@ public class cpuexec {
 /*TODO*///
 /*TODO*///--------------------------------------------------------------*/
 /*TODO*///
-/*TODO*///static void watchdog_reset(void)
-/*TODO*///{
-/*TODO*///	if (watchdog_counter == -1)
-/*TODO*///		logerror("watchdog armed\n");
-/*TODO*///	watchdog_counter = 3 * Machine->drv->frames_per_second;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///WRITE_HANDLER( watchdog_reset_w )
-/*TODO*///{
-/*TODO*///	watchdog_reset();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///READ_HANDLER( watchdog_reset_r )
-/*TODO*///{
-/*TODO*///	watchdog_reset();
-/*TODO*///	return 0xff;
-/*TODO*///}
-/*TODO*///
+    static void watchdog_reset() {
+        if (watchdog_counter == -1) {
+            logerror("watchdog armed\n");
+        }
+        watchdog_counter = (int) (3 * Machine.drv.frames_per_second);
+    }
+
+    public static WriteHandlerPtr watchdog_reset_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            watchdog_reset();
+        }
+    };
+
+    public static ReadHandlerPtr watchdog_reset_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            watchdog_reset();
+            return 0xff;
+        }
+    };
+    /*TODO*///
 /*TODO*///
 /*TODO*///WRITE16_HANDLER( watchdog_reset16_w )
 /*TODO*///{
@@ -1691,61 +1694,57 @@ public class cpuexec {
 /*TODO*///
 /*TODO*///
 /*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Callback for timed interrupts
-/*TODO*/// *	(not tied to a VBLANK)
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///static void cpu_timedintcallback(int param)
-/*TODO*///{
-/*TODO*///	/* bail if there is no routine */
-/*TODO*///	if (Machine->drv->cpu[param].timed_interrupt && cpu_getstatus(param))
-/*TODO*///	{
-/*TODO*///		cpuintrf_push_context(param);
-/*TODO*///		(*Machine->drv->cpu[param].timed_interrupt)();
-/*TODO*///		cpuintrf_pop_context();
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Converts an integral timing rate
-/*TODO*/// *	into a period
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////*--------------------------------------------------------------
-/*TODO*///
-/*TODO*///	Rates can be specified as follows:
-/*TODO*///
-/*TODO*///		rate <= 0		-> 0
-/*TODO*///		rate < 50000	-> 'rate' cycles per frame
-/*TODO*///		rate >= 50000	-> 'rate' nanoseconds
-/*TODO*///
-/*TODO*///--------------------------------------------------------------*/
-/*TODO*///
-/*TODO*///static double cpu_computerate(int value)
-/*TODO*///{
-/*TODO*///	/* values equal to zero are zero */
-/*TODO*///	if (value <= 0)
-/*TODO*///		return 0.0;
-/*TODO*///
-/*TODO*///	/* values above between 0 and 50000 are in Hz */
-/*TODO*///	if (value < 50000)
-/*TODO*///		return TIME_IN_HZ(value);
-/*TODO*///
-/*TODO*///	/* values greater than 50000 are in nanoseconds */
-/*TODO*///	else
-/*TODO*///		return TIME_IN_NSEC(value);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
+    /**
+     * ***********************************
+     *
+     * Callback for timed interrupts (not tied to a VBLANK)
+     *
+     ************************************
+     */
+    public static timer_callback cpu_timedintcallback = new timer_callback() {
+        public void handler(int param) {
+            /* bail if there is no routine */
+            if (Machine.drv.cpu[param].timed_interrupt != null && cpu_getstatus(param) != 0) {
+                cpuintrf_push_context(param);
+                //cpu_cause_interrupt(param, Machine.drv.cpu[param].timed_interrupt.handler());
+                Machine.drv.cpu[param].timed_interrupt.handler();
+                cpuintrf_pop_context();
+            }
+        }
+    };
+
+    /**
+     * ***********************************
+     *
+     * Converts an integral timing rate into a period
+     *
+     ************************************
+     */
+
+    /*--------------------------------------------------------------
+
+            Rates can be specified as follows:
+
+                    rate <= 0		-> 0
+                    rate < 50000	-> 'rate' cycles per frame
+                    rate >= 50000	-> 'rate' nanoseconds
+
+    --------------------------------------------------------------*/
+    public static double cpu_computerate(int value) {
+        /* values equal to zero are zero */
+        if (value <= 0) {
+            return 0.0;
+        }
+
+        /* values above between 0 and 50000 are in Hz */
+        if (value < 50000) {
+            return TIME_IN_HZ(value);
+        } /* values greater than 50000 are in nanoseconds */ else {
+            return TIME_IN_NSEC(value);
+        }
+    }
+
+    /*TODO*////*************************************
 /*TODO*/// *
 /*TODO*/// *	Callback to force a timeslice
 /*TODO*/// *

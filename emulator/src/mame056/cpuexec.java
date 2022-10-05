@@ -5,6 +5,8 @@ package mame056;
 
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import static arcadeflex.v078.mame.cpuexec.cpu_computerate;
+import static arcadeflex.v078.mame.cpuexec.cpu_timedintcallback;
 import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
 import static arcadeflex.v078.mame.cpuint.cpuint_init;
 import static arcadeflex.v078.mame.cpuint.cpuint_reset_cpu;
@@ -113,7 +115,7 @@ public class cpuexec {
 
     static int vblank;
     static int current_frame;
-    static int watchdog_counter;
+    public static int watchdog_counter;
 
     static int[] cycles_running = new int[1];
 
@@ -126,10 +128,8 @@ public class cpuexec {
      */
     //static int[]/*UINT8*/ interrupt_enable = new int[MAX_CPU];
     //static int[] interrupt_vector = new int[MAX_CPU];
-
     //static int[][]/*UINT8*/ irq_line_state = new int[MAX_CPU][MAX_IRQ_LINES];
     //static int[][] irq_line_vector = new int[MAX_CPU][MAX_IRQ_LINES];
-
     /**
      * ***********************************
      *
@@ -334,232 +334,6 @@ public class cpuexec {
         time_to_reset = 1;
     }
 
-
-    /*TODO*///
-/*TODO*///
-/*TODO*///#if 0
-/*TODO*///#pragma mark -
-/*TODO*///#pragma mark SAVE/RESTORE
-/*TODO*///#endif
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Handle saves at runtime
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///static void handle_save(void)
-/*TODO*///{
-/*TODO*///	char name[2] = { 0 };
-/*TODO*///	void *file;
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* open the file */
-/*TODO*///	name[0] = loadsave_schedule_id;
-/*TODO*///	file = osd_fopen(Machine->gamedrv->name, name, OSD_FILETYPE_STATE, 1);
-/*TODO*///
-/*TODO*///	/* write the save state */
-/*TODO*///	state_save_save_begin(file);
-/*TODO*///
-/*TODO*///	/* write tag 0 */
-/*TODO*///	state_save_set_current_tag(0);
-/*TODO*///	state_save_save_continue();
-/*TODO*///
-/*TODO*///	/* loop over CPUs */
-/*TODO*///	for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///	{
-/*TODO*///		cpuintrf_push_context(cpunum);
-/*TODO*///
-/*TODO*///		/* make sure banking is set */
-/*TODO*///		activecpu_reset_banking();
-/*TODO*///
-/*TODO*///		/* save the CPU data */
-/*TODO*///		state_save_set_current_tag(cpunum + 1);
-/*TODO*///		state_save_save_continue();
-/*TODO*///
-/*TODO*///		cpuintrf_pop_context();
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* finish and close */
-/*TODO*///	state_save_save_finish();
-/*TODO*///	osd_fclose(file);
-/*TODO*///
-/*TODO*///	/* unschedule the save */
-/*TODO*///	loadsave_schedule = LOADSAVE_NONE;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Handle loads at runtime
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///static void handle_load(void)
-/*TODO*///{
-/*TODO*///	char name[2] = { 0 };
-/*TODO*///	void *file;
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	/* open the file */
-/*TODO*///	name[0] = loadsave_schedule_id;
-/*TODO*///	file = osd_fopen(Machine->gamedrv->name, name, OSD_FILETYPE_STATE, 0);
-/*TODO*///
-/*TODO*///	/* if successful, load it */
-/*TODO*///	if (file)
-/*TODO*///	{
-/*TODO*///		/* start loading */
-/*TODO*///		if (!state_save_load_begin(file))
-/*TODO*///		{
-/*TODO*///			/* read tag 0 */
-/*TODO*///			state_save_set_current_tag(0);
-/*TODO*///			state_save_load_continue();
-/*TODO*///
-/*TODO*///			/* loop over CPUs */
-/*TODO*///			for (cpunum = 0; cpunum < cpu_gettotalcpu(); cpunum++)
-/*TODO*///			{
-/*TODO*///				cpuintrf_push_context(cpunum);
-/*TODO*///
-/*TODO*///				/* make sure banking is set */
-/*TODO*///				activecpu_reset_banking();
-/*TODO*///
-/*TODO*///				/* load the CPU data */
-/*TODO*///				state_save_set_current_tag(cpunum + 1);
-/*TODO*///				state_save_load_continue();
-/*TODO*///
-/*TODO*///				cpuintrf_pop_context();
-/*TODO*///			}
-/*TODO*///
-/*TODO*///			/* finish and close */
-/*TODO*///			state_save_load_finish();
-/*TODO*///		}
-/*TODO*///		osd_fclose(file);
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* unschedule the load */
-/*TODO*///	loadsave_schedule = LOADSAVE_NONE;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Handle saves & loads at runtime
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///static void handle_loadsave(void)
-/*TODO*///{
-/*TODO*///	/* it's one or the other */
-/*TODO*///	if (loadsave_schedule == LOADSAVE_SAVE)
-/*TODO*///		handle_save();
-/*TODO*///	else if (loadsave_schedule == LOADSAVE_LOAD)
-/*TODO*///		handle_load();
-/*TODO*///
-/*TODO*///	/* reset the schedule */
-/*TODO*///	loadsave_schedule = LOADSAVE_NONE;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Schedules a save/load for later
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///void cpu_loadsave_schedule(int type, char id)
-/*TODO*///{
-/*TODO*///	loadsave_schedule = type;
-/*TODO*///	loadsave_schedule_id = id;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Unschedules any saves or loads
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///void cpu_loadsave_reset(void)
-/*TODO*///{
-/*TODO*///	loadsave_schedule = LOADSAVE_NONE;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///#if 0
-/*TODO*///#pragma mark -
-/*TODO*///#pragma mark WATCHDOG
-/*TODO*///#endif
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Watchdog routines
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////*--------------------------------------------------------------
-/*TODO*///
-/*TODO*///	Use these functions to initialize, and later maintain, the
-/*TODO*///	watchdog. For convenience, when the machine is reset, the
-/*TODO*///	watchdog is disabled. If you call this function, the
-/*TODO*///	watchdog is initialized, and from that point onwards, if you
-/*TODO*///	don't call it at least once every 3 seconds, the machine
-/*TODO*///	will be reset.
-/*TODO*///
-/*TODO*///	The 3 seconds delay is targeted at qzshowby, which otherwise
-/*TODO*///	would reset at the start of a game.
-/*TODO*///
-/*TODO*///--------------------------------------------------------------*/
-    static void watchdog_reset() {
-        if (watchdog_counter == -1) {
-            logerror("watchdog armed\n");
-        }
-        watchdog_counter = (int) (3 * Machine.drv.frames_per_second);
-    }
-
-    public static WriteHandlerPtr watchdog_reset_w = new WriteHandlerPtr() {
-        public void handler(int offset, int data) {
-            watchdog_reset();
-        }
-    };
-
-    public static ReadHandlerPtr watchdog_reset_r = new ReadHandlerPtr() {
-        public int handler(int offset) {
-            watchdog_reset();
-            return 0xff;
-        }
-    };
-
-    /*TODO*///
-/*TODO*///
-/*TODO*///WRITE16_HANDLER( watchdog_reset16_w )
-/*TODO*///{
-/*TODO*///	watchdog_reset();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///READ16_HANDLER( watchdog_reset16_r )
-/*TODO*///{
-/*TODO*///	watchdog_reset();
-/*TODO*///	return 0xffff;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///WRITE32_HANDLER( watchdog_reset32_w )
-/*TODO*///{
-/*TODO*///	watchdog_reset();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///READ32_HANDLER( watchdog_reset32_r )
-/*TODO*///{
-/*TODO*///	watchdog_reset();
-/*TODO*///	return 0xffffffff;
-/*TODO*///}
-/*TODO*///
     /**
      * ***********************************
      *
@@ -1103,55 +877,7 @@ public class cpuexec {
             timer_reset(refresh_timer, TIME_NEVER);
         }
     };
-    /**
-     * ***********************************
-     *
-     * Callback for timed interrupts (not tied to a VBLANK)
-     *
-     ************************************
-     */
-    public static timer_callback cpu_timedintcallback = new timer_callback() {
-        public void handler(int param) {
-            /* bail if there is no routine */
-            if (Machine.drv.cpu[param].timed_interrupt != null && cpu_getstatus(param) != 0) {
-                cpuintrf_push_context(param);
-                //cpu_cause_interrupt(param, Machine.drv.cpu[param].timed_interrupt.handler());
-                Machine.drv.cpu[param].timed_interrupt.handler();
-                cpuintrf_pop_context();
-            }
-        }
-    };
 
-    /**
-     * ***********************************
-     *
-     * Converts an integral timing rate into a period
-     *
-     ************************************
-     */
-
-    /*--------------------------------------------------------------
-
-            Rates can be specified as follows:
-
-                    rate <= 0		-> 0
-                    rate < 50000	-> 'rate' cycles per frame
-                    rate >= 50000	-> 'rate' nanoseconds
-
-    --------------------------------------------------------------*/
-    static double cpu_computerate(int value) {
-        /* values equal to zero are zero */
-        if (value <= 0) {
-            return 0.0;
-        }
-
-        /* values above between 0 and 50000 are in Hz */
-        if (value < 50000) {
-            return TIME_IN_HZ(value);
-        } /* values greater than 50000 are in nanoseconds */ else {
-            return TIME_IN_NSEC(value);
-        }
-    }
     /**
      * ***********************************
      *
