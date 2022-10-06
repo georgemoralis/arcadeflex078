@@ -3,13 +3,14 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.cpuintrf.cpuintrf_pop_context;
+import static arcadeflex.v078.mame.cpuintrf.cpuintrf_push_context;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
 import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_ASSERT_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_CLEAR_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
 import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
-import static arcadeflex.v078.mame.memory.memory_set_context;
 import static common.libc.cstring.strcmp;
 import static arcadeflex036.osdepend.*;
 
@@ -312,109 +313,15 @@ public class cpuintrf {
     public static int activecpu;/* index of active CPU (or -1) */
     public static int totalcpu;/* total number of CPUs */
 
-    static cpuinfo[] cpu = new cpuinfo[MAX_CPU];
+    public static cpuinfo[] cpu = new cpuinfo[MAX_CPU];
 
-    static int[] cpu_active_context = new int[CPU_COUNT];
-    static int[] cpu_context_stack = new int[4];
-    static int cpu_context_stack_ptr;
+    public static int[] cpu_active_context = new int[CPU_COUNT];
+    public static int[] cpu_context_stack = new int[4];
+    public static int cpu_context_stack_ptr;
 
-    /**
-     * ***********************************
-     *
-     * Set a new CPU context
-     *
-     ************************************
-     */
-    public static void set_cpu_context(int cpunum) {
-        int newfamily = cpu[cpunum].family;
-        int oldcontext = cpu_active_context[newfamily];
 
-        /* if we need to change contexts, save the one that was there */
-        if (oldcontext != cpunum && oldcontext != -1) {
-            cpu[oldcontext].context = cpu[oldcontext].intf.get_context();
-        }
 
-        /* swap memory spaces */
-        activecpu = cpunum;
-        memory_set_context(cpunum);
 
-        /* if the new CPU's context is not swapped in, do it now */
-        if (oldcontext != cpunum) {
-            cpu[cpunum].intf.set_context(cpu[cpunum].context);
-            cpu_active_context[newfamily] = cpunum;
-        }
-    }
-
-    /**
-     * ***********************************
-     *
-     * Push/pop to a new CPU context
-     *
-     ************************************
-     */
-    public static void cpuintrf_push_context(int cpunum) {
-        /* push the old context onto the stack */
-        cpu_context_stack[cpu_context_stack_ptr++] = activecpu;
-
-        /* do the rest only if this isn't the activecpu */
-        if (cpunum != activecpu && cpunum != -1) {
-            set_cpu_context(cpunum);
-        }
-
-        /* this is now the active CPU */
-        activecpu = cpunum;
-    }
-
-    public static void cpuintrf_pop_context() {
-        /* push the old context onto the stack */
-        int cpunum = cpu_context_stack[--cpu_context_stack_ptr];
-
-        /* do the rest only if this isn't the activecpu */
-        if (cpunum != activecpu && cpunum != -1) {
-            set_cpu_context(cpunum);
-        }
-
-        /* this is now the active CPU */
-        activecpu = cpunum;
-    }
-
-    /**
-     * ***********************************
-     *
-     * Initialize a single CPU
-     *
-     ************************************
-     */
-    public static int cpuintrf_init() {
-        int cputype;
-
-        /* verify the order of entries in the cpuintrf[] array */
-        for (cputype = 0; cputype < CPU_COUNT; cputype++) {
-            /*TODO*///		/* make sure the index in the array matches the current index */
-/*TODO*///		if (cpuintrf[cputype].cpu_num != cputype)
-/*TODO*///		{
-/*TODO*///			printf("CPU #%d [%s] wrong ID %d: check enum CPU_... in src/cpuintrf.h!\n", cputype, cputype_name(cputype), cpuintrf[cputype].cpu_num);
-/*TODO*///			exit(1);
-/*TODO*///		}
-
-            /* also reset the active CPU context info */
-            cpu_active_context[cputype] = -1;
-        }
-
-        /* zap the CPU data structure */
-        for (int i = 0; i < MAX_CPU; i++) {
-            cpu[i] = new cpuinfo();//memset(cpu, 0, sizeof(cpu));
-        }
-        totalcpu = 0;
-
-        /* reset the context stack */
-        for (int i = 0; i < 4; i++) {
-            cpu_context_stack[i] = -1;//memset(cpu_context_stack, -1, sizeof(cpu_context_stack));
-        }
-        cpu_context_stack_ptr = 0;
-
-        return 0;
-    }
 
     /**
      * ***********************************
