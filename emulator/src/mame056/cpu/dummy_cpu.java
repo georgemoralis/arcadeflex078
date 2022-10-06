@@ -9,6 +9,7 @@ import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_VERSION;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_IS_LE;
+import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
 import static mame056.cpuintrfH.*;
 
 public class dummy_cpu extends cpu_interface {
@@ -20,7 +21,6 @@ public class dummy_cpu extends cpu_interface {
         default_vector = 0;
         icount = null;
         overclock = 1.00;
-        irq_int = -1;
         databus_width = 8;
         pgm_memory_base = 0;
         address_shift = 0;

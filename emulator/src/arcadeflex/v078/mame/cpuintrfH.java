@@ -7,7 +7,8 @@ package arcadeflex.v078.mame;
 import static mame056.cpuintrf.activecpu;
 import static mame056.cpuintrf.cpuintrf;
 import static mame056.cpuintrf.totalcpu;
-import mame056.cpuintrfH.cpu_interface;
+import mame056.cpuintrfH.IrqcallbackPtr;
+import mame056.cpuintrfH.burnPtr;
 
 public class cpuintrfH {
 
@@ -422,55 +423,80 @@ public class cpuintrfH {
     public static final int CPU_INFO_REG_LAYOUT = MAX_REGS + 6;
     public static final int CPU_INFO_WIN_LAYOUT = MAX_REGS + 7;
 
-    /*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Core CPU interface structure
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///struct cpu_interface
-/*TODO*///{
-/*TODO*///	/* index (used to make sure we mach the enum above */
-/*TODO*///	unsigned	cpu_num;
-/*TODO*///
-/*TODO*///	/* table of core functions */
-/*TODO*///	void		(*init)(void);
-/*TODO*///	void		(*reset)(void *param);
-/*TODO*///	void		(*exit)(void);
-/*TODO*///	int			(*execute)(int cycles);
-/*TODO*///	void		(*burn)(int cycles);
-/*TODO*///	unsigned	(*get_context)(void *reg);
-/*TODO*///	void		(*set_context)(void *reg);
-/*TODO*///	const void *(*get_cycle_table)(int which);
-/*TODO*///	void		(*set_cycle_table)(int which, void *new_table);
-/*TODO*///	unsigned	(*get_reg)(int regnum);
-/*TODO*///	void		(*set_reg)(int regnum, unsigned val);
-/*TODO*///	void		(*set_irq_line)(int irqline, int linestate);
-/*TODO*///	void		(*set_irq_callback)(int(*callback)(int irqline));
-/*TODO*///	const char *(*cpu_info)(void *context,int regnum);
-/*TODO*///	unsigned	(*cpu_dasm)(char *buffer,unsigned pc);
-/*TODO*///
-/*TODO*///	/* IRQ and clock information */
-/*TODO*///	unsigned	num_irqs;
-/*TODO*///	int			default_vector;
-/*TODO*///	int *		icount;
-/*TODO*///	double		overclock;
-/*TODO*///
-/*TODO*///	/* memory information */
-/*TODO*///	int			databus_width;
-/*TODO*///	mem_read_handler memory_read;
-/*TODO*///	mem_write_handler memory_write;
-/*TODO*///	mem_read_handler internal_read;
-/*TODO*///	mem_write_handler internal_write;
-/*TODO*///	offs_t		pgm_memory_base;
-/*TODO*///	void		(*set_op_base)(offs_t pc);
-/*TODO*///	int			address_shift;
-/*TODO*///	unsigned	address_bits;
-/*TODO*///	unsigned	endianess;
-/*TODO*///	unsigned	align_unit;
-/*TODO*///	unsigned	max_inst_len;
-/*TODO*///};
-/*TODO*///
+    /*************************************
+ *
+ *	Core CPU interface structure
+ *
+ *************************************/
+        public static abstract class cpu_interface {
+
+        /* index (used to make sure we mach the enum above */
+        public int cpu_num;
+
+        /* table of core functions */
+        public abstract void init();
+        public abstract void reset(Object param);
+        public abstract void exit();
+        public abstract int execute(int cycles);
+        public burnPtr burn;
+        public abstract Object init_context();//not in mame , used specific for arcadeflex
+        public abstract Object get_context();//different from mame returns reg object and not size since java doesn't support references
+        public abstract void set_context(Object reg);
+        public abstract int[] get_cycle_table(int which);
+        public abstract void set_cycle_table(int which, int[] new_table);
+        public abstract int get_reg(int regnum);
+        public abstract void set_reg(int regnum, int val);
+        public abstract void set_irq_line(int irqline, int linestate);
+        public abstract void set_irq_callback(IrqcallbackPtr callback);
+        public abstract String cpu_info(Object context, int regnum);
+        public abstract String cpu_dasm(String buffer, int pc);
+
+        /* IRQ and clock information */
+        public int/*unsigned*/ num_irqs;
+        public int default_vector;
+        public int[] icount;
+        public double overclock;
+        /* memory information */
+        public int databus_width;
+        public abstract int memory_read(int offset);
+        public abstract void memory_write(int offset, int data);
+        public abstract int internal_read(int offset);
+        public abstract void internal_write(int offset, int data);
+        public int pgm_memory_base;
+        public abstract void set_op_base(int pc);
+        public int address_shift;
+        public int/*unsigned*/ address_bits;
+        public int/*unsigned*/ endianess;
+        public int/*unsigned*/ align_unit;
+        public int/*unsigned*/ max_inst_len;
+
+        public abstract int mem_address_bits_of_cpu();//arcadeflex function (based on the above table)
+        /*	{ 16, cpu_readmem16 },
+    	{ 20, cpu_readmem20 },
+    	{ 21, cpu_readmem21 },
+    	{ 24, cpu_readmem24 },
+    
+    	{ 16, cpu_readmem16bew },
+    	{ 24, cpu_readmem24bew },
+    	{ 32, cpu_readmem32bew },
+    
+    	{ 16, cpu_readmem16lew },
+    	{ 17, cpu_readmem17lew },
+    	{ 24, cpu_readmem24lew },
+    	{ 29, cpu_readmem29lew },
+    	{ 32, cpu_readmem32lew },
+    
+    	{ 24, cpu_readmem24bedw },
+    	{ 29, cpu_readmem29bedw },
+    	{ 32, cpu_readmem32bedw },
+    
+    	{ 26, cpu_readmem26ledw },
+    	{ 29, cpu_readmem29ledw },
+    	{ 32, cpu_readmem32ledw },
+    
+    	{ 18, cpu_readmem18bedw }*/
+    }
+
 /*TODO*////*************************************
 /*TODO*/// *
 /*TODO*/// *	 Macros

@@ -8,6 +8,7 @@ import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
 import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_ASSERT_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_CLEAR_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
+import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
 import static arcadeflex.v078.mame.memory.memory_set_context;
 import static common.libc.cstring.strcmp;
 import static arcadeflex036.osdepend.*;
@@ -767,13 +768,7 @@ public class cpuintrf {
 /*TODO*///	VERIFY_ACTIVECPU(defresult, name)						\
 /*TODO*///	return result;											\
 /*TODO*///}
-    public static int activecpu_default_irq_line() {
-        if (activecpu < 0) {
-            logerror("activecpu_default_irq_line() called with no active cpu!\n");
-            return 0;
-        }
-        return cpu[activecpu].intf.irq_int;
-    }
+
 
     /*TODO*///CPU_FUNC(int,          activecpu_default_irq_vector, 0,  cpu[activecpu].intf.default_vector)
     public static int activecpu_address_bits() {

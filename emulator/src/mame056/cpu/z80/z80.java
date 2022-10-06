@@ -21,6 +21,7 @@ import static arcadeflex.v078.mame.cpuintrfH.REG_PREVIOUSPC;
 import static arcadeflex.v078.mame.cpuintrfH.REG_SP;
 import static arcadeflex.v078.mame.cpuintrfH.REG_SP_CONTENTS;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
+import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
 import static arcadeflex.v078.mame.memory.cpu_readmem16;
 import static arcadeflex.v078.mame.memory.cpu_readport16;
 import static arcadeflex.v078.mame.memory.cpu_setOPbase16;
@@ -44,7 +45,6 @@ public class z80 extends cpu_interface {
         default_vector = 255;
         icount = z80_ICount;
         overclock = 1.00;
-        irq_int = -1000;
         databus_width = 8;
         pgm_memory_base = 0;
         address_shift = 0;
