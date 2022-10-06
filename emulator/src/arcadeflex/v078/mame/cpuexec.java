@@ -689,6 +689,7 @@ public class cpuexec {
             return 0xff;
         }
     };
+
     /*TODO*///
 /*TODO*///
 /*TODO*///WRITE16_HANDLER( watchdog_reset16_w )
@@ -911,18 +912,17 @@ public class cpuexec {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Return the current local time for
-/*TODO*/// *	a CPU, relative to the current
-/*TODO*/// *	timeslice
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///double cpunum_get_localtime(int cpunum)
-/*TODO*///{
-/*TODO*///	double result;
+    /**
+     * ***********************************
+     *
+     * Return the current local time for a CPU, relative to the current
+     * timeslice
+     *
+     ************************************
+     */
+    public static double cpunum_get_localtime(int cpunum) {
+        throw new UnsupportedOperationException("Unsupported");
+        /*TODO*///	double result;
 /*TODO*///	
 /*TODO*///	VERIFY_CPUNUM(0, cpunum_get_localtime);
 /*TODO*///
@@ -934,8 +934,8 @@ public class cpuexec {
 /*TODO*///		result += TIME_IN_CYCLES(cycles, cpunum);
 /*TODO*///	}
 /*TODO*///	return result;
-/*TODO*///}
-/*TODO*///
+    }
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////*************************************

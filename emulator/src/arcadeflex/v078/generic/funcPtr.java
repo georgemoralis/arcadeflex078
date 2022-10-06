@@ -66,4 +66,11 @@ public class funcPtr {
 
         public abstract void handler(int i);
     }
+    /**
+     * Timer callback
+     */
+    public static abstract interface TimerCallbackHandlerPtr {
+
+        public abstract void handler(int i);
+    }
 }
