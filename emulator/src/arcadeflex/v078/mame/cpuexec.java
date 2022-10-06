@@ -889,17 +889,16 @@ public class cpuexec {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Abort the timeslice for the 
-/*TODO*/// *	active CPU
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///void activecpu_abort_timeslice(void)
-/*TODO*///{
-/*TODO*///	int current_icount;
+    /**
+     * ***********************************
+     *
+     * Abort the timeslice for the active CPU
+     *
+     ************************************
+     */
+    public static void activecpu_abort_timeslice() {
+        throw new UnsupportedOperationException("Unsupported");
+        /*TODO*///	int current_icount;
 /*TODO*///	
 /*TODO*///	VERIFY_EXECUTINGCPU_VOID(activecpu_abort_timeslice);
 /*TODO*///	LOG(("activecpu_abort_timeslice (CPU=%d, cycles_left=%d)\n", cpu_getexecutingcpu(), activecpu_get_icount() + 1));
@@ -909,8 +908,9 @@ public class cpuexec {
 /*TODO*///	cycles_stolen += current_icount;
 /*TODO*///	cycles_running -= current_icount;
 /*TODO*///	activecpu_adjust_icount(-current_icount);
-/*TODO*///}
-/*TODO*///
+    }
+
+    /*TODO*///
 /*TODO*///
     /**
      * ***********************************

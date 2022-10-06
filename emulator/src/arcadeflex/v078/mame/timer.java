@@ -10,6 +10,7 @@ import static arcadeflex.v078.generic.funcPtr.*;
 import static arcadeflex.v078.mame.cpuintrfH.*;
 import static arcadeflex.v078.mame.cpuexec.*;
 import static arcadeflex.v078.mame.timerH.*;
+import static arcadeflex.v078.mame.commonH.*;
 //TODO
 import static mame056.driverH.MAX_CPU;
 import static arcadeflex036.osdepend.*;
@@ -25,7 +26,7 @@ public class timer {
 /*TODO*///#else
 /*TODO*///#define LOG(x)
 /*TODO*///#endif
-/*TODO*///
+
     /*-------------------------------------------------
 	internal timer structure
     -------------------------------------------------*/
@@ -66,7 +67,7 @@ public class timer {
     /*-------------------------------------------------
 	get_relative_time - return the current time
 	relative to the global_offset
--------------------------------------------------*/
+    -------------------------------------------------*/
     public static double get_relative_time() {
         int activecpu;
 
@@ -190,22 +191,22 @@ public class timer {
     /*-------------------------------------------------
 	timer_free - remove all timers on the current
 	resource tag
--------------------------------------------------*/
+    -------------------------------------------------*/
     public static void timer_free() {
-        throw new UnsupportedOperationException("Unsupported");
-        /*TODO*///	int tag = get_resource_tag();
-/*TODO*///	mame_timer *timer, *next;
-/*TODO*///
-/*TODO*///	/* scan the list */
-/*TODO*///	for (timer = timer_head; timer != NULL; timer = next)
-/*TODO*///	{
-/*TODO*///		/* prefetch the next timer in case we remove this one */
-/*TODO*///		next = timer->next;
-/*TODO*///
-/*TODO*///		/* if this tag matches, remove it */
-/*TODO*///		if (timer->tag == tag)
-/*TODO*///			timer_remove(timer);
-/*TODO*///	}
+        int tag = get_resource_tag();
+        mame_timer timer = null;
+        mame_timer next = null;
+
+        /* scan the list */
+        for (timer = timer_head; timer != null; timer = next) {
+            /* prefetch the next timer in case we remove this one */
+            next = timer.next;
+
+            /* if this tag matches, remove it */
+            if (timer.tag == tag) {
+                timer_remove(timer);
+            }
+        }
     }
 
     /*-------------------------------------------------
@@ -277,129 +278,112 @@ public class timer {
         }
     }
 
-    /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_alloc - allocate a permament timer that
-/*TODO*///	isn't primed yet
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///mame_timer *timer_alloc(void (*callback)(int))
-/*TODO*///{
-/*TODO*///	double time = get_relative_time();
-/*TODO*///	mame_timer *timer = timer_new();
-/*TODO*///
-/*TODO*///	/* fail if we can't allocate a new entry */
-/*TODO*///	if (!timer)
-/*TODO*///		return NULL;
-/*TODO*///
-/*TODO*///	/* fill in the record */
-/*TODO*///	timer->callback = callback;
-/*TODO*///	timer->callback_param = 0;
-/*TODO*///	timer->enabled = 0;
-/*TODO*///	timer->temporary = 0;
-/*TODO*///	timer->tag = get_resource_tag();
-/*TODO*///	timer->period = 0;
-/*TODO*///
-/*TODO*///	/* compute the time of the next firing and insert into the list */
-/*TODO*///	timer->start = time;
-/*TODO*///	timer->expire = TIME_NEVER;
-/*TODO*///	timer_list_insert(timer);
-/*TODO*///
-/*TODO*///	/* return a handle */
-/*TODO*///	return timer;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_adjust - adjust the time when this
-/*TODO*///	timer will fire, and whether or not it will
-/*TODO*///	fire periodically
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void timer_adjust(mame_timer *which, double duration, int param, double period)
-/*TODO*///{
-/*TODO*///	double time = get_relative_time();
-/*TODO*///
-/*TODO*///	/* if this is the callback timer, mark it modified */
-/*TODO*///	if (which == callback_timer)
-/*TODO*///		callback_timer_modified = 1;
-/*TODO*///
-/*TODO*///	/* compute the time of the next firing and insert into the list */
-/*TODO*///	which->callback_param = param;
-/*TODO*///	which->enabled = 1;
-/*TODO*///
-/*TODO*///	/* set the start and expire times */
-/*TODO*///	which->start = time;
-/*TODO*///	which->expire = time + duration;
-/*TODO*///	which->period = period;
-/*TODO*///
-/*TODO*///	/* remove and re-insert the timer in its new order */
-/*TODO*///	timer_list_remove(which);
-/*TODO*///	timer_list_insert(which);
-/*TODO*///
-/*TODO*///	/* if this was inserted as the head, abort the current timeslice and resync */
-/*TODO*///LOG(("timer_adjust %08X to expire @ %.9f\n", (UINT32)which, which->expire));
-/*TODO*///	if (which == timer_head && cpu_getexecutingcpu() >= 0)
-/*TODO*///		activecpu_abort_timeslice();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_pulse - allocate a pulse timer, which
-/*TODO*///	repeatedly calls the callback using the given
-/*TODO*///	period
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void timer_pulse(double period, int param, void (*callback)(int))
-/*TODO*///{
-/*TODO*///	mame_timer *timer = timer_alloc(callback);
-/*TODO*///
-/*TODO*///	/* fail if we can't allocate */
-/*TODO*///	if (!timer)
-/*TODO*///		return;
-/*TODO*///
-/*TODO*///	/* adjust to our liking */
-/*TODO*///	timer_adjust(timer, period, param, period);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_set - allocate a one-shot timer, which
-/*TODO*///	calls the callback after the given duration
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void timer_set(double duration, int param, void (*callback)(int))
-/*TODO*///{
-/*TODO*///	mame_timer *timer = timer_alloc(callback);
-/*TODO*///
-/*TODO*///	/* fail if we can't allocate */
-/*TODO*///	if (!timer)
-/*TODO*///		return;
-/*TODO*///
-/*TODO*///	/* mark the timer temporary */
-/*TODO*///	timer->temporary = 1;
-/*TODO*///
-/*TODO*///	/* adjust to our liking */
-/*TODO*///	timer_adjust(timer, duration, param, 0);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_reset - reset the timing on a timer
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void timer_reset(mame_timer *which, double duration)
-/*TODO*///{
-/*TODO*///	/* adjust the timer */
-/*TODO*///	timer_adjust(which, duration, which->callback_param, which->period);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
+    /*-------------------------------------------------
+	timer_alloc - allocate a permament timer that
+	isn't primed yet
+    -------------------------------------------------*/
+    public static mame_timer timer_alloc(TimerCallbackHandlerPtr callback) {
+        double time = get_relative_time();
+        mame_timer timer = timer_new();
+
+        /* fail if we can't allocate a new entry */
+        if (timer == null) {
+            return null;
+        }
+
+        /* fill in the record */
+        timer.callback = callback;
+        timer.callback_param = 0;
+        timer.enabled = 0;
+        timer.temporary = 0;
+        timer.tag = get_resource_tag();
+        timer.period = 0;
+
+        /* compute the time of the next firing and insert into the list */
+        timer.start = time;
+        timer.expire = TIME_NEVER;
+        timer_list_insert(timer);
+
+        /* return a handle */
+        return timer;
+    }
+
+    /*-------------------------------------------------
+	timer_adjust - adjust the time when this
+	timer will fire, and whether or not it will
+	fire periodically
+    -------------------------------------------------*/
+    public static void timer_adjust(mame_timer which, double duration, int param, double period) {
+        double time = get_relative_time();
+
+        /* if this is the callback timer, mark it modified */
+        if (which == callback_timer) {
+            callback_timer_modified = 1;
+        }
+
+        /* compute the time of the next firing and insert into the list */
+        which.callback_param = param;
+        which.enabled = 1;
+
+        /* set the start and expire times */
+        which.start = time;
+        which.expire = time + duration;
+        which.period = period;
+
+        /* remove and re-insert the timer in its new order */
+        timer_list_remove(which);
+        timer_list_insert(which);
+
+        /* if this was inserted as the head, abort the current timeslice and resync */
+        //LOG(("timer_adjust %08X to expire @ %.9f\n", (UINT32)which, which->expire));
+        if (which == timer_head && cpu_getexecutingcpu() >= 0) {
+            activecpu_abort_timeslice();
+        }
+    }
+
+    /*-------------------------------------------------
+	timer_pulse - allocate a pulse timer, which
+	repeatedly calls the callback using the given
+	period
+    -------------------------------------------------*/
+    public static void timer_pulse(double period, int param, TimerCallbackHandlerPtr callback) {
+        mame_timer timer = timer_alloc(callback);
+
+        /* fail if we can't allocate */
+        if (timer == null) {
+            return;
+        }
+
+        /* adjust to our liking */
+        timer_adjust(timer, period, param, period);
+    }
+
+    /*-------------------------------------------------
+	timer_set - allocate a one-shot timer, which
+	calls the callback after the given duration
+    -------------------------------------------------*/
+    public static void timer_set(double duration, int param, TimerCallbackHandlerPtr callback) {
+        mame_timer timer = timer_alloc(callback);
+
+        /* fail if we can't allocate */
+        if (timer == null) {
+            return;
+        }
+
+        /* mark the timer temporary */
+        timer.temporary = 1;
+
+        /* adjust to our liking */
+        timer_adjust(timer, duration, param, 0);
+    }
+
+    /*-------------------------------------------------
+            timer_reset - reset the timing on a timer
+    -------------------------------------------------*/
+    public static void timer_reset(mame_timer which, double duration) {
+        /* adjust the timer */
+        timer_adjust(which, duration, which.callback_param, which.period);
+    }
 
     /*-------------------------------------------------
 	timer_remove - remove a timer from the system
@@ -427,86 +411,61 @@ public class timer {
         timer_free_tail = which;
     }
 
-    /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_enable - enable/disable a timer
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///int timer_enable(mame_timer *which, int enable)
-/*TODO*///{
-/*TODO*///	int old;
-/*TODO*///
-/*TODO*///	/* set the enable flag */
-/*TODO*///	old = which->enabled;
-/*TODO*///	which->enabled = enable;
-/*TODO*///
-/*TODO*///	/* remove the timer and insert back into the list */
-/*TODO*///	timer_list_remove(which);
-/*TODO*///	timer_list_insert(which);
-/*TODO*///
-/*TODO*///	return old;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_timeelapsed - return the time since the
-/*TODO*///	last trigger
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///double timer_timeelapsed(mame_timer *which)
-/*TODO*///{
-/*TODO*///	double time = get_relative_time();
-/*TODO*///	return time - which->start;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_timeleft - return the time until the
-/*TODO*///	next trigger
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///double timer_timeleft(mame_timer *which)
-/*TODO*///{
-/*TODO*///	double time = get_relative_time();
-/*TODO*///	return which->expire - time;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_get_time - return the current time
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///double timer_get_time(void)
-/*TODO*///{
-/*TODO*///	return global_offset + get_relative_time();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_starttime - return the time when this
-/*TODO*///	timer started counting
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///double timer_starttime(mame_timer *which)
-/*TODO*///{
-/*TODO*///	return global_offset + which->start;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	timer_firetime - return the time when this
-/*TODO*///	timer will fire next
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///double timer_firetime(mame_timer *which)
-/*TODO*///{
-/*TODO*///	return global_offset + which->expire;
-/*TODO*///}
-/*TODO*///
+    /*-------------------------------------------------
+	timer_enable - enable/disable a timer
+    -------------------------------------------------*/
+    public static int timer_enable(mame_timer which, int enable) {
+        int old;
+
+        /* set the enable flag */
+        old = which.enabled;
+        which.enabled = enable;
+
+        /* remove the timer and insert back into the list */
+        timer_list_remove(which);
+        timer_list_insert(which);
+
+        return old;
+    }
+
+    /*-------------------------------------------------
+	timer_timeelapsed - return the time since the
+	last trigger
+    -------------------------------------------------*/
+    public static double timer_timeelapsed(mame_timer which) {
+        double time = get_relative_time();
+        return time - which.start;
+    }
+
+    /*-------------------------------------------------
+	timer_timeleft - return the time until the
+	next trigger
+    -------------------------------------------------*/
+    public static double timer_timeleft(mame_timer which) {
+        double time = get_relative_time();
+        return which.expire - time;
+    }
+
+    /*-------------------------------------------------
+	timer_get_time - return the current time
+    -------------------------------------------------*/
+    public static double timer_get_time() {
+        return global_offset + get_relative_time();
+    }
+
+    /*-------------------------------------------------
+	timer_starttime - return the time when this
+	timer started counting
+    -------------------------------------------------*/
+    public static double timer_starttime(mame_timer which) {
+        return global_offset + which.start;
+    }
+
+    /*-------------------------------------------------
+	timer_firetime - return the time when this
+	timer will fire next
+    -------------------------------------------------*/
+    public static double timer_firetime(mame_timer which) {
+        return global_offset + which.expire;
+    }
 }
