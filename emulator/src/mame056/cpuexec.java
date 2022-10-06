@@ -8,9 +8,14 @@ import static arcadeflex.v078.mame.cpuexec.cpu_timedintcallback;
 import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
 import static arcadeflex.v078.mame.cpuint.cpuint_init;
 import static arcadeflex.v078.mame.cpuint.cpuint_reset_cpu;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_get_icount;
+import static arcadeflex.v078.mame.cpuintrf.cpuintrf_exit_cpu;
 import static arcadeflex.v078.mame.cpuintrf.cpuintrf_init;
+import static arcadeflex.v078.mame.cpuintrf.cpuintrf_init_cpu;
 import static arcadeflex.v078.mame.cpuintrf.cpuintrf_pop_context;
 import static arcadeflex.v078.mame.cpuintrf.cpuintrf_push_context;
+import static arcadeflex.v078.mame.cpuintrf.cpunum_execute;
+import static arcadeflex.v078.mame.cpuintrf.cpunum_reset;
 import static arcadeflex.v078.mame.cpuintrfH.ASSERT_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.CLEAR_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.PULSE_LINE;
@@ -21,7 +26,6 @@ import static mame056.cpuexecH.*;
 import static mame056.driverH.*;
 import static mame056.hiscore.*;
 import static mame056.sndintrf.*;
-import static mame056.cpuintrf.*;
 import static mame056.cpuintrfH.*;
 import static mame056.mame.*;
 import static mame056.timer.*;
@@ -647,6 +651,11 @@ public class cpuexec {
      ************************************
      */
     public static void cpu_spinuntil_trigger(int trigger) {
+        int activecpu = cpu_getactivecpu();
+        if (activecpu < 0) {
+            logerror("cpu_yielduntil_trigger() called with no active cpu!\n");
+            return;
+        }
         timer_suspendcpu_trigger(activecpu, trigger);
     }
 

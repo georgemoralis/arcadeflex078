@@ -6,6 +6,8 @@ package arcadeflex.v078.mame;
 
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_get_pc_byte;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_set_op_base;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
 import static arcadeflex.v078.mame.memory.cpu_bankbase;
 import static arcadeflex.v078.mame.memory.cpu_setOPbase16;
@@ -13,8 +15,6 @@ import static arcadeflex.v078.mame.memory.mem_amask;
 import static arcadeflex.v078.mame.memory.opcode_entry;
 import static arcadeflex.v078.mame.memory.readmem_lookup;
 import common.ptr.UBytePtr;
-import static mame056.cpuintrf.activecpu_get_pc_byte;
-import static mame056.cpuintrf.activecpu_set_op_base;
 //common imports
 
 public class memoryH {

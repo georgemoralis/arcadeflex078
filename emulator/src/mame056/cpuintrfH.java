@@ -3,10 +3,12 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.cpuintrf.activecpu_get_pc_byte;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_get_reg;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_set_op_base;
 import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
 import static arcadeflex.v078.mame.cpuintrfH.REG_PREVIOUSPC;
 import static arcadeflex.v078.mame.cpuintrfH.REG_SP_CONTENTS;
-import static mame056.cpuintrf.*;
 
 public class cpuintrfH {
 

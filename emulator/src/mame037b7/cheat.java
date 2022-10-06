@@ -4,6 +4,9 @@
  */
 package mame037b7;
 
+import static arcadeflex.v078.mame.cpuintrf.cpunum_address_mask;
+import static arcadeflex.v078.mame.cpuintrf.cpunum_read_byte;
+import static arcadeflex.v078.mame.cpuintrf.cpunum_write_byte;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
 import static common.libc.cstdio.sprintf;
 import arcadeflex037b7.util.cheatFileParser;
@@ -14,9 +17,6 @@ import static mame056.ui_text.*;
 import static mame056.ui_textH.*;
 import static mame056.inptportH.*;
 import static mame056.mame.*;
-import static mame056.cpuintrf.cpunum_address_mask;
-import static mame056.cpuintrf.cpunum_read_byte;
-import static mame056.cpuintrf.cpunum_write_byte;
 import static mame056.input.*;
 import static mame056.inputH.*;
 import static mame056.usrintrf.*;

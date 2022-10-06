@@ -4,6 +4,8 @@
 package mame056;
 
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import static arcadeflex.v078.mame.cpuintrf.cputype_databus_width;
+import static arcadeflex.v078.mame.cpuintrf.cputype_endianess;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_IS_LE;
 import static arcadeflex056.debug.*;
 import static arcadeflex056.fileio.*;
@@ -20,7 +22,6 @@ import static mame056.osdependH.*;
 import static mame056.mame.*;
 import static mame056.mameH.*;
 import static mame056.cpuexecH.*;
-import static mame056.cpuintrf.*;
 import static mame056.drawgfxH.*;
 import static mame056.tilemapH.*;
 //import static mame056.tilemapC.*;

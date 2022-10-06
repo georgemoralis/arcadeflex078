@@ -4,11 +4,19 @@
  */
 package arcadeflex.v078.mame;
 
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
+import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_ASSERT_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_CLEAR_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
 import static arcadeflex.v078.mame.memory.memory_set_context;
+import static common.libc.cstring.strcmp;
 import static mame056.cpuintrf.*;
-import static mame056.cpuintrf.cpu_context_stack_ptr;
 import static mame056.cpuintrfH.CPU_COUNT;
 import static mame056.driverH.MAX_CPU;
+import static arcadeflex036.osdepend.*;
+import static mame056.cpuexecH.CPU_FLAGS_MASK;
+import mame056.cpuintrfH.IrqcallbackPtr;
 
 public class cpuintrf {
 
@@ -738,24 +746,24 @@ public class cpuintrf {
 /*TODO*///};
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Other variables we own
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///int activecpu;		/* index of active CPU (or -1) */
+    /**
+     * ***********************************
+     *
+     * Other variables we own
+     *
+     ************************************
+     */
+    static int activecpu;/* index of active CPU (or -1) */
     static int executingcpu;/* index of executing CPU (or -1) */
- /*TODO*///int totalcpu;		/* total number of CPUs */
-/*TODO*///
-/*TODO*///static struct cpuinfo cpu[MAX_CPU];
-/*TODO*///
-/*TODO*///static int cpu_active_context[CPU_COUNT];
-/*TODO*///static int cpu_context_stack[4];
-/*TODO*///static int cpu_context_stack_ptr;
-/*TODO*///
-/*TODO*///static unsigned (*cpu_dasm_override)(int cpunum, char *buffer, unsigned pc);
+    static int totalcpu;/* total number of CPUs */
+
+    static cpuinfo[] cpu = new cpuinfo[MAX_CPU];
+
+    static int[] cpu_active_context = new int[CPU_COUNT];
+    static int[] cpu_context_stack = new int[4];
+    static int cpu_context_stack_ptr;
+
+    /*TODO*///static unsigned (*cpu_dasm_override)(int cpunum, char *buffer, unsigned pc);
 /*TODO*///
 /*TODO*///
     /**
@@ -873,114 +881,90 @@ public class cpuintrf {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Initialize a single CPU
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///int cpuintrf_init_cpu(int cpunum, int cputype)
-/*TODO*///{
-/*TODO*///	char familyname[256];
-/*TODO*///	int j, size;
-/*TODO*///
-/*TODO*///	/* fill in the type and interface */
-/*TODO*///	cpu[cpunum].intf = cpuintrf[cputype];
-/*TODO*///	cpu[cpunum].cputype = cputype;
-/*TODO*///
-/*TODO*///	/* determine the family index */
-/*TODO*///	strcpy(familyname, cputype_core_file(cputype));
-/*TODO*///	for (j = 0; j < CPU_COUNT; j++)
-/*TODO*///		if (!strcmp(familyname, cputype_core_file(j)))
-/*TODO*///		{
-/*TODO*///			cpu[cpunum].family = j;
-/*TODO*///			break;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///	/* determine the context size */
-/*TODO*///	size = (*cpu[cpunum].intf.get_context)(NULL);
-/*TODO*///	if (size == 0)
-/*TODO*///	{
-/*TODO*///		/* that can't really be true */
-/*TODO*///		logerror("CPU #%d claims to need no context buffer!\n", cpunum);
-/*TODO*///		return 1;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* allocate a context buffer for the CPU */
-/*TODO*///	cpu[cpunum].context = malloc(size);
-/*TODO*///	if (cpu[cpunum].context == NULL)
-/*TODO*///	{
-/*TODO*///		/* that's really bad :( */
-/*TODO*///		logerror("CPU #%d failed to allocate context buffer (%d bytes)!\n", cpunum, size);
-/*TODO*///		return 1;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* zap the context buffer */
-/*TODO*///	memset(cpu[cpunum].context, 0, size);
-/*TODO*///
-/*TODO*///	/* initialize the CPU and stash the context */
-/*TODO*///	activecpu = cpunum;
-/*TODO*///	(*cpu[cpunum].intf.init)();
-/*TODO*///	(*cpu[cpunum].intf.get_context)(cpu[cpunum].context);
-/*TODO*///	activecpu = -1;
-/*TODO*///
-/*TODO*///	/* clear out the registered CPU for this family */
-/*TODO*///	cpu_active_context[cpu[cpunum].family] = -1;
-/*TODO*///
-/*TODO*///	/* make sure the total includes us */
-/*TODO*///	totalcpu = cpunum + 1;
-/*TODO*///
-/*TODO*///	return 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Exit/free a single CPU
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///void cpuintrf_exit_cpu(int cpunum)
-/*TODO*///{
-/*TODO*///	/* if the CPU core defines an exit function, call it now */
-/*TODO*///	if (cpu[cpunum].intf.exit)
-/*TODO*///		(*cpu[cpunum].intf.exit)();
-/*TODO*///
-/*TODO*///	/* free the context buffer for that CPU */
-/*TODO*///	if (cpu[cpunum].context)
-/*TODO*///		free(cpu[cpunum].context);
-/*TODO*///	cpu[cpunum].context = NULL;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Interfaces to the active CPU
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Adjust/get icount
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///void activecpu_adjust_icount(int delta)
+    /**
+     * ***********************************
+     *
+     * Initialize a single CPU
+     *
+     ************************************
+     */
+    public static int cpuintrf_init_cpu(int cpunum, int cputype) {
+        String familyname;
+        int j, size;
+
+        /* fill in the type and interface */
+        cpu[cpunum].intf = cpuintrf[cputype];
+        cpu[cpunum].cputype = cputype;
+
+        /* determine the family index */
+        familyname = cputype_core_file(cputype);
+        for (j = 0; j < CPU_COUNT; j++) {
+            if (strcmp(familyname, cputype_core_file(j)) == 0) {
+                cpu[cpunum].family = j;
+                break;
+            }
+        }
+
+        cpu[cpunum].context = cpu[cpunum].intf.init_context();
+
+        /* initialize the CPU and stash the context */
+        activecpu = cpunum;
+        cpu[cpunum].intf.init();
+
+        activecpu = -1;
+
+        /* clear out the registered CPU for this family */
+        cpu_active_context[cpu[cpunum].family] = -1;
+
+        /* make sure the total includes us */
+        totalcpu = cpunum + 1;
+
+        return 0;
+    }
+
+    /**
+     * ***********************************
+     *
+     * Exit/free a single CPU
+     *
+     ************************************
+     */
+    public static void cpuintrf_exit_cpu(int cpunum) {
+        /* if the CPU core defines an exit function, call it now */
+        cpu[cpunum].intf.exit();
+
+        /* free the context buffer for that CPU */
+        if (cpu[cpunum].context != null) {
+            cpu[cpunum].context = null;
+        }
+    }
+
+    /**
+     * ***********************************
+     *
+     * Interfaces to the active CPU
+     *
+     ************************************
+     */
+
+    /*--------------------------
+ 	Adjust/get icount
+    --------------------------*/
+
+ /*TODO*///void activecpu_adjust_icount(int delta)
 /*TODO*///{
 /*TODO*///	VERIFY_ACTIVECPU_VOID(activecpu_adjust_icount);
 /*TODO*///	*cpu[activecpu].intf.icount += delta;
 /*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///int activecpu_get_icount(void)
-/*TODO*///{
-/*TODO*///	VERIFY_ACTIVECPU(0, activecpu_get_icount);
-/*TODO*///	return *cpu[activecpu].intf.icount;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
+    public static int activecpu_get_icount() {
+        if (activecpu < 0) {
+            logerror("activecpu_get_icount() called with no active cpu!\n");
+            return 0;
+        }
+        return cpu[activecpu].intf.icount[0];
+    }
+
+    /*TODO*////*--------------------------
 /*TODO*/// 	Reset banking pointers
 /*TODO*///--------------------------*/
 /*TODO*///
@@ -991,23 +975,22 @@ public class cpuintrf {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	IRQ line setting
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///void activecpu_set_irq_line(int irqline, int state)
-/*TODO*///{
-/*TODO*///	VERIFY_ACTIVECPU_VOID(activecpu_set_irq_line);
-/*TODO*///	if (state != INTERNAL_CLEAR_LINE && state != INTERNAL_ASSERT_LINE)
-/*TODO*///	{
-/*TODO*///		logerror("activecpu_set_irq_line called when cpu_set_irq_line should have been used!\n");
-/*TODO*///		return;
-/*TODO*///	}
-/*TODO*///	(*cpu[activecpu].intf.set_irq_line)(irqline, state - INTERNAL_CLEAR_LINE);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
+    /*--------------------------
+            IRQ line setting
+    --------------------------*/
+    public static void activecpu_set_irq_line(int irqline, int state) {
+        if (activecpu < 0) {
+            logerror("activecpu_set_irq_line() called with no active cpu!\n");
+            return;
+        }
+        if (state != INTERNAL_CLEAR_LINE && state != INTERNAL_ASSERT_LINE) {
+            logerror("activecpu_set_irq_line called when cpu_set_irq_line should have been used!\n");
+            return;
+        }
+        cpu[activecpu].intf.set_irq_line(irqline, state - INTERNAL_CLEAR_LINE);
+    }
+
+    /*TODO*////*--------------------------
 /*TODO*/// 	Get/set cycle table
 /*TODO*///--------------------------*/
 /*TODO*///
@@ -1025,49 +1008,52 @@ public class cpuintrf {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Get/set registers
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///unsigned activecpu_get_reg(int regnum)
-/*TODO*///{
-/*TODO*///	VERIFY_ACTIVECPU(0, activecpu_get_reg);
-/*TODO*///	return (*cpu[activecpu].intf.get_reg)(regnum);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///void activecpu_set_reg(int regnum, unsigned val)
+    /*--------------------------
+ 	Get/set registers
+    --------------------------*/
+    public static int activecpu_get_reg(int regnum) {
+        if (activecpu < 0) {
+            logerror("activecpu_get_reg() called with no active cpu!\n");
+            return 0;
+        }
+        return cpu[activecpu].intf.get_reg(regnum);
+    }
+
+    /*TODO*///void activecpu_set_reg(int regnum, unsigned val)
 /*TODO*///{
 /*TODO*///	VERIFY_ACTIVECPU_VOID(activecpu_set_reg);
 /*TODO*///	(*cpu[activecpu].intf.set_reg)(regnum, val);
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Get/set PC
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///offs_t activecpu_get_pc_byte(void)
-/*TODO*///{
-/*TODO*///	offs_t base, pc;
-/*TODO*///	int shift;
-/*TODO*///
-/*TODO*///	VERIFY_ACTIVECPU(0, activecpu_get_pc_byte);
-/*TODO*///	shift = cpu[activecpu].intf.address_shift;
-/*TODO*///	base = cpu[activecpu].intf.pgm_memory_base;
-/*TODO*///	pc = (*cpu[activecpu].intf.get_reg)(REG_PC);
-/*TODO*///	return base + ((shift < 0) ? (pc << -shift) : (pc >> shift));
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///void activecpu_set_op_base(unsigned val)
-/*TODO*///{
-/*TODO*///	VERIFY_ACTIVECPU_VOID(activecpu_set_op_base);
-/*TODO*///	(*cpu[activecpu].intf.set_op_base)(val);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
+    /*--------------------------
+ 	Get/set PC
+    --------------------------*/
+    public static int activecpu_get_pc_byte() {
+        int base, pc;
+        int shift;
+        if (activecpu < 0) {
+            logerror("activecpu_get_pc_byte() called with no active cpu!\n");
+            return 0;
+        }
+        shift = cpu[activecpu].intf.address_shift;
+        base = cpu[activecpu].intf.pgm_memory_base;
+        pc = cpu[activecpu].intf.get_reg(REG_PC);
+        if (shift != 0) { //only for debugging
+            throw new UnsupportedOperationException("to be checked!");//z80 doesn't have shift so we can't check , leave that for future to not be forgotten
+        }
+        return base + ((shift < 0) ? (pc << -shift) : (pc >>> shift));
+    }
+
+    public static void activecpu_set_op_base(int val) {
+        if (activecpu < 0) {
+            logerror("activecpu_set_op_base() called with no active cpu!\n");
+            return;
+        }
+        cpu[activecpu].intf.set_op_base(val);
+    }
+
+    /*TODO*////*--------------------------
 /*TODO*/// 	Disassembly
 /*TODO*///--------------------------*/
 /*TODO*///
@@ -1171,10 +1157,24 @@ public class cpuintrf {
 /*TODO*///}
 /*TODO*///
 /*TODO*///CPU_FUNC(int,          activecpu_default_irq_vector, 0,  cpu[activecpu].intf.default_vector)
-/*TODO*///CPU_FUNC(unsigned,     activecpu_address_bits,       0,  cpu[activecpu].intf.address_bits)
-/*TODO*///CPU_FUNC(unsigned,     activecpu_address_mask,       0,  0xffffffffUL >> (32 - cpu[activecpu].intf.address_bits))
-/*TODO*///CPU_FUNC(int,          activecpu_address_shift,      0,  cpu[activecpu].intf.address_shift)
-/*TODO*///CPU_FUNC(unsigned,     activecpu_endianess,          0,  cpu[activecpu].intf.endianess)
+    public static int activecpu_address_bits() {
+        if (activecpu < 0) {
+            logerror("activecpu_address_bits() called with no active cpu!\n");
+            return 0;
+        }
+        return cpu[activecpu].intf.address_bits;
+    }
+
+    /*TODO*///CPU_FUNC(unsigned,     activecpu_address_mask,       0,  0xffffffffUL >> (32 - cpu[activecpu].intf.address_bits))
+    public static int activecpu_address_shift() {
+        if (activecpu < 0) {
+            logerror("activecpu_address_shift() called with no active cpu!\n");
+            return 0;
+        }
+        return cpu[activecpu].intf.address_shift;
+    }
+
+    /*TODO*///CPU_FUNC(unsigned,     activecpu_endianess,          0,  cpu[activecpu].intf.endianess)
 /*TODO*///CPU_FUNC(unsigned,     activecpu_databus_width,      0,  cpu[activecpu].intf.databus_width)
 /*TODO*///CPU_FUNC(unsigned,     activecpu_align_unit,         0,  cpu[activecpu].intf.align_unit)
 /*TODO*///CPU_FUNC(unsigned,     activecpu_max_inst_len,       0,  cpu[activecpu].intf.max_inst_len)
@@ -1188,75 +1188,80 @@ public class cpuintrf {
 /*TODO*///
 /*TODO*///
 /*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Interfaces to a specific CPU
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Execute
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///int cpunum_execute(int cpunum, int cycles)
-/*TODO*///{
-/*TODO*///	int ran;
-/*TODO*///	VERIFY_CPUNUM(0, cpunum_execute);
-/*TODO*///	cpuintrf_push_context(cpunum);
-/*TODO*///	executingcpu = cpunum;
-/*TODO*///	(*cpu[cpunum].intf.set_op_base)(activecpu_get_pc_byte());
-/*TODO*///	ran = (*cpu[cpunum].intf.execute)(cycles);
-/*TODO*///	executingcpu = -1;
-/*TODO*///	cpuintrf_pop_context();
-/*TODO*///	return ran;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Reset and set IRQ ack
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///void cpunum_reset(int cpunum, void *param, int (*irqack)(int))
-/*TODO*///{
-/*TODO*///	VERIFY_CPUNUM_VOID(cpunum_reset);
-/*TODO*///	cpuintrf_push_context(cpunum);
-/*TODO*///	(*cpu[cpunum].intf.set_op_base)(0);
-/*TODO*///	(*cpu[cpunum].intf.reset)(param);
-/*TODO*///	if (irqack)
-/*TODO*///		(*cpu[cpunum].intf.set_irq_callback)(irqack);
-/*TODO*///	cpuintrf_pop_context();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Read a byte
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///data8_t cpunum_read_byte(int cpunum, offs_t address)
-/*TODO*///{
-/*TODO*///	int result;
-/*TODO*///	VERIFY_CPUNUM(0, cpunum_read_byte);
-/*TODO*///	cpuintrf_push_context(cpunum);
-/*TODO*///	result = (*cpu[cpunum].intf.memory_read)(address);
-/*TODO*///	cpuintrf_pop_context();
-/*TODO*///	return result;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Write a byte
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///void cpunum_write_byte(int cpunum, offs_t address, data8_t data)
-/*TODO*///{
-/*TODO*///	VERIFY_CPUNUM_VOID(cpunum_write_byte);
-/*TODO*///	cpuintrf_push_context(cpunum);
-/*TODO*///	(*cpu[cpunum].intf.memory_write)(address, data);
-/*TODO*///	cpuintrf_pop_context();
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*--------------------------
+    /**
+     * ***********************************
+     *
+     * Interfaces to a specific CPU
+     *
+     ************************************
+     */
+
+    /*--------------------------
+            Execute
+    --------------------------*/
+    public static int cpunum_execute(int cpunum, int cycles) {
+        int ran;
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_execute() called for invalid cpu num!\n");
+            return 0;
+        }
+        cpuintrf_push_context(cpunum);
+        executingcpu = cpunum;
+        cpu[cpunum].intf.set_op_base(activecpu_get_pc_byte());
+        ran = cpu[cpunum].intf.execute(cycles);
+        executingcpu = -1;
+        cpuintrf_pop_context();
+        return ran;
+    }
+
+    /*--------------------------
+ 	Reset and set IRQ ack
+    --------------------------*/
+    public static void cpunum_reset(int cpunum, Object param, IrqcallbackPtr irqack) {
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_reset() called for invalid cpu num!\n");
+            return;
+        }
+        cpuintrf_push_context(cpunum);
+        cpu[cpunum].intf.set_op_base(0);
+        cpu[cpunum].intf.reset(param);
+        if (irqack != null) {
+            cpu[cpunum].intf.set_irq_callback(irqack);
+        }
+        cpuintrf_pop_context();
+    }
+
+
+    /*--------------------------
+            Read a byte
+    --------------------------*/
+    public static int /*data8_t*/ cpunum_read_byte(int cpunum, int address) {
+        int result;
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_read_byte() called for invalid cpu num!\n");
+            return 0;
+        }
+        cpuintrf_push_context(cpunum);
+        result = cpu[cpunum].intf.memory_read(address);
+        cpuintrf_pop_context();
+        return result & 0xFF;
+    }
+
+
+    /*--------------------------
+ 	Write a byte
+    --------------------------*/
+    public static void cpunum_write_byte(int cpunum, int address, int/*data8_t*/ data) {
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_write_byte() called for invalid cpu num!\n");
+            return;
+        }
+        cpuintrf_push_context(cpunum);
+        cpu[cpunum].intf.memory_write(address, data & 0xFF);
+        cpuintrf_pop_context();
+    }
+
+    /*TODO*////*--------------------------
 /*TODO*/// 	Get context pointer
 /*TODO*///--------------------------*/
 /*TODO*///
@@ -1291,29 +1296,29 @@ public class cpuintrf {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*////*--------------------------
-/*TODO*/// 	Get/set registers
-/*TODO*///--------------------------*/
-/*TODO*///
-/*TODO*///unsigned cpunum_get_reg(int cpunum, int regnum)
-/*TODO*///{
-/*TODO*///	unsigned result;
-/*TODO*///	VERIFY_CPUNUM(0, cpunum_get_reg);
-/*TODO*///	cpuintrf_push_context(cpunum);
-/*TODO*///	result = (*cpu[cpunum].intf.get_reg)(regnum);
-/*TODO*///	cpuintrf_pop_context();
-/*TODO*///	return result;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///void cpunum_set_reg(int cpunum, int regnum, unsigned val)
-/*TODO*///{
-/*TODO*///	VERIFY_CPUNUM_VOID(cpunum_set_reg);
-/*TODO*///	cpuintrf_push_context(cpunum);
-/*TODO*///	(*cpu[cpunum].intf.set_reg)(regnum, val);
-/*TODO*///	cpuintrf_pop_context();
-/*TODO*///}
-/*TODO*///
+    /*--------------------------
+            Get/set registers
+    --------------------------*/
+    public static int cpunum_get_reg(int cpunum, int regnum) {
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_get_reg() called for invalid cpu num!\n");
+            return 0;
+        }
+        int/*unsigned*/ result;
+        cpuintrf_push_context(cpunum);
+        result = cpu[cpunum].intf.get_reg(regnum);
+        cpuintrf_pop_context();
+        return result;
+    }
+
+    public static void cpunum_set_reg(int cpunum, int regnum, int val) {
+        /*TODO*///VERIFY_CPUNUM_VOID(cpunum_set_reg);
+        cpuintrf_push_context(cpunum);
+        cpu[cpunum].intf.set_reg(regnum, val);
+        cpuintrf_pop_context();
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*////*--------------------------
 /*TODO*/// 	Get/set PC
@@ -1410,13 +1415,34 @@ public class cpuintrf {
 /*TODO*///	return result;											\
 /*TODO*///}
 /*TODO*///
-/*TODO*///CPUNUM_FUNC(int,          cpunum_default_irq_vector, 0,  cpu[cpunum].intf.default_vector)
-/*TODO*///CPUNUM_FUNC(unsigned,     cpunum_address_bits,       0,  cpu[cpunum].intf.address_bits)
-/*TODO*///CPUNUM_FUNC(unsigned,     cpunum_address_mask,       0,  0xffffffffUL >> (32 - cpu[cpunum].intf.address_bits))
-/*TODO*///CPUNUM_FUNC(int,          cpunum_address_shift,      0,  cpu[cpunum].intf.address_shift)
+    public static int cpunum_default_irq_vector(int cpunum) {
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_default_irq_vector() called for invalid cpu num!\n");
+            return 0;
+        }
+        return cpu[cpunum].intf.default_vector;
+    }
+
+    /*TODO*///CPUNUM_FUNC(unsigned,     cpunum_address_bits,       0,  cpu[cpunum].intf.address_bits)
+    public static int cpunum_address_mask(int cpunum) {
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_address_mask() called for invalid cpu num!\n");
+            return 0;
+        }
+        return (0xffffffff >>> (32 - cpu[cpunum].intf.address_bits));
+    }
+
+    /*TODO*///CPUNUM_FUNC(int,          cpunum_address_shift,      0,  cpu[cpunum].intf.address_shift)
 /*TODO*///CPUNUM_FUNC(unsigned,     cpunum_endianess,          0,  cpu[cpunum].intf.endianess)
-/*TODO*///CPUNUM_FUNC(unsigned,     cpunum_databus_width,      0,  cpu[cpunum].intf.databus_width)
-/*TODO*///CPUNUM_FUNC(unsigned,     cpunum_align_unit,         0,  cpu[cpunum].intf.align_unit)
+    public static int cpunum_databus_width(int cpunum) {
+        if (cpunum < 0 || cpunum >= totalcpu) {
+            logerror("cpunum_databus_width() called for invalid cpu num!\n");
+            return 0;
+        }
+        return cpu[cpunum].intf.databus_width;
+    }
+
+    /*TODO*///CPUNUM_FUNC(unsigned,     cpunum_align_unit,         0,  cpu[cpunum].intf.align_unit)
 /*TODO*///CPUNUM_FUNC(unsigned,     cpunum_max_inst_len,       0,  cpu[cpunum].intf.max_inst_len)
 /*TODO*///CPUNUM_FUNC(const char *, cpunum_name,               "", (*cpu[cpunum].intf.cpu_info)(NULL, CPU_INFO_NAME))
 /*TODO*///CPUNUM_FUNC(const char *, cpunum_core_family,        "", (*cpu[cpunum].intf.cpu_info)(NULL, CPU_INFO_FAMILY))
@@ -1448,15 +1474,50 @@ public class cpuintrf {
 /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_address_bits,       0,  cpuintrf[cputype].address_bits)
 /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_address_mask,       0,  0xffffffffUL >> (32 - cpuintrf[cputype].address_bits))
 /*TODO*///CPUTYPE_FUNC(int,          cputype_address_shift,      0,  cpuintrf[cputype].address_shift)
-/*TODO*///CPUTYPE_FUNC(unsigned,     cputype_endianess,          0,  cpuintrf[cputype].endianess)
-/*TODO*///CPUTYPE_FUNC(unsigned,     cputype_databus_width,      0,  cpuintrf[cputype].databus_width)
-/*TODO*///CPUTYPE_FUNC(unsigned,     cputype_align_unit,         0,  cpuintrf[cputype].align_unit)
+    public static int cputype_endianess(int cputype) {
+        cputype &= ~CPU_FLAGS_MASK;
+        if (cputype >= 0 && cputype < CPU_COUNT) {
+            return cpuintrf[cputype].endianess;
+        } else {
+            logerror("cputype_endianess() called with invalid cpu type!\n");
+        }
+        return 0;
+    }
+
+    public static int cputype_databus_width(int cputype) {
+        cputype &= ~CPU_FLAGS_MASK;
+        if (cputype >= 0 && cputype < CPU_COUNT) {
+            return cpuintrf[cputype].databus_width;
+        } else {
+            logerror("cputype_databus_width() called with invalid cpu type!\n");
+        }
+        return 0;
+    }
+
+    /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_align_unit,         0,  cpuintrf[cputype].align_unit)
 /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_max_inst_len,       0,  cpuintrf[cputype].max_inst_len)
-/*TODO*///CPUTYPE_FUNC(const char *, cputype_name,               "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_NAME))
-/*TODO*///CPUTYPE_FUNC(const char *, cputype_core_family,        "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_FAMILY))
+    public static String cputype_name(int cputype) {
+        cputype &= ~CPU_FLAGS_MASK;
+        if (cputype >= 0 && cputype < CPU_COUNT) {
+            return cpuintrf[cputype].cpu_info(null, CPU_INFO_NAME);
+        } else {
+            logerror("cputype_name() called with invalid cpu type!\n");
+        }
+        return "";
+    }
+
+    /*TODO*///CPUTYPE_FUNC(const char *, cputype_core_family,        "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_FAMILY))
 /*TODO*///CPUTYPE_FUNC(const char *, cputype_core_version,       "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_VERSION))
-/*TODO*///CPUTYPE_FUNC(const char *, cputype_core_file,          "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_FILE))
-/*TODO*///CPUTYPE_FUNC(const char *, cputype_core_credits,       "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_CREDITS))
+    public static String cputype_core_file(int cputype) {
+        cputype &= ~CPU_FLAGS_MASK;
+        if (cputype >= 0 && cputype < CPU_COUNT) {
+            return cpuintrf[cputype].cpu_info(null, CPU_INFO_FILE);
+        } else {
+            logerror("cputype_core_file() called with invalid cpu type!\n");
+        }
+        return "";
+    }
+    /*TODO*///CPUTYPE_FUNC(const char *, cputype_core_credits,       "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_CREDITS))
 /*TODO*///CPUTYPE_FUNC(const char *, cputype_reg_layout,         "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_REG_LAYOUT))
 /*TODO*///CPUTYPE_FUNC(const char *, cputype_win_layout,         "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_WIN_LAYOUT))
 /*TODO*///

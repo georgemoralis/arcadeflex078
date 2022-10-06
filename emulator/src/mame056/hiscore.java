@@ -5,13 +5,14 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.cpuintrf.cpunum_read_byte;
+import static arcadeflex.v078.mame.cpuintrf.cpunum_write_byte;
 import static common.ptr.*;
 import static mame056.mame.Machine;
 import arcadeflex056.util.hiscoreFileParser;
 import static mame056.osdependH.*;
 import static arcadeflex056.fileio.*;
 import static arcadeflex036.osdepend.logerror;
-import static mame056.cpuintrf.*;
 
 public class hiscore {
 

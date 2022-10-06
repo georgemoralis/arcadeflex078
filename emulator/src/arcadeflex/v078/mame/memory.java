@@ -6,6 +6,9 @@ package arcadeflex.v078.mame;
 
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_address_bits;
+import static arcadeflex.v078.mame.cpuintrf.activecpu_address_shift;
+import static arcadeflex.v078.mame.cpuintrf.cpunum_databus_width;
 //mame imports
 import static arcadeflex.v078.mame.cpuintrfH.*;
 import static arcadeflex.v078.mame.memoryH.*;
@@ -22,9 +25,6 @@ import static java.lang.System.exit;
 import static mame056.common.memory_region;
 import static mame056.common.memory_region_length;
 import static mame056.commonH.REGION_CPU1;
-import static mame056.cpuintrf.activecpu_address_bits;
-import static mame056.cpuintrf.activecpu_address_shift;
-import static mame056.cpuintrf.cpunum_databus_width;
 import static mame056.cpuintrfH.CPU_V60;
 import static mame056.cpuintrfH.activecpu_get_pc;
 import static mame056.driverH.MAX_CPU;

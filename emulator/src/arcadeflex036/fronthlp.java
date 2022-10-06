@@ -16,6 +16,7 @@ along with Arcadeflex.  If not, see <http://www.gnu.org/licenses/>.
  */
 package arcadeflex036;
 
+import static arcadeflex.v078.mame.cpuintrf.cputype_name;
 import static common.libc.cstring.*;
 import static common.libc.cstdio.*;
 import static mame056.cpuexecH.*;
@@ -27,7 +28,6 @@ import static mame056.driver.drivers;
 import static mame056.driverH.*;
 import static mame056.sndintrf.*;
 import static mame056.version.build_version;
-import static mame056.cpuintrf.cputype_name;
 import mame056.sndintrfH.MachineSound;
 
 

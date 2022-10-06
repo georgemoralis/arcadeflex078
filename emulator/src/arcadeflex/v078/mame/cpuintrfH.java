@@ -4,9 +4,9 @@
  */
 package arcadeflex.v078.mame;
 
-import static mame056.cpuintrf.activecpu;
+import static arcadeflex.v078.mame.cpuintrf.activecpu;
+import static arcadeflex.v078.mame.cpuintrf.totalcpu;
 import static mame056.cpuintrf.cpuintrf;
-import static mame056.cpuintrf.totalcpu;
 import mame056.cpuintrfH.IrqcallbackPtr;
 import mame056.cpuintrfH.burnPtr;
 
