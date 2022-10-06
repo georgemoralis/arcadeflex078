@@ -6,10 +6,6 @@ package mame056;
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
 //mame imports
-import static arcadeflex.v078.mame.cpuint.*;
-
-//TODO
-import static arcadeflex.v078.mame.cpuintrfH.IRQ_LINE_NMI;
 
 
 public class cpuexecH {

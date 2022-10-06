@@ -10,7 +10,7 @@ import static mame056.sndintrfH.*;
 import static mame056.common.*;
 import static mame056.driverH.*;
 import static mame056.timer.*;
-import static mame056.timerH.*;
+import static arcadeflex.v078.mame.timerH.*;
 import static arcadeflex036.osdepend.*;
 import static mame056.mame.Machine;
 

@@ -9,6 +9,7 @@ import static arcadeflex.v078.generic.funcPtr.*;
 //mame imports
 import static arcadeflex.v078.mame.cpuintrf.*;
 import static arcadeflex.v078.mame.cpuintrfH.*;
+import static arcadeflex.v078.mame.timerH.*;
 
 import static arcadeflex036.osdepend.logerror;
 import static mame056.cpuexec.cpu_triggerint;
@@ -16,7 +17,6 @@ import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
 import mame056.timer.timer_callback;
 import static mame056.timer.timer_set;
-import static mame056.timerH.TIME_NOW;
 
 public class cpuint {
 

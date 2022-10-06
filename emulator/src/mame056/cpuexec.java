@@ -33,7 +33,7 @@ import static mame056.hiscore.*;
 import static mame056.sndintrf.*;
 import static mame056.mame.*;
 import static mame056.timer.*;
-import static mame056.timerH.*;
+import static arcadeflex.v078.mame.timerH.*;
 import static arcadeflex036.osdepend.*;
 import static mame056.inptport.*;
 

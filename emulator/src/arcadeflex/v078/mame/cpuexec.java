@@ -4,17 +4,17 @@
  */
 package arcadeflex.v078.mame;
 
-import static arcadeflex036.osdepend.*;
-import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
-import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
-import static arcadeflex.v078.mame.cpuintrf.cpuintrf_pop_context;
-import static arcadeflex.v078.mame.cpuintrf.cpuintrf_push_context;
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuintrf.*;
+import static arcadeflex.v078.mame.timerH.*;
+//TODO
 import static mame056.cpuexec.cpu_getstatus;
 import static mame056.cpuexec.watchdog_counter;
 import static mame056.mame.Machine;
 import mame056.timer.timer_callback;
-import static mame056.timerH.TIME_IN_HZ;
-import static mame056.timerH.TIME_IN_NSEC;
+import static arcadeflex036.osdepend.*;
 
 public class cpuexec {
 

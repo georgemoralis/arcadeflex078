@@ -12,7 +12,7 @@ import static arcadeflex.v078.mame.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.*;
 import static mame056.cpuexecH.CPU_FLAGS_MASK;
 import static mame056.mame.Machine;
-import static mame056.timerH.*;
+import static arcadeflex.v078.mame.timerH.*;
 
 /**
  *
@@ -60,8 +60,8 @@ public class timer {
     }
 
     /* conversion constants */
-    static double[] cycles_to_sec = new double[MAX_CPU];
-    static double[] sec_to_cycles = new double[MAX_CPU];
+    public static double[] cycles_to_sec = new double[MAX_CPU];
+    public static double[] sec_to_cycles = new double[MAX_CPU];
 
     /* list of per-CPU timer data */
     static cpu_entry[] cpudata = new cpu_entry[MAX_CPU + 1];
