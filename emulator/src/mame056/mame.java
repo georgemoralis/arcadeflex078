@@ -3,6 +3,7 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.common.begin_resource_tracking;
 import static arcadeflex.v078.mame.memory.memory_init;
 import static arcadeflex.v078.mame.memory.memory_shutdown;
 import static mame056.mameH.*;
@@ -65,6 +66,7 @@ public class mame {
     static int leds_status;
 
     public static int run_game(int game) {
+        begin_resource_tracking();
         int err;
         /* copy some settings into easier-to-handle variables */
         record = options.record;
@@ -184,6 +186,7 @@ public class mame {
 /*TODO*///		cpu_loadsave_reset();
 /*TODO*///
         if (osd_init() == 0) {
+            begin_resource_tracking();
             if (init_machine() == 0) {
                 if (run_machine() == 0) {
                     err = 0;

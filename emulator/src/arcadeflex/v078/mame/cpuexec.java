@@ -649,27 +649,27 @@ public class cpuexec {
 /*TODO*///#pragma mark -
 /*TODO*///#pragma mark WATCHDOG
 /*TODO*///#endif
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Watchdog routines
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////*--------------------------------------------------------------
-/*TODO*///
-/*TODO*///	Use these functions to initialize, and later maintain, the
-/*TODO*///	watchdog. For convenience, when the machine is reset, the
-/*TODO*///	watchdog is disabled. If you call this function, the
-/*TODO*///	watchdog is initialized, and from that point onwards, if you
-/*TODO*///	don't call it at least once every 3 seconds, the machine
-/*TODO*///	will be reset.
-/*TODO*///
-/*TODO*///	The 3 seconds delay is targeted at qzshowby, which otherwise
-/*TODO*///	would reset at the start of a game.
-/*TODO*///
-/*TODO*///--------------------------------------------------------------*/
-/*TODO*///
+    /**
+     * ***********************************
+     *
+     * Watchdog routines
+     *
+     ************************************
+     */
+
+    /*--------------------------------------------------------------
+
+	Use these functions to initialize, and later maintain, the
+	watchdog. For convenience, when the machine is reset, the
+	watchdog is disabled. If you call this function, the
+	watchdog is initialized, and from that point onwards, if you
+	don't call it at least once every 3 seconds, the machine
+	will be reset.
+
+	The 3 seconds delay is targeted at qzshowby, which otherwise
+	would reset at the start of a game.
+
+    --------------------------------------------------------------*/
     static void watchdog_reset() {
         if (watchdog_counter == -1) {
             logerror("watchdog armed\n");

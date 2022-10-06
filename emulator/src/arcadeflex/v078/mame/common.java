@@ -5,6 +5,7 @@
 package arcadeflex.v078.mame;
 
 public class common {
+
     /*TODO*////*********************************************************************
 /*TODO*///
 /*TODO*///	common.c
@@ -71,11 +72,11 @@ public class common {
 /*TODO*////* malloc tracking */
 /*TODO*///static struct malloc_info malloc_list[MAX_MALLOCS];
 /*TODO*///static int malloc_list_index = 0;
-/*TODO*///
-/*TODO*////* resource tracking */
-/*TODO*///int resource_tracking_tag = 0;
-/*TODO*///
-/*TODO*////* generic NVRAM */
+
+    /* resource tracking */
+    static int resource_tracking_tag = 0;
+
+    /*TODO*////* generic NVRAM */
 /*TODO*///size_t generic_nvram_size;
 /*TODO*///data8_t *generic_nvram;
 /*TODO*///
@@ -720,18 +721,16 @@ public class common {
 /*TODO*///	return bitmap_alloc_core(width,height,depth,1);
 /*TODO*///}
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	begin_resource_tracking - start tracking
-/*TODO*///	resources
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void begin_resource_tracking(void)
-/*TODO*///{
-/*TODO*///	/* increment the tag counter */
-/*TODO*///	resource_tracking_tag++;
-/*TODO*///}
-/*TODO*///
+
+    /*-------------------------------------------------
+	begin_resource_tracking - start tracking
+	resources
+-------------------------------------------------*/
+    public static void begin_resource_tracking() {
+        /* increment the tag counter */
+        resource_tracking_tag++;
+    }
+    /*TODO*///
 /*TODO*///
 /*TODO*////*-------------------------------------------------
 /*TODO*///	end_resource_tracking - stop tracking

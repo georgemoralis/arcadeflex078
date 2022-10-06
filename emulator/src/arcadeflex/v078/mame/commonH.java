@@ -4,27 +4,12 @@
  */
 package arcadeflex.v078.mame;
 
+//mame imports
+import static arcadeflex.v078.mame.common.*;
+
 public class commonH {
 
-    /*TODO*////*********************************************************************
-/*TODO*///
-/*TODO*///	common.h
-/*TODO*///
-/*TODO*///	Generic functions, mostly ROM related.
-/*TODO*///
-/*TODO*///*********************************************************************/
-/*TODO*///
-/*TODO*///#ifndef COMMON_H
-/*TODO*///#define COMMON_H
-/*TODO*///
-/*TODO*///#include "hash.h"
-/*TODO*///
-/*TODO*///#ifdef __cplusplus
-/*TODO*///extern "C" {
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
+    /*TODO*////***************************************************************************
 /*TODO*///
 /*TODO*///	Type definitions
 /*TODO*///
@@ -430,9 +415,7 @@ public class commonH {
 /*TODO*///void begin_resource_tracking(void);
 /*TODO*///void end_resource_tracking(void);
     public static int get_resource_tag() {
-        throw new UnsupportedOperationException("Unsupported");
-        /*TODO*///	extern int resource_tracking_tag;
-/*TODO*///	return resource_tracking_tag;
+        return resource_tracking_tag;
     }
     /*TODO*///
 /*TODO*////* automatically-freeing memory */
