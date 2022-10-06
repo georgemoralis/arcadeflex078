@@ -4,12 +4,10 @@
  */
 package arcadeflex.v078.mame;
 
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
-import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_ASSERT_LINE;
-import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_CLEAR_LINE;
-import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
-import static arcadeflex.v078.mame.memory.memory_set_context;
+//mame imports
+import static arcadeflex.v078.mame.cpuintrfH.*;
+import static arcadeflex.v078.mame.memory.*;
+//TODO
 import static common.libc.cstring.strcmp;
 import static mame056.cpuintrf.*;
 import static mame056.cpuintrfH.CPU_COUNT;
@@ -20,205 +18,20 @@ import mame056.cpuintrfH.IrqcallbackPtr;
 
 public class cpuintrf {
 
-    /*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///	cpuintrf.c
-/*TODO*///
-/*TODO*///	Core CPU interface functions and definitions.
-/*TODO*///
-/*TODO*///	Cleanup phase 1: split into two pieces
-/*TODO*///	Cleanup phase 2: simplify CPU core interfaces
-/*TODO*///	Cleanup phase 3: phase out old interrupt system
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#include <signal.h>
-/*TODO*///#include "driver.h"
-/*TODO*///#include "state.h"
-/*TODO*///#include "mamedbg.h"
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Include headers from all CPUs
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///#if (HAS_Z80)
-/*TODO*///#include "cpu/z80/z80.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_Z180)
-/*TODO*///#include "cpu/z180/z180.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_8080 || HAS_8085A)
-/*TODO*///#include "cpu/i8085/i8085.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M6502 || HAS_M65C02 || HAS_M65SC02 || HAS_M6510 || HAS_M6510T || HAS_M7501 || HAS_M8502 || HAS_N2A03 || HAS_DECO16)
-/*TODO*///#include "cpu/m6502/m6502.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M4510)
-/*TODO*///#include "cpu/m6502/m4510.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M65CE02)
-/*TODO*///#include "cpu/m6502/m65ce02.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M6509)
-/*TODO*///#include "cpu/m6502/m6509.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_H6280)
-/*TODO*///#include "cpu/h6280/h6280.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I86)
-/*TODO*///#include "cpu/i86/i86intf.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I88)
-/*TODO*///#include "cpu/i86/i88intf.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I186)
-/*TODO*///#include "cpu/i86/i186intf.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I188)
-/*TODO*///#include "cpu/i86/i188intf.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I286)
-/*TODO*///#include "cpu/i86/i286intf.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_V20 || HAS_V30 || HAS_V33)
-/*TODO*///#include "cpu/nec/necintrf.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_V60 || HAS_V70)
-/*TODO*///#include "cpu/v60/v60.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I8035 || HAS_I8039 || HAS_I8048 || HAS_N7751)
-/*TODO*///#include "cpu/i8039/i8039.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_I8X41)
-/*TODO*///#include "cpu/i8x41/i8x41.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M6800 || HAS_M6801 || HAS_M6802 || HAS_M6803 || HAS_M6808 || HAS_HD63701)
-/*TODO*///#include "cpu/m6800/m6800.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M6805 || HAS_M68705 || HAS_HD63705)
-/*TODO*///#include "cpu/m6805/m6805.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M6809)
-/*TODO*///#include "cpu/m6809/m6809.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_HD6309)
-/*TODO*///#include "cpu/hd6309/hd6309.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_KONAMI)
-/*TODO*///#include "cpu/konami/konami.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_M68000 || HAS_M68010 || HAS_M68020 || HAS_M68EC020)
-/*TODO*///#include "cpu/m68000/m68000.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_T11)
-/*TODO*///#include "cpu/t11/t11.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_S2650)
-/*TODO*///#include "cpu/s2650/s2650.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_TMS34010 || HAS_TMS34020)
-/*TODO*///#include "cpu/tms34010/tms34010.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_TMS9900 || HAS_TMS9940 || HAS_TMS9980 || HAS_TMS9985 || HAS_TMS9989 || HAS_TMS9995 || HAS_TMS99105A || HAS_TMS99110A)
-/*TODO*///#include "cpu/tms9900/tms9900.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_Z8000)
-/*TODO*///#include "cpu/z8000/z8000.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_TMS32010)
-/*TODO*///#include "cpu/tms32010/tms32010.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_TMS32025)
-/*TODO*///#include "cpu/tms32025/tms32025.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_TMS32031)
-/*TODO*///#include "cpu/tms32031/tms32031.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_CCPU)
-/*TODO*///#include "cpu/ccpu/ccpu.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_ADSP2100 || HAS_ADSP2101 || HAS_ADSP2104 || HAS_ADSP2105 || HAS_ADSP2115)
-/*TODO*///#include "cpu/adsp2100/adsp2100.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_PSXCPU)
-/*TODO*///#include "cpu/mips/psx.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_ASAP)
-/*TODO*///#include "cpu/asap/asap.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_UPD7810 || HAS_UPD7807)
-/*TODO*///#include "cpu/upd7810/upd7810.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_JAGUAR)
-/*TODO*///#include "cpu/jaguar/jaguar.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_R3000)
-/*TODO*///#include "cpu/mips/r3000.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_R4600 || HAS_R5000)
-/*TODO*///#include "cpu/mips/mips3.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_ARM)
-/*TODO*///#include "cpu/arm/arm.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_SH2)
-/*TODO*///#include "cpu/sh2/sh2.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_DSP32C)
-/*TODO*///#include "cpu/dsp32/dsp32.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_PIC16C54 || HAS_PIC16C55 || HAS_PIC16C56 || HAS_PIC16C57 || HAS_PIC16C58)
-/*TODO*///#include "cpu/pic16c5x/pic16c5x.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_G65816)
-/*TODO*///#include "cpu/g65816/g65816.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_SPC700)
-/*TODO*///#include "cpu/spc700/spc700.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_E132XS)
-/*TODO*///#include "cpu/e132xs/e132xs.h"
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///#ifdef MESS
-/*TODO*///
-/*TODO*///#if (HAS_APEXC)
-/*TODO*///#include "cpu/apexc/apexc.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_CDP1802)
-/*TODO*///#include "cpu/cdp1802/cdp1802.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_CP1600)
-/*TODO*///#include "cpu/cp1600/cp1600.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_F8)
-/*TODO*///#include "cpu/f8/f8.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_LH5801)
-/*TODO*///#include "cpu/lh5801/lh5801.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_PDP1)
-/*TODO*///#include "cpu/pdp1/pdp1.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_SATURN)
-/*TODO*///#include "cpu/saturn/saturn.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_SC61860)
-/*TODO*///#include "cpu/sc61860/sc61860.h"
-/*TODO*///#endif
-/*TODO*///#if (HAS_Z80GB)
-/*TODO*///#include "cpu/z80gb/z80gb.h"
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
+    /**
+     * *************************************************************************
+     *
+     * cpuintrf.c
+     *
+     * Core CPU interface functions and definitions.
+     *
+     * Cleanup phase 1: split into two pieces Cleanup phase 2: simplify CPU core
+     * interfaces Cleanup phase 3: phase out old interrupt system
+     *
+     **************************************************************************
+     */
+
+    /*TODO*////*************************************
 /*TODO*/// *
 /*TODO*/// *	Debug logging
 /*TODO*/// *
@@ -275,26 +88,22 @@ public class cpuintrf {
 /*TODO*///		logerror(#name "() called for invalid cpu num!\n");	\
 /*TODO*///		return;												\
 /*TODO*///	}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Internal CPU info type
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///struct cpuinfo
-/*TODO*///{
-/*TODO*///	struct cpu_interface intf; 		/* copy of the interface data */
-/*TODO*///	int cputype; 					/* type index of this CPU */
-/*TODO*///	int family; 					/* family index of this CPU */
-/*TODO*///	void *context;					/* dynamically allocated context buffer */
-/*TODO*///};
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
+    /**
+     * ***********************************
+     *
+     * Internal CPU info type
+     *
+     ************************************
+     */
+    static class cpuinfo {
+
+        public cpu_interface intf;/* copy of the interface data */
+        public int cputype;/* type index of this CPU */
+        public int family;/* family index of this CPU */
+        public Object context;/* dynamically allocated context buffer */
+    }
+
+    /*TODO*////*************************************
 /*TODO*/// *
 /*TODO*/// *	Prototypes for dummy CPU
 /*TODO*/// *

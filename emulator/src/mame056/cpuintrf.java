@@ -4,7 +4,6 @@
 package mame056;
 
 import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
-import static arcadeflex036.osdepend.*;
 
 //cpu imports
 import mame056.cpu.dummy_cpu;
@@ -12,92 +11,6 @@ import mame056.cpu.z80.z80;
 
 public class cpuintrf {
 
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Internal CPU info type
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-    public static class cpuinfo {
-
-        public cpu_interface intf;/* copy of the interface data */
-        public int cputype;/* type index of this CPU */
-        public int family;/* family index of this CPU */
-        public Object context;/* dynamically allocated context buffer */
-    }
-    /*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	Macros to generate CPU entries
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* most CPUs use this macro */
-
-    /*TODO*///#define CPU0(cpu,name,nirq,dirq,oc,i1,datawidth,mem,shift,bits,endian,align,maxinst) \
-/*TODO*///	{																			   \
-/*TODO*///		CPU_##cpu,																   \
-/*TODO*///		name##_init, name##_reset, name##_exit, name##_execute, NULL,			   \
-/*TODO*///		name##_get_context, name##_set_context, NULL, NULL, 					   \
-/*TODO*///		name##_get_reg, name##_set_reg,			   \
-/*TODO*///		name##_set_irq_line, name##_set_irq_callback,		   \
-/*TODO*///		name##_info, name##_dasm, 										   \
-/*TODO*///		nirq, dirq, &name##_ICount, oc, i1, 							   \
-/*TODO*///		datawidth,																   \
-/*TODO*///		(mem_read_handler)cpu_readmem##mem, (mem_write_handler)cpu_writemem##mem, NULL, NULL,						   \
-/*TODO*///		0, cpu_setopbase##mem,													   \
-/*TODO*///		shift, bits, CPU_IS_##endian, align, maxinst							   \
-/*TODO*///	}
-/*TODO*///
-/*TODO*////* CPUs which have the _burn function */
-/*TODO*///#define CPU1(cpu,name,nirq,dirq,oc,i1,datawidth,mem,shift,bits,endian,align,maxinst)	 \
-/*TODO*///	{																			   \
-/*TODO*///		CPU_##cpu,																   \
-/*TODO*///		name##_init, name##_reset, name##_exit, name##_execute, 				   \
-/*TODO*///		name##_burn,															   \
-/*TODO*///		name##_get_context, name##_set_context, 								   \
-/*TODO*///		name##_get_cycle_table, name##_set_cycle_table, 						   \
-/*TODO*///		name##_get_reg, name##_set_reg,			   \
-/*TODO*///		name##_set_irq_line, name##_set_irq_callback,		   \
-/*TODO*///		name##_info, name##_dasm, 										   \
-/*TODO*///		nirq, dirq, &name##_ICount, oc, i1, 							   \
-/*TODO*///		datawidth,																   \
-/*TODO*///		(mem_read_handler)cpu_readmem##mem, (mem_write_handler)cpu_writemem##mem, NULL, NULL,						   \
-/*TODO*///		0, cpu_setopbase##mem,													   \
-/*TODO*///		shift, bits, CPU_IS_##endian, align, maxinst							   \
-/*TODO*///	}
-/*TODO*///
-/*TODO*////* like CPU0, but CPU has Harvard-architecture like program/data memory */
-/*TODO*///#define CPU3(cpu,name,nirq,dirq,oc,i1,datawidth,mem,shift,bits,endian,align,maxinst) \
-/*TODO*///	{																			   \
-/*TODO*///		CPU_##cpu,																   \
-/*TODO*///		name##_init, name##_reset, name##_exit, name##_execute, NULL,			   \
-/*TODO*///		name##_get_context, name##_set_context, NULL, NULL, 					   \
-/*TODO*///		name##_get_reg, name##_set_reg,			   \
-/*TODO*///		name##_set_irq_line, name##_set_irq_callback,		   \
-/*TODO*///		name##_info, name##_dasm, 										   \
-/*TODO*///		nirq, dirq, &name##_icount, oc, i1, 							   \
-/*TODO*///		datawidth,																   \
-/*TODO*///		(mem_read_handler)cpu_readmem##mem, (mem_write_handler)cpu_writemem##mem, NULL, NULL,						   \
-/*TODO*///		cpu##_PGM_OFFSET, cpu_setopbase##mem,									   \
-/*TODO*///		shift, bits, CPU_IS_##endian, align, maxinst							   \
-/*TODO*///	}
-/*TODO*///
-/*TODO*////* like CPU0, but CPU has internal memory (or I/O ports, timers or similiar) */
-/*TODO*///#define CPU4(cpu,name,nirq,dirq,oc,i1,datawidth,mem,shift,bits,endian,align,maxinst) \
-/*TODO*///	{																			   \
-/*TODO*///		CPU_##cpu,																   \
-/*TODO*///		name##_init, name##_reset, name##_exit, name##_execute, NULL,			   \
-/*TODO*///		name##_get_context, name##_set_context, NULL, NULL, 					   \
-/*TODO*///		name##_get_reg, name##_set_reg,			   \
-/*TODO*///		name##_set_irq_line, name##_set_irq_callback,		   \
-/*TODO*///		name##_info, name##_dasm, 										   \
-/*TODO*///		nirq, dirq, &name##_icount, oc, i1, 							   \
-/*TODO*///		datawidth,																   \
-/*TODO*///		(mem_read_handler)cpu_readmem##mem, (mem_write_handler)cpu_writemem##mem, name##_internal_r, name##_internal_w, \
-/*TODO*///		0, cpu_setopbase##mem,													   \
-/*TODO*///		shift, bits, CPU_IS_##endian, align, maxinst							   \
-/*TODO*///	}
     /**
      * ***********************************
      *

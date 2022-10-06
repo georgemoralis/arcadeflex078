@@ -4,8 +4,9 @@
  */
 package arcadeflex.v078.mame;
 
-import static arcadeflex.v078.mame.cpuintrf.activecpu;
-import static arcadeflex.v078.mame.cpuintrf.totalcpu;
+//mame imports
+import static arcadeflex.v078.mame.cpuintrf.*;
+//TODO
 import static mame056.cpuintrf.cpuintrf;
 import mame056.cpuintrfH.IrqcallbackPtr;
 import mame056.cpuintrfH.burnPtr;
@@ -423,32 +424,48 @@ public class cpuintrfH {
     public static final int CPU_INFO_REG_LAYOUT = MAX_REGS + 6;
     public static final int CPU_INFO_WIN_LAYOUT = MAX_REGS + 7;
 
-    /*************************************
- *
- *	Core CPU interface structure
- *
- *************************************/
-        public static abstract class cpu_interface {
+    /**
+     * ***********************************
+     *
+     * Core CPU interface structure
+     *
+     ************************************
+     */
+    public static abstract class cpu_interface {
 
         /* index (used to make sure we mach the enum above */
         public int cpu_num;
 
         /* table of core functions */
         public abstract void init();
+
         public abstract void reset(Object param);
+
         public abstract void exit();
+
         public abstract int execute(int cycles);
         public burnPtr burn;
+
         public abstract Object init_context();//not in mame , used specific for arcadeflex
+
         public abstract Object get_context();//different from mame returns reg object and not size since java doesn't support references
+
         public abstract void set_context(Object reg);
+
         public abstract int[] get_cycle_table(int which);
+
         public abstract void set_cycle_table(int which, int[] new_table);
+
         public abstract int get_reg(int regnum);
+
         public abstract void set_reg(int regnum, int val);
+
         public abstract void set_irq_line(int irqline, int linestate);
+
         public abstract void set_irq_callback(IrqcallbackPtr callback);
+
         public abstract String cpu_info(Object context, int regnum);
+
         public abstract String cpu_dasm(String buffer, int pc);
 
         /* IRQ and clock information */
@@ -458,11 +475,16 @@ public class cpuintrfH {
         public double overclock;
         /* memory information */
         public int databus_width;
+
         public abstract int memory_read(int offset);
+
         public abstract void memory_write(int offset, int data);
+
         public abstract int internal_read(int offset);
+
         public abstract void internal_write(int offset, int data);
         public int pgm_memory_base;
+
         public abstract void set_op_base(int pc);
         public int address_shift;
         public int/*unsigned*/ address_bits;
@@ -497,15 +519,22 @@ public class cpuintrfH {
     	{ 18, cpu_readmem18bedw }*/
     }
 
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 Macros
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///#define		activecpu_get_previouspc()	activecpu_get_reg(REG_PREVIOUSPC)
-/*TODO*///#define		activecpu_get_pc()			activecpu_get_reg(REG_PC)
-/*TODO*///#define		activecpu_get_sp()			activecpu_get_reg(REG_SP)
+    /**
+     * ***********************************
+     *
+     * Macros
+     *
+     ************************************
+     */
+    public static int activecpu_get_previouspc() {
+        return activecpu_get_reg(REG_PREVIOUSPC);
+    }
+
+    public static int activecpu_get_pc() {
+        return activecpu_get_reg(REG_PC);
+    }
+
+    /*TODO*///#define		activecpu_get_sp()			activecpu_get_reg(REG_SP)
 /*TODO*///#define		activecpu_set_pc(val)		activecpu_set_reg(REG_PC, val)
 /*TODO*///#define		activecpu_set_sp(val)		activecpu_set_reg(REG_SP, val)
 /*TODO*///
@@ -514,12 +543,12 @@ public class cpuintrfH {
 /*TODO*///#define		cpunum_get_sp(cpu)			cpunum_get_reg(cpu, REG_SP)
 /*TODO*///#define		cpunum_set_pc(cpu, val)		cpunum_set_reg(cpu, REG_PC, val)
 /*TODO*///#define		cpunum_set_sp(cpu, val)		cpunum_set_reg(cpu, REG_SP, val)
-/*TODO*///
-/*TODO*////* this is kind of gross - is it necessary */
-/*TODO*///#define 	cpu_geturnpc() 				activecpu_get_reg(REG_SP_CONTENTS)
-/*TODO*///
-/*TODO*///
-/*TODO*///
+
+    /* this is kind of gross - is it necessary */
+    public static int cpu_geturnpc() {
+        return activecpu_get_reg(REG_SP_CONTENTS);
+    }
+
     /**
      * ***********************************
      *
