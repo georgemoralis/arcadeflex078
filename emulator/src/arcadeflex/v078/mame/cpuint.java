@@ -16,7 +16,6 @@ import static mame056.cpuintrf.cpuintrf_pop_context;
 import static mame056.cpuintrf.cpuintrf_push_context;
 import static mame056.cpuintrf.cpunum_default_irq_vector;
 import mame056.cpuintrfH.IrqcallbackPtr;
-import static mame056.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
 import mame056.timer.timer_callback;

@@ -6,10 +6,10 @@ package arcadeflex.v078.mame;
 
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
-import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
-import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
 //mame imports
+import static arcadeflex.v078.mame.cpuintrfH.*;
 import static arcadeflex.v078.mame.memoryH.*;
+//todo imports
 import static arcadeflex036.osdepend.logerror;
 import common.libc.cstdio;
 import static common.libc.cstdio.fclose;
@@ -27,7 +27,6 @@ import static mame056.cpuintrf.activecpu_address_shift;
 import static mame056.cpuintrf.cpunum_databus_width;
 import static mame056.cpuintrfH.CPU_V60;
 import static mame056.cpuintrfH.activecpu_get_pc;
-import static mame056.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
 

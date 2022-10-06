@@ -9,7 +9,17 @@
 package mame056.cpu.z80;
 
 import static arcadeflex.v078.mame.cpuintrfH.CLEAR_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_CREDITS;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FAMILY;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_VERSION;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_IS_LE;
 import static arcadeflex.v078.mame.cpuintrfH.IRQ_LINE_NMI;
+import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
+import static arcadeflex.v078.mame.cpuintrfH.REG_PREVIOUSPC;
+import static arcadeflex.v078.mame.cpuintrfH.REG_SP;
+import static arcadeflex.v078.mame.cpuintrfH.REG_SP_CONTENTS;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
 import static arcadeflex.v078.mame.memory.cpu_readmem16;
 import static arcadeflex.v078.mame.memory.cpu_readport16;

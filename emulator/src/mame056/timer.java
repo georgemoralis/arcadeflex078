@@ -5,10 +5,10 @@
 package mame056;
 
 import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
+import static arcadeflex.v078.mame.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.*;
 import static mame056.cpuexecH.CPU_FLAGS_MASK;
 import mame056.cpuintrfH.burnPtr;
-import static mame056.cpuintrfH.cputype_get_interface;
 import static mame056.mame.Machine;
 import static mame056.timerH.*;
 

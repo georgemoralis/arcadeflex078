@@ -374,66 +374,55 @@ public class cpuintrfH {
     public static final int MAX_IRQ_LINES = 16;/* maximum number of IRQ lines per CPU */
     public static final int IRQ_LINE_NMI = 127;/* IRQ line for NMIs */
 
- /*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	CPU information constants
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* get_reg/set_reg constants */
-/*TODO*///enum
-/*TODO*///{
-/*TODO*///	MAX_REGS = 128,				/* maximum number of register of any CPU */
-/*TODO*///
-/*TODO*///	/* This value is passed to activecpu_get_reg to retrieve the previous
-/*TODO*///	 * program counter value, ie. before a CPU emulation started
-/*TODO*///	 * to fetch opcodes and arguments for the current instrution. */
-/*TODO*///	REG_PREVIOUSPC = -1,
-/*TODO*///
-/*TODO*///	/* This value is passed to activecpu_get_reg to retrieve the current
-/*TODO*///	 * program counter value. */
-/*TODO*///	REG_PC = -2,
-/*TODO*///
-/*TODO*///	/* This value is passed to activecpu_get_reg to retrieve the current
-/*TODO*///	 * stack pointer value. */
-/*TODO*///	REG_SP = -3,
-/*TODO*///
-/*TODO*///	/* This value is passed to activecpu_get_reg/activecpu_set_reg, instead of one of
-/*TODO*///	 * the names from the enum a CPU core defines for it's registers,
-/*TODO*///	 * to get or set the contents of the memory pointed to by a stack pointer.
-/*TODO*///	 * You can specify the n'th element on the stack by (REG_SP_CONTENTS-n),
-/*TODO*///	 * ie. lower negative values. The actual element size (UINT16 or UINT32)
-/*TODO*///	 * depends on the CPU core. */
-/*TODO*///	REG_SP_CONTENTS = -4
-/*TODO*///};
-/*TODO*///
-/*TODO*///
-/*TODO*////* endianness constants */
-/*TODO*///enum
-/*TODO*///{
-/*TODO*///	CPU_IS_LE = 0,				/* emulated CPU is little endian */
-/*TODO*///	CPU_IS_BE					/* emulated CPU is big endian */
-/*TODO*///};
-/*TODO*///
-/*TODO*///
-/*TODO*////* Values passed to the cpu_info function of a core to retrieve information */
-/*TODO*///enum
-/*TODO*///{
-/*TODO*///	CPU_INFO_REG,
-/*TODO*///	CPU_INFO_FLAGS = MAX_REGS,
-/*TODO*///	CPU_INFO_NAME,
-/*TODO*///	CPU_INFO_FAMILY,
-/*TODO*///	CPU_INFO_VERSION,
-/*TODO*///	CPU_INFO_FILE,
-/*TODO*///	CPU_INFO_CREDITS,
-/*TODO*///	CPU_INFO_REG_LAYOUT,
-/*TODO*///	CPU_INFO_WIN_LAYOUT
-/*TODO*///};
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
+
+    /**
+     * ***********************************
+     *
+     * CPU information constants
+     *
+     ************************************
+     */
+
+    /* get_reg/set_reg constants */
+    public static final int MAX_REGS = 128;/* maximum number of register of any CPU */
+
+ /* This value is passed to activecpu_get_reg to retrieve the previous
+	 * program counter value, ie. before a CPU emulation started
+	 * to fetch opcodes and arguments for the current instrution. */
+    public static final int REG_PREVIOUSPC = -1;
+
+    /* This value is passed to activecpu_get_reg to retrieve the current
+	 * program counter value. */
+    public static final int REG_PC = -2;
+
+    /* This value is passed to activecpu_get_reg to retrieve the current
+	 * stack pointer value. */
+    public static final int REG_SP = -3;
+
+    /* This value is passed to activecpu_get_reg/activecpu_set_reg, instead of one of
+	 * the names from the enum a CPU core defines for it's registers,
+	 * to get or set the contents of the memory pointed to by a stack pointer.
+	 * You can specify the n'th element on the stack by (REG_SP_CONTENTS-n),
+	 * ie. lower negative values. The actual element size (UINT16 or UINT32)
+	 * depends on the CPU core. */
+    public static final int REG_SP_CONTENTS = -4;
+
+    /* endianness constants */
+    public static final int CPU_IS_LE = 0;/* emulated CPU is little endian */
+    public static final int CPU_IS_BE = 1;/* emulated CPU is big endian */
+
+ /* Values passed to the cpu_info function of a core to retrieve information */
+    public static final int CPU_INFO_REG = 0;
+    public static final int CPU_INFO_FLAGS = MAX_REGS;
+    public static final int CPU_INFO_NAME = MAX_REGS + 1;
+    public static final int CPU_INFO_FAMILY = MAX_REGS + 2;
+    public static final int CPU_INFO_VERSION = MAX_REGS + 3;
+    public static final int CPU_INFO_FILE = MAX_REGS + 4;
+    public static final int CPU_INFO_CREDITS = MAX_REGS + 5;
+    public static final int CPU_INFO_REG_LAYOUT = MAX_REGS + 6;
+    public static final int CPU_INFO_WIN_LAYOUT = MAX_REGS + 7;
+
+    /*TODO*////*************************************
 /*TODO*/// *
 /*TODO*/// *	Core CPU interface structure
 /*TODO*/// *
@@ -481,295 +470,6 @@ public class cpuintrfH {
 /*TODO*///	unsigned	align_unit;
 /*TODO*///	unsigned	max_inst_len;
 /*TODO*///};
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 Core CPU interface functions
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* reset the internal CPU tracking */
-/*TODO*///int cpuintrf_init(void);
-/*TODO*///
-/*TODO*////* set up the interface for one CPU of a given type */
-/*TODO*///int	cpuintrf_init_cpu(int cpunum, int cputype);
-/*TODO*///
-/*TODO*////* clean up the interface for one CPU */
-/*TODO*///void cpuintrf_exit_cpu(int cpunum);
-/*TODO*///
-/*TODO*////* remember the previous context and set a new one */
-/*TODO*///void cpuintrf_push_context(int cpunum);
-/*TODO*///
-/*TODO*////* restore the previous context */
-/*TODO*///void cpuintrf_pop_context(void);
-/*TODO*///
-/*TODO*////* set the dasm override handler */
-/*TODO*///void cpuintrf_set_dasm_override(unsigned (*dasm_override)(int cpunum, char *buffer, unsigned pc));
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 Active CPU acccessors
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* apply a +/- to the current icount */
-/*TODO*///void activecpu_adjust_icount(int delta);
-/*TODO*///
-/*TODO*////* return the current icount */
-/*TODO*///int activecpu_get_icount(void);
-/*TODO*///
-/*TODO*////* ensure banking is reset properly */
-/*TODO*///void activecpu_reset_banking(void);
-/*TODO*///
-/*TODO*////* set the IRQ line on a CPU -- drivers use cpu_set_irq_line() */
-/*TODO*///void activecpu_set_irq_line(int irqline, int state);
-/*TODO*///
-/*TODO*////* return a pointer to the active cycle count table for the active CPU */
-/*TODO*///const void *activecpu_get_cycle_table(int which);
-/*TODO*///
-/*TODO*////* set a pointer to the active cycle count table for the active CPU */
-/*TODO*///void activecpu_set_cycle_tbl(int which, void *new_table);
-/*TODO*///
-/*TODO*////* return the value of a register on the active CPU */
-/*TODO*///unsigned activecpu_get_reg(int regnum);
-/*TODO*///
-/*TODO*////* set the value of a register on the active CPU */
-/*TODO*///void activecpu_set_reg(int regnum, unsigned val);
-/*TODO*///
-/*TODO*////* return the PC, corrected to a byte offset, on the active CPU */
-/*TODO*///offs_t activecpu_get_pc_byte(void);
-/*TODO*///
-/*TODO*////* update the banking on the active CPU */
-/*TODO*///void activecpu_set_op_base(unsigned val);
-/*TODO*///
-/*TODO*////* disassemble a line at a given PC on the active CPU */
-/*TODO*///unsigned activecpu_dasm(char *buffer, unsigned pc);
-/*TODO*///
-/*TODO*////* return a string containing the state of the flags on the active CPU */
-/*TODO*///const char *activecpu_flags(void);
-/*TODO*///
-/*TODO*////* return a string containing the value of a register on the active CPU */
-/*TODO*///const char *activecpu_dump_reg(int regnum);
-/*TODO*///
-/*TODO*////* return a string containing the state of the active CPU */
-/*TODO*///const char *activecpu_dump_state(void);
-/*TODO*///
-/*TODO*////* return the default IRQ vector for the active CPU */
-/*TODO*///int activecpu_default_irq_vector(void);
-/*TODO*///
-/*TODO*////* return the width of the address bus on the active CPU */
-/*TODO*///unsigned activecpu_address_bits(void);
-/*TODO*///
-/*TODO*////* return the active address mask on the active CPU */
-/*TODO*///unsigned activecpu_address_mask(void);
-/*TODO*///
-/*TODO*////* return the shift value to convert from address to bytes on the active CPU */
-/*TODO*///int activecpu_address_shift(void);
-/*TODO*///
-/*TODO*////* return the endianess of the active CPU */
-/*TODO*///unsigned activecpu_endianess(void);
-/*TODO*///
-/*TODO*////* return the width of the data bus on the active CPU */
-/*TODO*///unsigned activecpu_databus_width(void);
-/*TODO*///
-/*TODO*////* return the required alignment of data accesses on the active CPU */
-/*TODO*///unsigned activecpu_align_unit(void);
-/*TODO*///
-/*TODO*////* return the maximum length of one instruction on the active CPU */
-/*TODO*///unsigned activecpu_max_inst_len(void);
-/*TODO*///
-/*TODO*////* return a string containing the name of the active CPU */
-/*TODO*///const char *activecpu_name(void);
-/*TODO*///
-/*TODO*////* return a string containing the family of the active CPU */
-/*TODO*///const char *activecpu_core_family(void);
-/*TODO*///
-/*TODO*////* return a string containing the version of the active CPU */
-/*TODO*///const char *activecpu_core_version(void);
-/*TODO*///
-/*TODO*////* return a string containing the filename for the emulator of the active CPU */
-/*TODO*///const char *activecpu_core_file(void);
-/*TODO*///
-/*TODO*////* return a string containing the emulation credits for the active CPU */
-/*TODO*///const char *activecpu_core_credits(void);
-/*TODO*///
-/*TODO*////* return a string containing the registers of the active CPU */
-/*TODO*///const char *activecpu_reg_layout(void);
-/*TODO*///
-/*TODO*////* return a string containing the debugger layout of the active CPU */
-/*TODO*///const char *activecpu_win_layout(void);
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 Specific CPU acccessors
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* execute the requested cycles on a given CPU */
-/*TODO*///int cpunum_execute(int cpunum, int cycles);
-/*TODO*///
-/*TODO*////* signal a reset and set the IRQ ack callback for a given CPU */
-/*TODO*///void cpunum_reset(int cpunum, void *param, int (*irqack)(int));
-/*TODO*///
-/*TODO*////* read a byte from another CPU's memory space */
-/*TODO*///data8_t cpunum_read_byte(int cpunum, offs_t address);
-/*TODO*///
-/*TODO*////* write a byte from another CPU's memory space */
-/*TODO*///void cpunum_write_byte(int cpunum, offs_t address, data8_t data);
-/*TODO*///
-/*TODO*////* return a pointer to the saved context of a given CPU, or NULL if the
-/*TODO*///   context is active (and contained within the CPU core */
-/*TODO*///void *cpunum_get_context_ptr(int cpunum);
-/*TODO*///
-/*TODO*////* return a pointer to the active cycle count table for a given CPU */
-/*TODO*///const void *cpunum_get_cycle_table(int cpunum, int which);
-/*TODO*///
-/*TODO*////* set a pointer to the active cycle count table for a given CPU */
-/*TODO*///void cpunum_set_cycle_tbl(int cpunum, int which, void *new_table);
-/*TODO*///
-/*TODO*////* return the value of a register on a given CPU */
-/*TODO*///unsigned cpunum_get_reg(int cpunum, int regnum);
-/*TODO*///
-/*TODO*////* set the value of a register on a given CPU */
-/*TODO*///void cpunum_set_reg(int cpunum, int regnum, unsigned val);
-/*TODO*///
-/*TODO*////* return the PC, corrected to a byte offset, on a given CPU */
-/*TODO*///offs_t cpunum_get_pc_byte(int cpunum);
-/*TODO*///
-/*TODO*////* update the banking on a given CPU */
-/*TODO*///void cpunum_set_op_base(int cpunum, unsigned val);
-/*TODO*///
-/*TODO*////* disassemble a line at a given PC on a given CPU */
-/*TODO*///unsigned cpunum_dasm(int cpunum, char *buffer, unsigned pc);
-/*TODO*///
-/*TODO*////* return a string containing the state of the flags on a given CPU */
-/*TODO*///const char *cpunum_flags(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the value of a register on a given CPU */
-/*TODO*///const char *cpunum_dump_reg(int cpunum, int regnum);
-/*TODO*///
-/*TODO*////* return a string containing the state of a given CPU */
-/*TODO*///const char *cpunum_dump_state(int cpunum);
-/*TODO*///
-/*TODO*////* return the default IRQ vector for a given CPU */
-/*TODO*///int cpunum_default_irq_vector(int cpunum);
-/*TODO*///
-/*TODO*////* return the width of the address bus on a given CPU */
-/*TODO*///unsigned cpunum_address_bits(int cpunum);
-/*TODO*///
-/*TODO*////* return the active address mask on a given CPU */
-/*TODO*///unsigned cpunum_address_mask(int cpunum);
-/*TODO*///
-/*TODO*////* return the shift value to convert from address to bytes on a given CPU */
-/*TODO*///int cpunum_address_shift(int cpunum);
-/*TODO*///
-/*TODO*////* return the endianess of a given CPU */
-/*TODO*///unsigned cpunum_endianess(int cpunum);
-/*TODO*///
-/*TODO*////* return the width of the data bus on a given CPU */
-/*TODO*///unsigned cpunum_databus_width(int cpunum);
-/*TODO*///
-/*TODO*////* return the required alignment of data accesses on a given CPU */
-/*TODO*///unsigned cpunum_align_unit(int cpunum);
-/*TODO*///
-/*TODO*////* return the maximum length of one instruction on a given CPU */
-/*TODO*///unsigned cpunum_max_inst_len(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the name of a given CPU */
-/*TODO*///const char *cpunum_name(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the family of a given CPU */
-/*TODO*///const char *cpunum_core_family(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the version of a given CPU */
-/*TODO*///const char *cpunum_core_version(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the filename for the emulator of a given CPU */
-/*TODO*///const char *cpunum_core_file(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the emulation credits for a given CPU */
-/*TODO*///const char *cpunum_core_credits(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the registers of a given CPU */
-/*TODO*///const char *cpunum_reg_layout(int cpunum);
-/*TODO*///
-/*TODO*////* return a string containing the debugger layout of a given CPU */
-/*TODO*///const char *cpunum_win_layout(int cpunum);
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 CPU type acccessors
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* return the default IRQ vector for a given CPU type */
-/*TODO*///int cputype_default_irq_vector(int cputype);
-/*TODO*///
-/*TODO*////* return the width of the address bus on a given CPU type */
-/*TODO*///unsigned cputype_address_bits(int cputype);
-/*TODO*///
-/*TODO*////* return the active address mask on a given CPU type */
-/*TODO*///unsigned cputype_address_mask(int cputype);
-/*TODO*///
-/*TODO*////* return the shift value to convert from address to bytes on a given CPU type */
-/*TODO*///int cputype_address_shift(int cputype);
-/*TODO*///
-/*TODO*////* return the endianess of a given CPU type */
-/*TODO*///unsigned cputype_endianess(int cputype);
-/*TODO*///
-/*TODO*////* return the width of the data bus on a given CPU type */
-/*TODO*///unsigned cputype_databus_width(int cputype);
-/*TODO*///
-/*TODO*////* return the required alignment of data accesses on a given CPU type */
-/*TODO*///unsigned cputype_align_unit(int cputype);
-/*TODO*///
-/*TODO*////* return the maximum length of one instruction on a given CPU type */
-/*TODO*///unsigned cputype_max_inst_len(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the name of a given CPU type */
-/*TODO*///const char *cputype_name(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the family of a given CPU type */
-/*TODO*///const char *cputype_core_family(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the version of a given CPU type */
-/*TODO*///const char *cputype_core_version(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the filename for the emulator of a given CPU type */
-/*TODO*///const char *cputype_core_file(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the emulation credits for a given CPU type */
-/*TODO*///const char *cputype_core_credits(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the registers of a given CPU type */
-/*TODO*///const char *cputype_reg_layout(int cputype);
-/*TODO*///
-/*TODO*////* return a string containing the debugger layout of a given CPU type */
-/*TODO*///const char *cputype_win_layout(int cputype);
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	 Miscellaneous functions
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*////* dump the states of all CPUs */
-/*TODO*///void cpu_dump_states(void);
-/*TODO*///
-/*TODO*////* set a callback function for reset on the 68k */
-/*TODO*///void cpu_set_m68k_reset(int cpunum, void (*resetfn)(void));
-/*TODO*///
-/*TODO*///
 /*TODO*///
 /*TODO*////*************************************
 /*TODO*/// *

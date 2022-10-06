@@ -3,6 +3,9 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
+import static arcadeflex.v078.mame.cpuintrfH.REG_PREVIOUSPC;
+import static arcadeflex.v078.mame.cpuintrfH.REG_SP_CONTENTS;
 import static mame056.cpuintrf.*;
 
 public class cpuintrfH {
@@ -86,53 +89,9 @@ public class cpuintrfH {
 
 
 
-    /**
-     * ***********************************
-     *
-     * CPU information constants
-     *
-     ************************************
-     */
-
-    /* get_reg/set_reg constants */
-    public static final int MAX_REGS = 128;/* maximum number of register of any CPU */
-
- /* This value is passed to cpu_get_reg to retrieve the previous
-	 * program counter value, ie. before a CPU emulation started
-	 * to fetch opcodes and arguments for the current instrution. */
-    public static final int REG_PREVIOUSPC = -1;
-
-    /* This value is passed to cpu_get_reg to retrieve the current
-	 * program counter value. */
-    public static final int REG_PC = -2;
-
-    /* This value is passed to cpu_get_reg to retrieve the current
-	 * stack pointer value. */
-    public static final int REG_SP = -3;
-
-    /* This value is passed to cpu_get_reg/cpu_set_reg, instead of one of
-	 * the names from the enum a CPU core defines for it's registers,
-	 * to get or set the contents of the memory pointed to by a stack pointer.
-	 * You can specify the n'th element on the stack by (REG_SP_CONTENTS-n),
-	 * ie. lower negative values. The actual element size (UINT16 or UINT32)
-	 * depends on the CPU core. */
-    public static final int REG_SP_CONTENTS = -4;
 
 
-    /* endianness constants */
-    public static final int CPU_IS_LE = 0;/* emulated CPU is little endian */
-    public static final int CPU_IS_BE = 1;/* emulated CPU is big endian */
-
- /* Values passed to the cpu_info function of a core to retrieve information */
-    public static final int CPU_INFO_REG = 0;
-    public static final int CPU_INFO_FLAGS = MAX_REGS;
-    public static final int CPU_INFO_NAME = MAX_REGS + 1;
-    public static final int CPU_INFO_FAMILY = MAX_REGS + 2;
-    public static final int CPU_INFO_VERSION = MAX_REGS + 3;
-    public static final int CPU_INFO_FILE = MAX_REGS + 4;
-    public static final int CPU_INFO_CREDITS = MAX_REGS + 5;
-    public static final int CPU_INFO_REG_LAYOUT = MAX_REGS + 6;
-    public static final int CPU_INFO_WIN_LAYOUT = MAX_REGS + 7;
+ 
 
     /**
      * ***********************************
@@ -297,17 +256,5 @@ public class cpuintrfH {
         return activecpu_get_pc_byte();
     }
 
-    /**
-     * ***********************************
-     *
-     * CPU interface accessors
-     *
-     ************************************
-     */
-
-    /* return a pointer to the interface struct for a given CPU type */
-    public static cpu_interface cputype_get_interface(int cputype) {
-        return cpuintrf[cputype];
-    }
 
 }

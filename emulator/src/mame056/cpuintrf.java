@@ -3,8 +3,11 @@
  */
 package mame056;
 
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
 import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_ASSERT_LINE;
 import static arcadeflex.v078.mame.cpuintrfH.INTERNAL_CLEAR_LINE;
+import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
 import static arcadeflex.v078.mame.memory.memory_set_context;
 import static common.libc.cstring.strcmp;
 import static arcadeflex036.osdepend.*;
