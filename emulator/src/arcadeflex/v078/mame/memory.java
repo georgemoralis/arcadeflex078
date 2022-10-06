@@ -23,7 +23,6 @@ import static java.lang.System.exit;
 import static mame056.common.memory_region;
 import static mame056.common.memory_region_length;
 import static mame056.commonH.REGION_CPU1;
-import static mame056.cpuintrfH.CPU_V60;
 import static mame056.driverH.MAX_CPU;
 import static mame056.mame.Machine;
 

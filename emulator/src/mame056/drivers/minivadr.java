@@ -5,6 +5,7 @@
 package mame056.drivers;
 
 import static arcadeflex.v078.mame.cpuint.irq0_line_hold;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_Z80;
 import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_READ;
 import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_WRITE;
 import static arcadeflex.v078.mame.memoryH.MEMPORT_MARKER;
@@ -21,7 +22,6 @@ import static arcadeflex056.fucPtr.*;
 import static mame056.commonH.*;
 import static mame056.inptportH.*;
 import static mame056.cpuexecH.*;
-import static mame056.cpuintrfH.*;
 import static mame056.driverH.*;
 import static mame056.inptport.*;
 import static mame056.drawgfxH.*;

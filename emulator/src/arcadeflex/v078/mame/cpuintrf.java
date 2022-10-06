@@ -11,12 +11,11 @@ import static arcadeflex.v078.mame.cpuintrfH.*;
 import static arcadeflex.v078.mame.memory.*;
 //TODO
 import static common.libc.cstring.strcmp;
-import static mame056.cpuintrf.*;
-import static mame056.cpuintrfH.CPU_COUNT;
 import static mame056.driverH.MAX_CPU;
 import static arcadeflex036.osdepend.*;
+import mame056.cpu.z80.z80;
+import mame056.cpu.dummy_cpu;
 import static mame056.cpuexecH.CPU_FLAGS_MASK;
-
 
 public class cpuintrf {
 
@@ -107,28 +106,6 @@ public class cpuintrf {
 
     /*TODO*////*************************************
 /*TODO*/// *
-/*TODO*/// *	Prototypes for dummy CPU
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///static void dummy_init(void);
-/*TODO*///static void dummy_reset(void *param);
-/*TODO*///static void dummy_exit(void);
-/*TODO*///static int dummy_execute(int cycles);
-/*TODO*///static unsigned dummy_get_context(void *regs);
-/*TODO*///static void dummy_set_context(void *regs);
-/*TODO*///static unsigned dummy_get_reg(int regnum);
-/*TODO*///static void dummy_set_reg(int regnum, unsigned val);
-/*TODO*///static void dummy_set_irq_line(int irqline, int state);
-/*TODO*///static void dummy_set_irq_callback(int (*callback)(int irqline));
-/*TODO*///static int dummy_ICount;
-/*TODO*///static const char *dummy_info(void *context, int regnum);
-/*TODO*///static unsigned dummy_dasm(char *buffer, unsigned pc);
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
 /*TODO*/// *	Macros to generate CPU entries
 /*TODO*/// *
 /*TODO*/// *************************************/
@@ -200,20 +177,18 @@ public class cpuintrf {
 /*TODO*///	}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	The core list of CPU interfaces
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///const struct cpu_interface cpuintrf[] =
-/*TODO*///{
-/*TODO*///	CPU0(DUMMY,    dummy,	 1,  0,1.00, 8, 16,	  0,16,LE,1, 1	),
-/*TODO*///#if (HAS_Z80)
-/*TODO*///	CPU1(Z80,	   z80, 	 1,255,1.00, 8, 16,	  0,16,LE,1, 4	),
-/*TODO*///#endif
-/*TODO*///#if (HAS_Z180)
+    /**
+     * ***********************************
+     *
+     * The core list of CPU interfaces
+     *
+     ************************************
+     */
+    public static cpu_interface cpuintrf[]
+            = {
+                new dummy_cpu(),//CPU0(DUMMY,    dummy,	 1,  0,1.00, 8, 16,	  0,16,LE,1, 1	),
+                new z80()
+            /*TODO*///#if (HAS_Z180)
 /*TODO*///	CPU1(Z180,	   z180, 	 1,255,1.00, 8, 20,	  0,20,LE,1, 4	),
 /*TODO*///#endif
 /*TODO*///#if (HAS_8080)
@@ -537,8 +512,8 @@ public class cpuintrf {
 /*TODO*///	CPU0(Z80GB,    z80gb,	 5,255,1.00, 8, 16,	  0,16,LE,1, 4	),
 /*TODO*///#endif
 /*TODO*///#endif
-/*TODO*///};
-/*TODO*///
+            };
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////*************************************
