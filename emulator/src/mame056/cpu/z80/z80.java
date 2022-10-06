@@ -8,7 +8,10 @@
  */
 package mame056.cpu.z80;
 
-import static arcadeflex.v078.mame.cpuintrfH.CLEAR_LINE;
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuintrfH.*;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_CREDITS;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FAMILY;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
@@ -74,7 +77,7 @@ public class z80 extends cpu_interface {
         public int irq_state;/* irq line state */
         public int[] int_state = new int[Z80_MAXDAISY];
         public Z80_DaisyChain[] irq = new Z80_DaisyChain[Z80_MAXDAISY];
-        public IrqcallbackPtr irq_callback;
+        public IrqCallbackHandlerPtr irq_callback;
         public int extra_cycles;/* extra cycles for interrupts */
     }
 
@@ -3750,7 +3753,7 @@ public class z80 extends cpu_interface {
      * Burn 'cycles' T-states. Adjust R register for the lost time
      * **************************************************************************
      */
-    public burnPtr burn_function = new burnPtr() {
+    public BurnHandlerPtr burn_function = new BurnHandlerPtr() {
         public void handler(int cycles) {
             if (cycles > 0) {
                 /* NOP takes 4 cycles per instruction */
@@ -4146,7 +4149,7 @@ public class z80 extends cpu_interface {
      * **************************************************************************
      */
     @Override
-    public void set_irq_callback(IrqcallbackPtr callback) {
+    public void set_irq_callback(IrqCallbackHandlerPtr callback) {
         //LOG(("Z80 #%d set_irq_callback $%08x\n",cpu_getactivecpu() , (int)callback));
         Z80.irq_callback = callback;
     }

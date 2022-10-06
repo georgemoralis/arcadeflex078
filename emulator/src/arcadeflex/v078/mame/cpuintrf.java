@@ -4,6 +4,8 @@
  */
 package arcadeflex.v078.mame;
 
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
 //mame imports
 import static arcadeflex.v078.mame.cpuintrfH.*;
 import static arcadeflex.v078.mame.memory.*;
@@ -14,7 +16,7 @@ import static mame056.cpuintrfH.CPU_COUNT;
 import static mame056.driverH.MAX_CPU;
 import static arcadeflex036.osdepend.*;
 import static mame056.cpuexecH.CPU_FLAGS_MASK;
-import mame056.cpuintrfH.IrqcallbackPtr;
+
 
 public class cpuintrf {
 
@@ -1026,7 +1028,7 @@ public class cpuintrf {
     /*--------------------------
  	Reset and set IRQ ack
     --------------------------*/
-    public static void cpunum_reset(int cpunum, Object param, IrqcallbackPtr irqack) {
+    public static void cpunum_reset(int cpunum, Object param, IrqCallbackHandlerPtr irqack) {
         if (cpunum < 0 || cpunum >= totalcpu) {
             logerror("cpunum_reset() called for invalid cpu num!\n");
             return;

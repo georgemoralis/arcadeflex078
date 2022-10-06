@@ -3,6 +3,7 @@
  */
 package mame056.cpu;
 
+import arcadeflex.v078.generic.funcPtr.IrqCallbackHandlerPtr;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_CREDITS;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FAMILY;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
@@ -91,7 +92,7 @@ public class dummy_cpu extends cpu_interface {
     }
 
     @Override
-    public void set_irq_callback(IrqcallbackPtr callback) {
+    public void set_irq_callback(IrqCallbackHandlerPtr callback) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

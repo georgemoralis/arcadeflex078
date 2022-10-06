@@ -90,26 +90,4 @@ public class cpuintrfH {
     public static final int CPU_COUNT = 67;
 
 
-
-
-
- 
-
-    /**
-     * ***********************************
-     *
-     * Core CPU interface structure
-     *
-     ************************************
-     */
-    public static abstract interface burnPtr {
-
-        public abstract void handler(int cycles);
-    }
-
-    public static abstract interface IrqcallbackPtr {
-
-        public abstract int handler(int irqline);
-    }
-
 }

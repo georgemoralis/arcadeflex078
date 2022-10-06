@@ -4,12 +4,12 @@
  */
 package arcadeflex.v078.mame;
 
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
 //mame imports
 import static arcadeflex.v078.mame.cpuintrf.*;
 //TODO
 import static mame056.cpuintrf.cpuintrf;
-import mame056.cpuintrfH.IrqcallbackPtr;
-import mame056.cpuintrfH.burnPtr;
 
 public class cpuintrfH {
 
@@ -444,7 +444,7 @@ public class cpuintrfH {
         public abstract void exit();
 
         public abstract int execute(int cycles);
-        public burnPtr burn;
+        public BurnHandlerPtr burn;
 
         public abstract Object init_context();//not in mame , used specific for arcadeflex
 
@@ -462,7 +462,7 @@ public class cpuintrfH {
 
         public abstract void set_irq_line(int irqline, int linestate);
 
-        public abstract void set_irq_callback(IrqcallbackPtr callback);
+        public abstract void set_irq_callback(IrqCallbackHandlerPtr callback);
 
         public abstract String cpu_info(Object context, int regnum);
 

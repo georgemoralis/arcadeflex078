@@ -4,11 +4,11 @@
  */
 package mame056;
 
+import arcadeflex.v078.generic.funcPtr.BurnHandlerPtr;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
 import static arcadeflex.v078.mame.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.*;
 import static mame056.cpuexecH.CPU_FLAGS_MASK;
-import mame056.cpuintrfH.burnPtr;
 import static mame056.mame.Machine;
 import static mame056.timerH.*;
 
@@ -45,7 +45,7 @@ public class timer {
     public static class cpu_entry {
 
         public int[] icount;
-        public burnPtr burn;
+        public BurnHandlerPtr burn;
         public int index;
         public int suspended;
         public int trigger;
