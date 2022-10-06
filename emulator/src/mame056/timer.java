@@ -5,6 +5,8 @@
 package mame056;
 
 import arcadeflex.v078.generic.funcPtr.BurnHandlerPtr;
+import static arcadeflex.v078.mame.cpuexecH.SUSPEND_REASON_RESET;
+import static arcadeflex.v078.mame.cpuexecH.SUSPEND_REASON_TRIGGER;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
 import static arcadeflex.v078.mame.cpuintrfH.cputype_get_interface;
 import static mame056.driverH.*;

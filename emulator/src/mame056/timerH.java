@@ -39,11 +39,6 @@ public class timerH {
         return ((int) ((t) * sec_to_cycles[cpu]));
     }
 
-    public static final int SUSPEND_REASON_HALT = 0x0001;
-    public static final int SUSPEND_REASON_RESET = 0x0002;
-    public static final int SUSPEND_REASON_SPIN = 0x0004;
-    public static final int SUSPEND_REASON_TRIGGER = 0x0008;
-    public static final int SUSPEND_REASON_DISABLE = 0x0010;
-    public static final int SUSPEND_ANY_REASON = -1;
+
 
 }

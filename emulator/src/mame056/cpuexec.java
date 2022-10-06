@@ -5,6 +5,10 @@ package mame056;
 
 import static arcadeflex.v078.mame.cpuexec.cpu_computerate;
 import static arcadeflex.v078.mame.cpuexec.cpu_timedintcallback;
+import static arcadeflex.v078.mame.cpuexecH.SUSPEND_ANY_REASON;
+import static arcadeflex.v078.mame.cpuexecH.SUSPEND_REASON_DISABLE;
+import static arcadeflex.v078.mame.cpuexecH.SUSPEND_REASON_HALT;
+import static arcadeflex.v078.mame.cpuexecH.SUSPEND_REASON_RESET;
 import static arcadeflex.v078.mame.cpuint.cpu_irq_callbacks;
 import static arcadeflex.v078.mame.cpuint.cpuint_init;
 import static arcadeflex.v078.mame.cpuint.cpuint_reset_cpu;

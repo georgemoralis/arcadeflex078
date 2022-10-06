@@ -12,18 +12,7 @@ package mame056.cpu.z80;
 import static arcadeflex.v078.generic.funcPtr.*;
 //mame imports
 import static arcadeflex.v078.mame.cpuintrfH.*;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_CREDITS;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FAMILY;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_VERSION;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_IS_LE;
-import static arcadeflex.v078.mame.cpuintrfH.IRQ_LINE_NMI;
-import static arcadeflex.v078.mame.cpuintrfH.REG_PC;
-import static arcadeflex.v078.mame.cpuintrfH.REG_PREVIOUSPC;
-import static arcadeflex.v078.mame.cpuintrfH.REG_SP;
-import static arcadeflex.v078.mame.cpuintrfH.REG_SP_CONTENTS;
-import static arcadeflex.v078.mame.cpuintrfH.cpu_getactivecpu;
+import static arcadeflex.v078.mame.cpuexecH.*;
 import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
 import static arcadeflex.v078.mame.memory.cpu_readmem16;
 import static arcadeflex.v078.mame.memory.cpu_readport16;
@@ -32,7 +21,6 @@ import static arcadeflex.v078.mame.memory.cpu_writemem16;
 import static arcadeflex.v078.mame.memory.cpu_writeport16;
 import static arcadeflex.v078.mame.memoryH.change_pc16;
 import static mame056.cpu.z80.z80H.*;
-import static mame056.cpuexecH.*;
 import static mame056.memoryH.*;
 import static arcadeflex036.osdepend.*;
 
