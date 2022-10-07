@@ -15,7 +15,6 @@ import static mame056.driverH.MAX_CPU;
 import static arcadeflex036.osdepend.*;
 import mame056.cpu.z80.z80;
 import mame056.cpu.dummy_cpu;
-import static mame056.cpuexecH.CPU_FLAGS_MASK;
 
 public class cpuintrf {
 
@@ -1263,7 +1262,6 @@ public class cpuintrf {
 /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_address_mask,       0,  0xffffffffUL >> (32 - cpuintrf[cputype].address_bits))
 /*TODO*///CPUTYPE_FUNC(int,          cputype_address_shift,      0,  cpuintrf[cputype].address_shift)
     public static int cputype_endianess(int cputype) {
-        cputype &= ~CPU_FLAGS_MASK;
         if (cputype >= 0 && cputype < CPU_COUNT) {
             return cpuintrf[cputype].endianess;
         } else {
@@ -1273,7 +1271,6 @@ public class cpuintrf {
     }
 
     public static int cputype_databus_width(int cputype) {
-        cputype &= ~CPU_FLAGS_MASK;
         if (cputype >= 0 && cputype < CPU_COUNT) {
             return cpuintrf[cputype].databus_width;
         } else {
@@ -1285,7 +1282,6 @@ public class cpuintrf {
     /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_align_unit,         0,  cpuintrf[cputype].align_unit)
 /*TODO*///CPUTYPE_FUNC(unsigned,     cputype_max_inst_len,       0,  cpuintrf[cputype].max_inst_len)
     public static String cputype_name(int cputype) {
-        cputype &= ~CPU_FLAGS_MASK;
         if (cputype >= 0 && cputype < CPU_COUNT) {
             return cpuintrf[cputype].cpu_info(null, CPU_INFO_NAME);
         } else {
@@ -1297,7 +1293,6 @@ public class cpuintrf {
     /*TODO*///CPUTYPE_FUNC(const char *, cputype_core_family,        "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_FAMILY))
 /*TODO*///CPUTYPE_FUNC(const char *, cputype_core_version,       "", (*cpuintrf[cputype].cpu_info)(NULL, CPU_INFO_VERSION))
     public static String cputype_core_file(int cputype) {
-        cputype &= ~CPU_FLAGS_MASK;
         if (cputype >= 0 && cputype < CPU_COUNT) {
             return cpuintrf[cputype].cpu_info(null, CPU_INFO_FILE);
         } else {

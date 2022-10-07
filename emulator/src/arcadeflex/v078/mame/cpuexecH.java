@@ -45,23 +45,21 @@ public class cpuexecH {
 /*TODO*///};
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	CPU flag constants
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///enum
-/*TODO*///{
-/*TODO*///	/* set this if the CPU is used as a slave for audio. It will not be emulated if */
-/*TODO*///	/* sound is disabled, therefore speeding up a lot the emulation. */
-/*TODO*///	CPU_AUDIO_CPU = 0x0002,
-/*TODO*///
-/*TODO*///	/* the Z80 can be wired to use 16 bit addressing for I/O ports */
-/*TODO*///	CPU_16BIT_PORT = 0x0001
-/*TODO*///};
-/*TODO*///
+    /**
+     * ***********************************
+     *
+     * CPU flag constants
+     *
+     ************************************
+     */
+
+    /* set this if the CPU is used as a slave for audio. It will not be emulated if */
+ /* sound is disabled, therefore speeding up a lot the emulation. */
+    public static final int CPU_AUDIO_CPU = 0x0002;
+
+    /* the Z80 can be wired to use 16 bit addressing for I/O ports */
+    public static final int CPU_16BIT_PORT = 0x0001;
+
     /**
      * ***********************************
      *

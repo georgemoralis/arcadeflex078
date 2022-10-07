@@ -82,6 +82,7 @@ public class cpuexecH {
             return a;
         }
         public int cpu_type;/* see #defines below. */
+        public int cpu_flags;
         public int cpu_clock;/* in Hertz */
         public Object memory_read;/* struct Memory_ReadAddress */
         public Object memory_write;/* struct Memory_WriteAddress */
@@ -94,23 +95,5 @@ public class cpuexecH {
         public Object reset_param;/* parameter for cpu_reset */
 
     }
-
-    /**
-     * ***********************************
-     *
-     * CPU flag constants
-     *
-     ************************************
-     */
-
-    /* flags for CPU go into upper byte */
-    public static final int CPU_FLAGS_MASK = 0xff00;
-
-    /* set this if the CPU is used as a slave for audio. It will not be emulated if sound is disabled, therefore speeding up a lot the emulation. */
-    public static final int CPU_AUDIO_CPU = 0x8000;
-
-    /* the Z80 can be wired to use 16 bit addressing for I/O ports */
-    public static final int CPU_16BIT_PORT = 0x4000;
-
 
 }

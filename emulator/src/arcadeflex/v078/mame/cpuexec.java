@@ -14,10 +14,10 @@ import static arcadeflex.v078.mame.timerH.*;
 import static arcadeflex.v078.mame.timer.*;
 import static arcadeflex.v078.mame.common.*;
 import static arcadeflex.v078.mame.cpuexecH.*;
-//mame imports
+import static arcadeflex.v078.mame.mame.*;
+//todo imports
 import static mame056.mame.Machine;
 import static arcadeflex036.osdepend.*;
-import static mame056.cpuexecH.CPU_AUDIO_CPU;
 import static mame056.driverH.MAX_CPU;
 import static mame056.driverH.VIDEO_UPDATE_AFTER_VBLANK;
 import static mame056.inptport.inputport_vblank_end;

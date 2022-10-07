@@ -21,7 +21,6 @@ import static mame056.driverH.*;
 import static mame056.osdependH.*;
 import static mame056.mame.*;
 import static mame056.mameH.*;
-import static mame056.cpuexecH.*;
 import static mame056.drawgfxH.*;
 import static mame056.tilemapH.*;
 //import static mame056.tilemapC.*;
@@ -67,7 +66,8 @@ public class common {
         UBytePtr regionbase;/* base of current region */
         int /*UINT32*/ regionlength;/* length of current region */
         String errorbuf = "";/* accumulated errors */
- 	UBytePtr		tempbuf=new UBytePtr(1024 * 64);			/* temporary buffer */
+        UBytePtr tempbuf = new UBytePtr(1024 * 64);
+        /* temporary buffer */
     }
 
     /**
@@ -454,8 +454,7 @@ public class common {
             lastcoin[num] = on;
         }
     };
-        
-    
+
     /*-------------------------------------------------
 	coin_lockout_w - locks out one coin input
     -------------------------------------------------*/
@@ -494,7 +493,7 @@ public class common {
     public static void updateflip() {
         int min_x, max_x, min_y, max_y;
 
-        tilemap_set_flip(ALL_TILEMAPS,(TILEMAP_FLIPX & flip_screen_x[0]) | (TILEMAP_FLIPY & flip_screen_y[0]));
+        tilemap_set_flip(ALL_TILEMAPS, (TILEMAP_FLIPX & flip_screen_x[0]) | (TILEMAP_FLIPY & flip_screen_y[0]));
         min_x = Machine.drv.default_visible_area.min_x;
         max_x = Machine.drv.default_visible_area.max_x;
         min_y = Machine.drv.default_visible_area.min_y;
@@ -1082,14 +1081,14 @@ public class common {
         int type = ROMREGION_GETTYPE(regiondata, rom_ptr);
         int datawidth = ROMREGION_GETWIDTH(regiondata, rom_ptr) / 8;
         boolean littleendian = ROMREGION_ISLITTLEENDIAN(regiondata, rom_ptr);
-        UBytePtr base=new UBytePtr();
+        UBytePtr base = new UBytePtr();
         int i, j;
 
         debugload("+ datawidth=%d little=%d\n", datawidth, littleendian ? 1 : 0);
 
         /* if this is a CPU region, override with the CPU width and endianness */
         if (type >= REGION_CPU1 && type < REGION_CPU1 + MAX_CPU) {
-            int cputype = Machine.drv.cpu[type - REGION_CPU1].cpu_type & ~CPU_FLAGS_MASK;
+            int cputype = Machine.drv.cpu[type - REGION_CPU1].cpu_type;
             if (cputype != 0) {
                 datawidth = cputype_databus_width(cputype) / 8;
                 littleendian = (cputype_endianess(cputype) == CPU_IS_LE);
@@ -1101,23 +1100,23 @@ public class common {
         if (ROMREGION_ISINVERTED(regiondata, rom_ptr)) {
             //throw new UnsupportedOperationException("Unimplemented");
             /*TODO*///		debugload("+ Inverting region\n");
-		for (i = 0, base = new UBytePtr(romdata.regionbase); i < romdata.regionlength; i++)
-			base.writeinc( base.read() ^ 0xff );
+            for (i = 0, base = new UBytePtr(romdata.regionbase); i < romdata.regionlength; i++) {
+                base.writeinc(base.read() ^ 0xff);
+            }
         }
-        
+
         /* swap the endianness if we need to */
         if (datawidth > 1 && !littleendian) {
             //throw new UnsupportedOperationException("Unimplemented");
             /*TODO*///		debugload("+ Byte swapping region\n");
-		for (i = 0, base = romdata.regionbase; i < romdata.regionlength; i += datawidth)
-		{
-			UBytePtr temp=new UBytePtr(8);
-			memcpy(temp, base, datawidth);
-			for (j = datawidth - 1; j >= 0; j--){
-				base.write(temp.read(j));
-                                base.inc();
-                        }
-		}
+            for (i = 0, base = romdata.regionbase; i < romdata.regionlength; i += datawidth) {
+                UBytePtr temp = new UBytePtr(8);
+                memcpy(temp, base, datawidth);
+                for (j = datawidth - 1; j >= 0; j--) {
+                    base.write(temp.read(j));
+                    base.inc();
+                }
+            }
         }
     }
 
@@ -1210,164 +1209,138 @@ public class common {
         if (datamask == 0xff && (groupsize == 1 || reversed == 0) && skip == 0) {
             return rom_fread(romdata, base, numbytes);
         }
-        
+
         /* chunky reads for complex loads */
-	skip += groupsize;
-	while (numbytes != 0)
-	{
-		int evengroupcount = ((romdata.tempbuf.memory.length) / groupsize) * groupsize;
-		int bytesleft = (numbytes > evengroupcount) ? evengroupcount : numbytes;
-		UBytePtr bufptr = new UBytePtr(romdata.tempbuf);
-                int _bufptr=0;
+        skip += groupsize;
+        while (numbytes != 0) {
+            int evengroupcount = ((romdata.tempbuf.memory.length) / groupsize) * groupsize;
+            int bytesleft = (numbytes > evengroupcount) ? evengroupcount : numbytes;
+            UBytePtr bufptr = new UBytePtr(romdata.tempbuf);
+            int _bufptr = 0;
 
-		/* read as much as we can */
-/*TODO*///		debugload("  Reading %X bytes into buffer\n", bytesleft);
+            /* read as much as we can */
+ /*TODO*///		debugload("  Reading %X bytes into buffer\n", bytesleft);
+            if (rom_fread(romdata, romdata.tempbuf, bytesleft) != bytesleft) {
+                return 0;
+            }
+            numbytes -= bytesleft;
 
-		if (rom_fread(romdata, romdata.tempbuf, bytesleft) != bytesleft)
-			return 0;
-		numbytes -= bytesleft;
+            /*TODO*///		debugload("  Copying to %08X\n", (int)base);
 
-/*TODO*///		debugload("  Copying to %08X\n", (int)base);
-
-		/* unmasked cases */
-		if (datamask == 0xff)
-		{
-			/* non-grouped data */
-			if (groupsize == 1)
-				for (i = 0; i < bytesleft; i++, base.inc(skip)){
-					base.write( bufptr.read(_bufptr++) );                                        
-                                }
-
-			/* grouped data -- non-reversed case */
-			else if (reversed==0)
-				while (bytesleft!=0)
-				{
-					for (i = 0; i < groupsize && (bytesleft!=0); i++, bytesleft--){
-						base.write(i, bufptr.read(_bufptr++));
-                                        }
-					base.inc(skip);
-				}
-
-			/* grouped data -- reversed case */
-			else
-				while (bytesleft != 0)
-				{
-					for (i = groupsize - 1; i >= 0 && (bytesleft!=0); i--, bytesleft--){
-						base.write(i, bufptr.read(_bufptr++));
-                                        }
-					base.inc(skip);
-				}
-		}
-
-		/* masked cases */
-		else
-		{
-			/* non-grouped data */
-			if (groupsize == 1)
-				for (i = 0; i < bytesleft; i++, base.inc(skip)){
-					base.write( (base.read() & ~datamask) | ((bufptr.read(_bufptr++) << datashift) & datamask) );
-                                }
-
-			/* grouped data -- non-reversed case */
-			else if (reversed==0)
-				while (bytesleft!=0)
-				{
-					for (i = 0; i < groupsize && (bytesleft!=0); i++, bytesleft--){
-                                            base.write(i, (base.read(i) & ~datamask) | ((bufptr.read(_bufptr++) << datashift) & datamask));
-                                        }
-					base.inc(skip);
-				}
-
-			/* grouped data -- reversed case */
-			else
-				while (bytesleft!=0)
-				{
-					for (i = groupsize - 1; i >= 0 && (bytesleft!=0); i--, bytesleft--){
-                                            base.write(i, (base.read(i) & ~datamask) | ((bufptr.read(_bufptr++) << datashift) & datamask));
-                                        }
-					base.inc(skip);
-				}
-		}
-	}
-/*TODO*///	debugload("  All done\n");
-	return ROM_GETLENGTH(romp, rom_ptr);
+            /* unmasked cases */
+            if (datamask == 0xff) {
+                /* non-grouped data */
+                if (groupsize == 1) {
+                    for (i = 0; i < bytesleft; i++, base.inc(skip)) {
+                        base.write(bufptr.read(_bufptr++));
+                    }
+                } /* grouped data -- non-reversed case */ else if (reversed == 0) {
+                    while (bytesleft != 0) {
+                        for (i = 0; i < groupsize && (bytesleft != 0); i++, bytesleft--) {
+                            base.write(i, bufptr.read(_bufptr++));
+                        }
+                        base.inc(skip);
+                    }
+                } /* grouped data -- reversed case */ else {
+                    while (bytesleft != 0) {
+                        for (i = groupsize - 1; i >= 0 && (bytesleft != 0); i--, bytesleft--) {
+                            base.write(i, bufptr.read(_bufptr++));
+                        }
+                        base.inc(skip);
+                    }
+                }
+            } /* masked cases */ else {
+                /* non-grouped data */
+                if (groupsize == 1) {
+                    for (i = 0; i < bytesleft; i++, base.inc(skip)) {
+                        base.write((base.read() & ~datamask) | ((bufptr.read(_bufptr++) << datashift) & datamask));
+                    }
+                } /* grouped data -- non-reversed case */ else if (reversed == 0) {
+                    while (bytesleft != 0) {
+                        for (i = 0; i < groupsize && (bytesleft != 0); i++, bytesleft--) {
+                            base.write(i, (base.read(i) & ~datamask) | ((bufptr.read(_bufptr++) << datashift) & datamask));
+                        }
+                        base.inc(skip);
+                    }
+                } /* grouped data -- reversed case */ else {
+                    while (bytesleft != 0) {
+                        for (i = groupsize - 1; i >= 0 && (bytesleft != 0); i--, bytesleft--) {
+                            base.write(i, (base.read(i) & ~datamask) | ((bufptr.read(_bufptr++) << datashift) & datamask));
+                        }
+                        base.inc(skip);
+                    }
+                }
+            }
+        }
+        /*TODO*///	debugload("  All done\n");
+        return ROM_GETLENGTH(romp, rom_ptr);
     }
 
 
     /*-------------------------------------------------
             fill_rom_data - fill a region of ROM space
     -------------------------------------------------*/
+    public static int fill_rom_data(rom_load_data romdata, RomModule[] romp, int rom_ptr) {
+        int numbytes = ROM_GETLENGTH(romp, rom_ptr);
+        UBytePtr base = new UBytePtr(romdata.regionbase, ROM_GETOFFSET(romp, rom_ptr));
 
-    public static int fill_rom_data(rom_load_data romdata, RomModule[] romp, int rom_ptr)
-    {
-	int numbytes = ROM_GETLENGTH(romp, rom_ptr);
-	UBytePtr base = new UBytePtr(romdata.regionbase, ROM_GETOFFSET(romp, rom_ptr));
+        /* make sure we fill within the region space */
+        if (ROM_GETOFFSET(romp, rom_ptr) + numbytes > romdata.regionlength) {
+            printf("Error in RomModule definition: FILL out of memory region space\n");
+            return 0;
+        }
 
-	/* make sure we fill within the region space */
-	if (ROM_GETOFFSET(romp, rom_ptr) + numbytes > romdata.regionlength)
-	{
-		printf("Error in RomModule definition: FILL out of memory region space\n");
-		return 0;
-	}
+        /* make sure the length was valid */
+        if (numbytes == 0) {
+            printf("Error in RomModule definition: FILL has an invalid length\n");
+            return 0;
+        }
 
-	/* make sure the length was valid */
-	if (numbytes == 0)
-	{
-		printf("Error in RomModule definition: FILL has an invalid length\n");
-		return 0;
-	}
-
-	/* fill the data */
-	memset(base, ROM_GETCRC(romp, rom_ptr) & 0xff, numbytes);
-	return 1;
+        /* fill the data */
+        memset(base, ROM_GETCRC(romp, rom_ptr) & 0xff, numbytes);
+        return 1;
     }
 
 
     /*-------------------------------------------------
             copy_rom_data - copy a region of ROM space
     -------------------------------------------------*/
+    public static int copy_rom_data(rom_load_data romdata, RomModule[] romp, int rom_ptr) {
+        UBytePtr base = new UBytePtr(romdata.regionbase, ROM_GETOFFSET(romp, rom_ptr));
+        int srcregion = (ROM_GETFLAGS(romp, rom_ptr) >> 24) & 0x00ff;
+        //System.out.println("region="+srcregion);
+        int numbytes = ROM_GETLENGTH(romp, rom_ptr);
+        int srcoffs = ROM_GETCRC(romp, rom_ptr);
+        UBytePtr srcbase = new UBytePtr();
 
-    public static int copy_rom_data(rom_load_data romdata, RomModule[] romp, int rom_ptr)
-    {
-            UBytePtr base = new UBytePtr(romdata.regionbase, ROM_GETOFFSET(romp, rom_ptr));
-            int srcregion = (ROM_GETFLAGS(romp, rom_ptr) >> 24)&0x00ff;
-            //System.out.println("region="+srcregion);
-            int numbytes = ROM_GETLENGTH(romp, rom_ptr);
-            int srcoffs = ROM_GETCRC(romp, rom_ptr);
-            UBytePtr srcbase = new UBytePtr();
+        /* make sure we copy within the region space */
+        if (ROM_GETOFFSET(romp, rom_ptr) + numbytes > romdata.regionlength) {
+            printf("Error in RomModule definition: COPY out of target memory region space\n");
+            return 0;
+        }
 
-            /* make sure we copy within the region space */
-            if (ROM_GETOFFSET(romp, rom_ptr) + numbytes > romdata.regionlength)
-            {
-                    printf("Error in RomModule definition: COPY out of target memory region space\n");
-                    return 0;
-            }
+        /* make sure the length was valid */
+        if (numbytes == 0) {
+            printf("Error in RomModule definition: COPY has an invalid length\n");
+            return 0;
+        }
 
-            /* make sure the length was valid */
-            if (numbytes == 0)
-            {
-                    printf("Error in RomModule definition: COPY has an invalid length\n");
-                    return 0;
-            }
+        /* make sure the source was valid */
+        srcbase = new UBytePtr(memory_region(srcregion));
+        if (srcbase == null) {
+            printf("Error in RomModule definition: COPY from an invalid region\n");
+            return 0;
+        }
 
-            /* make sure the source was valid */
-            srcbase = new UBytePtr(memory_region(srcregion));
-            if (srcbase == null)
-            {
-                    printf("Error in RomModule definition: COPY from an invalid region\n");
-                    return 0;
-            }
+        /* make sure we find within the region space */
+        if (srcoffs + numbytes > memory_region_length(srcregion)) {
+            printf("Error in RomModule definition: COPY out of source memory region space\n");
+            return 0;
+        }
 
-            /* make sure we find within the region space */
-            if (srcoffs + numbytes > memory_region_length(srcregion))
-            {
-                    printf("Error in RomModule definition: COPY out of source memory region space\n");
-                    return 0;
-            }
-
-            /* fill the data */
-            memcpy(base, new UBytePtr(srcbase, srcoffs), numbytes);
-            return 1;
+        /* fill the data */
+        memcpy(base, new UBytePtr(srcbase, srcoffs), numbytes);
+        return 1;
     }
 
 
@@ -1403,14 +1376,16 @@ public class common {
             /* handle fills */
             if (ROMENTRY_ISFILL(romp, rom_ptr)) {
                 //throw new UnsupportedOperationException("Unimplemented");
-                if (fill_rom_data(romdata, romp, rom_ptr++)==0)
+                if (fill_rom_data(romdata, romp, rom_ptr++) == 0) {
                     throw new UnsupportedOperationException("fatal error");
-/*TODO*///				goto fatalerror;
+                }
+                /*TODO*///				goto fatalerror;
             } /* handle copies */ else if (ROMENTRY_ISCOPY(romp, rom_ptr)) {
                 //throw new UnsupportedOperationException("Unimplemented");
-                if (copy_rom_data(romdata, romp, rom_ptr++) == 0)
+                if (copy_rom_data(romdata, romp, rom_ptr++) == 0) {
                     throw new UnsupportedOperationException("fatal error");
-/*TODO*///				goto fatalerror;
+                }
+                /*TODO*///				goto fatalerror;
             } /* handle files */ else if (ROMENTRY_ISFILE(romp, rom_ptr)) {
                 int baserom = rom_ptr;
                 int explength = 0;

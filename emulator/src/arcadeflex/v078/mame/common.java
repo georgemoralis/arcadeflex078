@@ -4,6 +4,9 @@
  */
 package arcadeflex.v078.mame;
 
+//mame imports
+import static arcadeflex.v078.mame.timer.*;
+
 public class common {
 
     /*TODO*////*********************************************************************
@@ -730,23 +733,21 @@ public class common {
         /* increment the tag counter */
         resource_tracking_tag++;
     }
+
+
+    /*-------------------------------------------------
+	end_resource_tracking - stop tracking
+	resources
+    -------------------------------------------------*/
+    public static void end_resource_tracking() {
+        /* call everyone who tracks resources to let them know */
+ /*TODO*///	auto_free();
+        timer_free();
+
+        /* decrement the tag counter */
+        resource_tracking_tag--;
+    }
     /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	end_resource_tracking - stop tracking
-/*TODO*///	resources
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void end_resource_tracking(void)
-/*TODO*///{
-/*TODO*///	/* call everyone who tracks resources to let them know */
-/*TODO*///	auto_free();
-/*TODO*///	timer_free();
-/*TODO*///
-/*TODO*///	/* decrement the tag counter */
-/*TODO*///	resource_tracking_tag--;
-/*TODO*///}
-/*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////***************************************************************************

@@ -4,6 +4,7 @@
 package mame056;
 
 import static arcadeflex.v078.mame.cpuexec.machine_reset;
+import static arcadeflex.v078.mame.cpuexecH.CPU_AUDIO_CPU;
 import static arcadeflex.v078.mame.cpuintrf.cputype_name;
 import static common.libc.cstdio.*;
 import static common.libc.cstring.*;
@@ -23,7 +24,6 @@ import static mame056.input.*;
 import static mame056.inptportH.*;
 import static mame056.mame.*;
 import static mame056.mameH.*;
-import static mame056.cpuexecH.*;
 import static mame056.ui_text.*;
 import static mame056.ui_textH.*;
 import static mame056.usrintrfH.*;

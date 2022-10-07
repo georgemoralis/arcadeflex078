@@ -30,7 +30,7 @@ public class driverH {
             frames_per_second = fps;
             vblank_duration = vblank;
             cpu_slices_per_frame = cpu_slices;
-            init_machine = im;
+            machine_init = im;
             screen_width = sw;
             screen_height = sh;
             default_visible_area = va;
@@ -68,8 +68,9 @@ public class driverH {
  /* and therefore the more accurate the emulation is. */
  /* However, an higher setting also means slower */
  /* performance. */
-        public InitMachinePtr init_machine;
-
+        public InitMachinePtr machine_init;
+        
+        public InitMachinePtr machine_stop;//TEMP!!!!!
         /* video hardware */
         public int screen_width, screen_height;
         public rectangle default_visible_area;/* the visible area can be changed at */

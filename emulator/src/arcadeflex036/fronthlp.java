@@ -16,6 +16,7 @@ along with Arcadeflex.  If not, see <http://www.gnu.org/licenses/>.
  */
 package arcadeflex036;
 
+import static arcadeflex.v078.mame.cpuexecH.CPU_AUDIO_CPU;
 import static arcadeflex.v078.mame.cpuintrf.cputype_name;
 import static common.libc.cstring.*;
 import static common.libc.cstdio.*;
