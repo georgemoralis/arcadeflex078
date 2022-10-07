@@ -736,12 +736,14 @@ public class cpuintrf {
     /*--------------------------
  	Adjust/get icount
     --------------------------*/
+    public static void activecpu_adjust_icount(int delta) {
+        if (activecpu < 0) {
+            logerror("activecpu_adjust_icount() called with no active cpu!\n");
+            return;
+        }
+        cpu[activecpu].intf.icount[0] += delta;
+    }
 
- /*TODO*///void activecpu_adjust_icount(int delta)
-/*TODO*///{
-/*TODO*///	VERIFY_ACTIVECPU_VOID(activecpu_adjust_icount);
-/*TODO*///	*cpu[activecpu].intf.icount += delta;
-/*TODO*///}
     public static int activecpu_get_icount() {
         if (activecpu < 0) {
             logerror("activecpu_get_icount() called with no active cpu!\n");

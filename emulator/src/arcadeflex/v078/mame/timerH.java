@@ -4,7 +4,8 @@
  */
 package arcadeflex.v078.mame;
 
-import static mame056.timer.*;
+//mame imports
+import static arcadeflex.v078.mame.timer.*;
 
 public class timerH {
 

@@ -18,6 +18,8 @@ package mame056;
  * *************************************************************************
  */
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
+import static arcadeflex.v078.mame.cpuexec.cpu_scalebyfcount;
+import static arcadeflex.v078.mame.cpuexecH.cpu_set_reset_line;
 import static arcadeflex.v078.mame.cpuintrfH.PULSE_LINE;
 import java.util.HashMap;
 import static arcadeflex036.osdepend.logerror;
@@ -27,7 +29,6 @@ import static mame056.inptportH.*;
 import static mame056.input.*;
 import static mame056.inputH.*;
 import static mame056.mame.*;
-import static mame056.cpuexec.*;
 import static mame056.osdependH.*;
 
 public class inptport {

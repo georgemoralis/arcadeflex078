@@ -4,12 +4,16 @@
 package mame056;
 
 import static arcadeflex.v078.mame.common.begin_resource_tracking;
+import static arcadeflex.v078.mame.cpuexec.cpu_exit;
+import static arcadeflex.v078.mame.cpuexec.cpu_init;
+import static arcadeflex.v078.mame.cpuexec.cpu_init_refresh_timer;
+import static arcadeflex.v078.mame.cpuexec.cpu_run;
 import static arcadeflex.v078.mame.memory.memory_init;
 import static arcadeflex.v078.mame.memory.memory_shutdown;
+import static arcadeflex.v078.mame.timer.timer_init;
 import static mame056.mameH.*;
 import static mame056.common.*;
 import static mame056.commonH.*;
-import static mame056.cpuexec.*;
 import static mame056.drawgfxH.*;
 import static mame056.driverH.*;
 import static mame056.input.*;
@@ -85,7 +89,6 @@ public class mame {
         } else {
             Machine.color_depth = 16;
         }
-        
 
         switch (options.color_depth) {
             case 16:
@@ -109,8 +112,8 @@ public class mame {
                 Machine.color_depth = 16;
             } else {
                 //throw new UnsupportedOperationException("Unsupported");
-                			alpha_active = 1;
-			alpha_init();
+                alpha_active = 1;
+                alpha_init();
             }
         } else {
             alpha_active = 0;
@@ -260,6 +263,8 @@ public class mame {
         spriteram_size[0] = 0;
         spriteram_2_size[0] = 0;
 
+        timer_init();
+        cpu_init_refresh_timer();
         /* first of all initialize the memory handlers, which could be used by the */
  /* other initialization routines */
         cpu_init();
@@ -488,38 +493,32 @@ public class mame {
         /* create spriteram buffers if necessary */
         if ((drv.video_attributes & VIDEO_BUFFERS_SPRITERAM) != 0) {
             //throw new UnsupportedOperationException("Unsupported");
-            	if (spriteram_size[0] != 0)
-		{
-			buffered_spriteram = new UBytePtr(spriteram_size[0]);
-			if (buffered_spriteram==null)
-			{
-				vh_close();
-				return 1;
-			}
+            if (spriteram_size[0] != 0) {
+                buffered_spriteram = new UBytePtr(spriteram_size[0]);
+                if (buffered_spriteram == null) {
+                    vh_close();
+                    return 1;
+                }
 
-/*TODO*///			state_save_register_UINT8("generic_video", 0, "buffered_spriteram", buffered_spriteram, spriteram_size);
+                /*TODO*///			state_save_register_UINT8("generic_video", 0, "buffered_spriteram", buffered_spriteram, spriteram_size);
 /*TODO*///
-			if (spriteram_2_size[0] != 0)
-			{
-				buffered_spriteram_2 = new UBytePtr(spriteram_2_size[0]);
-				if (buffered_spriteram_2==null)
-				{
-					vh_close();
-					return 1;
-				}
+                if (spriteram_2_size[0] != 0) {
+                    buffered_spriteram_2 = new UBytePtr(spriteram_2_size[0]);
+                    if (buffered_spriteram_2 == null) {
+                        vh_close();
+                        return 1;
+                    }
 
-/*TODO*///				state_save_register_UINT8("generic_video", 0, "buffered_spriteram_2", buffered_spriteram_2, spriteram_2_size);
-			}
+                    /*TODO*///				state_save_register_UINT8("generic_video", 0, "buffered_spriteram_2", buffered_spriteram_2, spriteram_2_size);
+                }
 
-/*TODO*///			buffered_spriteram16 = buffered_spriteram;
+                /*TODO*///			buffered_spriteram16 = buffered_spriteram;
 /*TODO*///			buffered_spriteram32 = buffered_spriteram;
 /*TODO*///			buffered_spriteram16_2 = buffered_spriteram_2;
 /*TODO*///			buffered_spriteram32_2 = buffered_spriteram_2;
-		}
-		else
-		{
-			logerror("vh_open():  Video buffers spriteram but spriteram_size is 0\n");
-		}
+            } else {
+                logerror("vh_open():  Video buffers spriteram but spriteram_size is 0\n");
+            }
         }
 
         /* build our private user interface font */

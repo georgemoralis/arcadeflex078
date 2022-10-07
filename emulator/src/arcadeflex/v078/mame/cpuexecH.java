@@ -6,6 +6,8 @@ package arcadeflex.v078.mame;
 
 //generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuexec.*;
 
 public class cpuexecH {
 
@@ -81,9 +83,11 @@ public class cpuexecH {
      ************************************
      */
 
-    /*TODO*////* Backwards compatibility */
-/*TODO*///#define cpu_set_reset_line 		cpunum_set_reset_line
-/*TODO*///#define cpu_set_halt_line 		cpunum_set_halt_line
+    /* Backwards compatibility */
+    public static void cpu_set_reset_line(int cpunum, int state) {
+        cpunum_set_reset_line(cpunum, state);
+    }
+    /*TODO*///#define cpu_set_halt_line 		cpunum_set_halt_line
     /**
      * ***********************************
      *
@@ -103,8 +107,11 @@ public class cpuexecH {
     /*TODO*////* Backwards compatibility */
 /*TODO*///#define timer_suspendcpu(cpunum, suspend, reason)	do { if (suspend) cpunum_suspend(cpunum, reason, 1); else cpunum_resume(cpunum, reason); } while (0)
 /*TODO*///#define timer_holdcpu(cpunum, suspend, reason)		do { if (suspend) cpunum_suspend(cpunum, reason, 0); else cpunum_resume(cpunum, reason); } while (0)
-/*TODO*///#define cpu_getstatus(cpunum)						(!cpunum_is_suspended(cpunum, SUSPEND_REASON_HALT | SUSPEND_REASON_RESET | SUSPEND_REASON_DISABLE))
-/*TODO*///#define timer_get_overclock(cpunum)					cpunum_get_clockscale(cpunum)
+    public static int cpu_getstatus(int cpunum) {
+        return (cpunum_is_suspended(cpunum, SUSPEND_REASON_HALT | SUSPEND_REASON_RESET | SUSPEND_REASON_DISABLE) == 0) ? 1 : 0;
+    }
+
+    /*TODO*///#define timer_get_overclock(cpunum)					cpunum_get_clockscale(cpunum)
 /*TODO*///#define timer_set_overclock(cpunum, overclock)		cpunum_set_clockscale(cpunum, overclock)
 /*TODO*///
 /*TODO*///

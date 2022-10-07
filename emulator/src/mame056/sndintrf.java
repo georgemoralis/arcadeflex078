@@ -4,12 +4,18 @@
 package mame056;
 
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
+import arcadeflex.v078.generic.funcPtr.TimerCallbackHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import arcadeflex.v078.mame.timer.mame_timer;
+import static arcadeflex.v078.mame.timer.timer_alloc;
+import static arcadeflex.v078.mame.timer.timer_remove;
+import static arcadeflex.v078.mame.timer.timer_reset;
+import static arcadeflex.v078.mame.timer.timer_set;
+import static arcadeflex.v078.mame.timer.timer_timeelapsed;
 
 import static mame056.sndintrfH.*;
 import static mame056.common.*;
 import static mame056.driverH.*;
-import static mame056.timer.*;
 import static arcadeflex.v078.mame.timerH.*;
 import static arcadeflex036.osdepend.*;
 import static mame056.mame.Machine;
@@ -23,7 +29,7 @@ public class sndintrf {
 
     static int latch, read_debug;
 
-    public static timer_callback soundlatch_callback = new timer_callback() {
+    public static TimerCallbackHandlerPtr soundlatch_callback = new TimerCallbackHandlerPtr() {
         public void handler(int param) {
             if (read_debug == 0 && latch != param) {
                 logerror("Warning: sound latch written before being read. Previous: %02x, new: %02x\n", latch, param);
@@ -72,7 +78,7 @@ public class sndintrf {
 
     static int latch2,read_debug2;
 
-    public static timer_callback soundlatch2_callback = new timer_callback() {
+    public static TimerCallbackHandlerPtr soundlatch2_callback = new TimerCallbackHandlerPtr() {
         public void handler(int param) {
             if (read_debug2 == 0 && latch2 != param)
                     logerror("Warning: sound latch 2 written before being read. Previous: %02x, new: %02x\n",latch2,param);
@@ -118,7 +124,7 @@ public class sndintrf {
 
     static int latch3,read_debug3;
 
-    public static timer_callback soundlatch3_callback = new timer_callback() {
+    public static TimerCallbackHandlerPtr soundlatch3_callback = new TimerCallbackHandlerPtr() {
         public void handler(int param) {
             if (read_debug3 == 0 && latch3 != param)
                     logerror("Warning: sound latch 3 written before being read. Previous: %02x, new: %02x\n",latch3,param);
@@ -225,7 +231,7 @@ public class sndintrf {
 /*TODO*///
 /*TODO*///***************************************************************************/
 /*TODO*///
-    static timer_entry sound_update_timer;
+    static mame_timer sound_update_timer;
     static double refresh_period;
     static double refresh_period_inv;
 
@@ -729,7 +735,7 @@ public class sndintrf {
 
         refresh_period = TIME_IN_HZ(Machine.drv.frames_per_second);
         refresh_period_inv = 1.0 / refresh_period;
-        sound_update_timer = timer_set(TIME_NEVER, 0, null);
+        sound_update_timer = timer_alloc(null);
         /*if (mixer_sh_start() != 0) {
             return 1;
         }
