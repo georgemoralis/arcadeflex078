@@ -14,7 +14,7 @@ import static common.libc.cstring.strcmp;
 import static mame056.driverH.MAX_CPU;
 import static arcadeflex036.osdepend.*;
 import mame056.cpu.z80.z80;
-import mame056.cpu.dummy_cpu;
+import arcadeflex.v078.cpu.dummy_cpu;
 
 public class cpuintrf {
 

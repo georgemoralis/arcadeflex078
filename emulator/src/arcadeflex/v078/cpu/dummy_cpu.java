@@ -1,17 +1,12 @@
 /**
  * ported to v0.56
  */
-package mame056.cpu;
+package arcadeflex.v078.cpu;
 
-import arcadeflex.v078.generic.funcPtr.IrqCallbackHandlerPtr;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_DUMMY;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_CREDITS;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FAMILY;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_FILE;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_NAME;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_INFO_VERSION;
-import static arcadeflex.v078.mame.cpuintrfH.CPU_IS_LE;
-import arcadeflex.v078.mame.cpuintrfH.cpu_interface;
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuintrfH.*;
 
 public class dummy_cpu extends cpu_interface {
 
