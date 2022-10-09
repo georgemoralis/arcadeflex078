@@ -3,9 +3,9 @@
  */
 package mame056;
 
+import static arcadeflex.v078.vidhrdw.generic.flip_screen_x;
 import static common.ptr.*;
 import java.util.ArrayList;
-import static mame056.common.*;
 
 public class commonH {
 
