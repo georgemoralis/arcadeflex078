@@ -744,22 +744,22 @@ public class sndintrf {
             return 1;
         }*/
 
-        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
+/*        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
             if ((sndintf[Machine.drv.sound[totalsound].sound_type].start(Machine.drv.sound[totalsound])) != 0) {
                 return 1;//goto getout;
             }
             totalsound++;
-        }
+        }*/
         return 0;
     }
 
     public static void sound_stop() {
         int totalsound = 0;
 
-        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
+/*        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
             sndintf[Machine.drv.sound[totalsound].sound_type].stop();
             totalsound++;
-        }
+        }*/
 
     //    streams_sh_stop();
     //    mixer_sh_stop();
@@ -777,10 +777,10 @@ public class sndintrf {
     public static void sound_update() {
         int totalsound = 0;
 
-        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
+ /*       while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
             sndintf[Machine.drv.sound[totalsound].sound_type].update();
             totalsound++;
-        }
+        }*/
 
 //        streams_sh_update();
 //        mixer_sh_update();
@@ -791,10 +791,10 @@ public class sndintrf {
     public static void sound_reset() {
         int totalsound = 0;
 
-        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
+/*        while (Machine.drv.sound[totalsound].sound_type != 0 && totalsound < MAX_SOUND) {
             sndintf[Machine.drv.sound[totalsound].sound_type].reset();
             totalsound++;
-        }
+        }*/
     }
 
     public static String sound_name(MachineSound msound) {

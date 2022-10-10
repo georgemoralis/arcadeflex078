@@ -1855,13 +1855,13 @@ public class usrintrf {
 
         buf2 = sprintf("\n%s", ui_getstring(UI_sound));
         buf += buf2;
-        if ((Machine.drv.sound_attributes & SOUND_SUPPORTS_STEREO) != 0) {
+/*        if ((Machine.drv.sound_attributes & SOUND_SUPPORTS_STEREO) != 0) {
             buf += sprintf(" (%s)", ui_getstring(UI_stereo));
-        }
+        }*/
         buf += ":\n";
 
         i = 0;
-        while (i < MAX_SOUND && Machine.drv.sound[i].sound_type != 0) {
+/*        while (i < MAX_SOUND && Machine.drv.sound[i].sound_type != 0) {
             if (sound_num(Machine.drv.sound[i]) != 0) {
                 buf += sprintf("%dx", sound_num(Machine.drv.sound[i]));
             }
@@ -1882,7 +1882,7 @@ public class usrintrf {
             buf += "\n";
 
             i++;
-        }
+        }*/
         if ((Machine.drv.video_attributes & VIDEO_TYPE_VECTOR) != 0) {
             buf += sprintf("\n%s\n", ui_getstring(UI_vectorgame));
         } else {

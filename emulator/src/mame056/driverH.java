@@ -3,6 +3,7 @@
  */
 package mame056;
 
+import arcadeflex.v078.generic.funcPtr.MachineHandlerPtr;
 import arcadeflex.v078.mame.cpuexecH.MachineCPU;
 import static arcadeflex056.fucPtr.*;
 import static common.util.*;
@@ -69,7 +70,7 @@ public class driverH {
  /* However, an higher setting also means slower */
  /* performance. */
         public InitMachinePtr machine_init;
-        
+
         public InitMachinePtr machine_stop;//TEMP!!!!!
         /* video hardware */
         public int screen_width, screen_height;
@@ -198,7 +199,7 @@ public class driverH {
     public static class GameDriver {
 
         //this is used instead of GAME macro
-        public GameDriver(String year, String name, String source, RomLoadPtr romload, GameDriver parent, MachineDriver drv, InputPortPtr input, InitDriverPtr init, int monitor, String manufacture, String fullname) {
+        public GameDriver(String year, String name, String source, RomLoadPtr romload, GameDriver parent, MachineHandlerPtr drv, InputPortPtr input, InitDriverPtr init, int monitor, String manufacture, String fullname) {
             this.year = year;
             this.source_file = source;
             this.clone_of = parent;
@@ -216,7 +217,7 @@ public class driverH {
         }
 
         //GAMEX macro
-        public GameDriver(String year, String name, String source, RomLoadPtr romload, GameDriver parent, MachineDriver drv, InputPortPtr input, InitDriverPtr init, int monitor, String manufacture, String fullname, int flags) {
+        public GameDriver(String year, String name, String source, RomLoadPtr romload, GameDriver parent, MachineHandlerPtr drv, InputPortPtr input, InitDriverPtr init, int monitor, String manufacture, String fullname, int flags) {
             this.year = year;
             this.source_file = source;
             this.clone_of = parent;
@@ -241,7 +242,7 @@ public class driverH {
         public String description;
         public String year;
         public String manufacturer;
-        public MachineDriver drv;
+        public MachineHandlerPtr drv;
         public InputPortTiny[] input_ports;
         public InitDriverPtr driver_init;/* optional function to be called during initialization */
  /* This is called ONCE, unlike Machine->init_machine */

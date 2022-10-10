@@ -8,6 +8,8 @@ import static arcadeflex.v078.mame.cpuexec.cpu_exit;
 import static arcadeflex.v078.mame.cpuexec.cpu_init;
 import static arcadeflex.v078.mame.cpuexec.cpu_init_refresh_timer;
 import static arcadeflex.v078.mame.cpuexec.cpu_run;
+import arcadeflex.v078.mame.driverH.InternalMachineDriver;
+import static arcadeflex.v078.mame.mame.expand_machine_driver;
 import static arcadeflex.v078.mame.memory.memory_init;
 import static arcadeflex.v078.mame.memory.memory_shutdown;
 import static arcadeflex.v078.mame.timer.timer_init;
@@ -54,7 +56,7 @@ public class mame {
 
     static GameDriver gamedrv;
 
-    static MachineDriver drv;
+    static InternalMachineDriver drv;
     static mame_bitmap real_scrbitmap;
 
     /* Variables to hold the status of various game options */
@@ -69,6 +71,8 @@ public class mame {
 
     static int leds_status;
 
+    static InternalMachineDriver internal_drv= new InternalMachineDriver();
+    
     public static int run_game(int game) {
         begin_resource_tracking();
         int err;
@@ -77,8 +81,9 @@ public class mame {
         playback = options.playback;
 
         Machine.gamedrv = gamedrv = drivers[game];
-        Machine.drv = drv = gamedrv.drv;
-
+        expand_machine_driver(gamedrv.drv, internal_drv);
+        Machine.drv = internal_drv;
+        drv= internal_drv;
         /* copy configuration */
         if ((drv.video_attributes & VIDEO_RGB_DIRECT) != 0) {
             if ((drv.video_attributes & VIDEO_NEEDS_6BITS_PER_GUN) != 0) {
@@ -397,7 +402,7 @@ public class mame {
         /* convert the gfx ROMs into character sets. This is done BEFORE calling the driver's */
  /* convert_color_prom() routine (in palette_init()) because it might need to check the */
  /* Machine.gfx[] data */
-        if (drv.gfxdecodeinfo != null) {
+/*        if (drv.gfxdecodeinfo != null) {
             for (i = 0; i < MAX_GFX_ELEMENTS && drv.gfxdecodeinfo[i].memory_region != -1; i++) {
                 int reglen = 8 * memory_region_length(drv.gfxdecodeinfo[i].memory_region);
                 GfxLayout glcopy;
@@ -438,7 +443,7 @@ public class mame {
                 Machine.gfx[i].total_colors = drv.gfxdecodeinfo[i].total_color_codes;
             }
         }
-
+*/
         bmwidth[0] = drv.screen_width;
         bmheight[0] = drv.screen_height;
 
@@ -570,9 +575,9 @@ public class mame {
 
         update_video_and_audio();
 
-        if (drv.vh_eof_callback != null) {
+/*        if (drv.vh_eof_callback != null) {
             (drv.vh_eof_callback).handler();
-        }
+        }*/
         return 0;
     }
 
@@ -590,7 +595,7 @@ public class mame {
             osd_mark_dirty(Machine.uixmin, Machine.uiymin, Machine.uixmin + Machine.uiwidth - 1, Machine.uiymin + Machine.uiheight - 1);
         }
 
-        Machine.drv.vh_update.handler(Machine.scrbitmap, bitmap_dirty);
+        Machine.drv.video_update.handler(Machine.scrbitmap, bitmap_dirty);
         /* update screen */
 
  /*TODO*///	if (artwork_backdrop || artwork_overlay)
@@ -627,7 +632,7 @@ public class mame {
         if (vh_open() == 0) {
             tilemap_init();
             //System.out.println(priority_bitmap);
-            if (drv.vh_start == null || drv.vh_start.handler() == 0)/* start the video hardware */ {
+            if (drv.video_start == null || drv.video_start.handler() == 0)/* start the video hardware */ {
                 if (sound_start() == 0) /* start the audio hardware */ {
                     int region;
 
@@ -669,7 +674,7 @@ public class mame {
                             InitCheat();
                         }
 
-                        if (drv.nvram_handler != null) {
+                        /*if (drv.nvram_handler != null) {
                             Object f;
 
                             f = osd_fopen(Machine.gamedrv.name, null, OSD_FILETYPE_NVRAM, 0);
@@ -677,16 +682,16 @@ public class mame {
                             if (f != null) {
                                 osd_fclose(f);
                             }
-                        }
+                        }*/
                         cpu_run();/* run the emulation! */
-                        if (drv.nvram_handler != null) {
+                        /*if (drv.nvram_handler != null) {
                             Object f;
 
                             if ((f = osd_fopen(Machine.gamedrv.name, null, OSD_FILETYPE_NVRAM, 1)) != null) {
                                 drv.nvram_handler.handler(f, 1);
                                 osd_fclose(f);
                             }
-                        }
+                        }*/
 
                         if (options.cheat != 0) {
                             StopCheat();
@@ -698,9 +703,9 @@ public class mame {
                     //userquit:
                     /* the following MUST be done after hiscore_save() otherwise *//* some 68000 games will not work */
                     sound_stop();
-                    if (drv.vh_stop != null) {
+                    /*if (drv.vh_stop != null) {
                         drv.vh_stop.handler();
-                    }
+                    }*/
                     /*TODO*///                    artwork_kill();
                     res = 0;
                 } else if (bailing == 0) {
@@ -726,9 +731,9 @@ public class mame {
         int res;
         /* the following MUST be done after hiscore_save() otherwise *//* some 68000 games will not work */
         sound_stop();
-        if (drv.vh_stop != null) {
+        /*if (drv.vh_stop != null) {
             drv.vh_stop.handler();
-        }
+        }*/
         /*TODO*///        artwork_kill();
         res = 0;
         tilemap_close();

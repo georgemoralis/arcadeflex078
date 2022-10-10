@@ -65,7 +65,7 @@ public class generic {
      *
      **************************************************************************
      */
-    public static VhStartPtr generic_vh_start = new VhStartPtr() {
+    public static VhStartPtr video_start_generic = new VhStartPtr() {
         public int handler() {
             dirtybuffer = null;
             tmpbitmap = null;

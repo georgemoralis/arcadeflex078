@@ -4,18 +4,17 @@
  */
 package arcadeflex.v078.drivers;
 
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_READ;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_WRITE;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_MARKER;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_TYPE_MEM;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_8;
-import static arcadeflex.v078.mame.memoryH.MRA_RAM;
-import static arcadeflex.v078.mame.memoryH.MRA_ROM;
-import static arcadeflex.v078.mame.memoryH.MWA_NOP;
-import static arcadeflex.v078.mame.memoryH.MWA_ROM;
-import arcadeflex.v078.mame.memoryH.Memory_ReadAddress;
-import arcadeflex.v078.mame.memoryH.Memory_WriteAddress;
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuint.*;
+import static arcadeflex.v078.mame.cpuintrfH.CPU_Z80;
+import static arcadeflex.v078.mame.driverH.*;
+import static arcadeflex.v078.mame.memoryH.*;
+
 import arcadeflex056.fucPtr.InputPortPtr;
+import static mame056.driverH.DEFAULT_60HZ_VBLANK_DURATION;
+import static mame056.driverH.VIDEO_TYPE_RASTER;
 import static mame056.inptport.input_port_0_r;
 import static mame056.inptportH.INPUT_PORTS_END;
 import static mame056.inptportH.IPT_BUTTON1;
@@ -26,9 +25,12 @@ import static mame056.inptportH.IPT_UNKNOWN;
 import static mame056.inptportH.IP_ACTIVE_LOW;
 import static mame056.inptportH.PORT_BIT;
 import static mame056.inptportH.PORT_START;
+import static mame056.vidhrdw.generic.video_start_generic;
 import static mame056.vidhrdw.generic.videoram;
 import static mame056.vidhrdw.generic.videoram_size;
 import static mame056.vidhrdw.minivadr.minivadr_videoram_w;
+import static mame056.vidhrdw.minivadr.palette_init_minivadr;
+import static mame056.vidhrdw.minivadr.video_update_minivadr;
 
 public class minivadr {
 
@@ -63,27 +65,29 @@ public class minivadr {
         }
     };
 
-    static MachineHandlerPtr machine_driver_minivadr = new MachineHandlerPtr() {/* basic machine hardware */
-        public void handler(InternalMachineDriver machine) {	
-		/* basic machine hardware */
-		MDRV_CPU_ADD(Z80,24000000 / 6);		 /* 4 MHz ? */
-		MDRV_CPU_MEMORY(readmem,writemem);
-		MDRV_CPU_VBLANK_INT(irq0_line_hold,1);
-	
-		MDRV_FRAMES_PER_SECOND(60);
-		MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION);
-	
-		/* video hardware */
-		MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER);
-		MDRV_SCREEN_SIZE(256, 256);
-		MDRV_VISIBLE_AREA(0, 256-1, 16, 240-1);
-		MDRV_PALETTE_LENGTH(2);
-	
-		MDRV_PALETTE_INIT(minivadr)
-		MDRV_VIDEO_START(generic)
-		MDRV_VIDEO_UPDATE(minivadr)
-	
-		/* sound hardware */
+    public static MachineHandlerPtr machine_driver_minivadr = new MachineHandlerPtr() {/* basic machine hardware */
+        public void handler(InternalMachineDriver machine) {
+            MACHINE_DRIVER_START(machine);
+            /* basic machine hardware */
+            MDRV_CPU_ADD(CPU_Z80, 24000000 / 6);
+            /* 4 MHz ? */
+            MDRV_CPU_MEMORY(readmem, writemem);
+            MDRV_CPU_VBLANK_INT(irq0_line_hold, 1);
+
+            MDRV_FRAMES_PER_SECOND(60);
+            MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION);
+
+            /* video hardware */
+            MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER);
+            MDRV_SCREEN_SIZE(256, 256);
+            MDRV_VISIBLE_AREA(0, 256 - 1, 16, 240 - 1);
+            MDRV_PALETTE_LENGTH(2);
+
+            MDRV_PALETTE_INIT(palette_init_minivadr);
+            MDRV_VIDEO_START(video_start_generic);
+            MDRV_VIDEO_UPDATE(video_update_minivadr);
+
+            /* sound hardware */
             MACHINE_DRIVER_END();
         }
     };

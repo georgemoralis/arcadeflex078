@@ -3,6 +3,9 @@
  */
 package arcadeflex.v078.generic;
 
+//mame imports
+import static arcadeflex.v078.mame.driverH.*;
+
 public class funcPtr {
 
     /**

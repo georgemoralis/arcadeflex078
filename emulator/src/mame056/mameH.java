@@ -3,11 +3,11 @@
  */
 package mame056;
 
+import arcadeflex.v078.mame.driverH.InternalMachineDriver;
 import static common.ptr.*;
 import common.subArrays.IntArray;
 import mame056.drawgfxH.*;
 import mame056.driverH.GameDriver;
-import mame056.driverH.MachineDriver;
 import mame056.commonH.GameSamples;
 import mame056.commonH.mame_bitmap;
 import mame056.inptportH.InputPort;
@@ -40,7 +40,7 @@ public class mameH {
         public /*UINT16 * */ char[] game_colortable;/* lookup table used to map gfx pen numbers to color numbers */
         public /*UINT32 * */ IntArray remapped_colortable;/* the above, already remapped through Machine->pens */
         public GameDriver gamedrv;/* contains the definition of the game machine */
-        public MachineDriver drv;/* same as gamedrv->drv */
+        public InternalMachineDriver drv;/* same as gamedrv->drv */
         public int color_depth;/* video color depth: 8, 16, 15 or 32 */
         public int sample_rate;/* the digital audio sample rate; 0 if sound is disabled. */
  /* This is set to a default value, or a value specified by */

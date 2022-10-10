@@ -4,6 +4,12 @@
  */
 package arcadeflex.v078.mame;
 
+import arcadeflex.v078.generic.funcPtr.MachineHandlerPtr;
+import arcadeflex.v078.mame.cpuexecH.MachineCPU;
+import arcadeflex.v078.mame.driverH.InternalMachineDriver;
+import static arcadeflex.v078.mame.driverH.MAX_CPU;
+import static arcadeflex036.osdepend.*;
+
 public class mame {
 
     /*TODO*////***************************************************************************
@@ -644,19 +650,20 @@ public class mame {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	expand_machine_driver - construct a machine
-/*TODO*///	driver from the macroized state
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void expand_machine_driver(void (*constructor)(struct InternalMachineDriver *), struct InternalMachineDriver *output)
-/*TODO*///{
-/*TODO*///	/* keeping this function allows us to pre-init the driver before constructing it */
-/*TODO*///	memset(output, 0, sizeof(*output));
-/*TODO*///	(*constructor)(output);
-/*TODO*///}
-/*TODO*///
+
+    /*-------------------------------------------------
+	expand_machine_driver - construct a machine
+	driver from the macroized state
+    -------------------------------------------------*/
+    public static void expand_machine_driver(MachineHandlerPtr constructor, InternalMachineDriver output) {
+        /* keeping this function allows us to pre-init the driver before constructing it */
+        if (output == null) {
+            output = new InternalMachineDriver();
+        }
+        (constructor).handler(output);
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////*-------------------------------------------------
@@ -1123,6 +1130,7 @@ public class mame {
         /*TODO*///	last_partial_scanline = 0;
 /*TODO*///	performance.partial_updates_this_frame = 0;
     }
+
     /*TODO*///
 /*TODO*///
 /*TODO*///
@@ -1431,29 +1439,26 @@ public class mame {
 /*TODO*///
 /*TODO*///
 /*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	machine_add_cpu - add a CPU during machine
-/*TODO*///	driver expansion
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///struct MachineCPU *machine_add_cpu(struct InternalMachineDriver *machine, const char *tag, int type, int cpuclock)
-/*TODO*///{
-/*TODO*///	int cpunum;
-/*TODO*///
-/*TODO*///	for (cpunum = 0; cpunum < MAX_CPU; cpunum++)
-/*TODO*///		if (machine->cpu[cpunum].cpu_type == 0)
-/*TODO*///		{
-/*TODO*///			machine->cpu[cpunum].tag = tag;
-/*TODO*///			machine->cpu[cpunum].cpu_type = type;
-/*TODO*///			machine->cpu[cpunum].cpu_clock = cpuclock;
-/*TODO*///			return &machine->cpu[cpunum];
-/*TODO*///		}
-/*TODO*///
-/*TODO*///	logerror("Out of CPU's!\n");
-/*TODO*///	return NULL;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
+    /*-------------------------------------------------
+ 	machine_add_cpu - add a CPU during machine
+ 	driver expansion
+    -------------------------------------------------*/
+    public static MachineCPU machine_add_cpu(InternalMachineDriver machine, String tag, int type, int cpuclock) {
+        int cpunum;
+
+        for (cpunum = 0; cpunum < MAX_CPU; cpunum++) {
+            if (machine.cpu[cpunum].cpu_type == 0) {
+                machine.cpu[cpunum].tag = tag;
+                machine.cpu[cpunum].cpu_type = type;
+                machine.cpu[cpunum].cpu_clock = cpuclock;
+                return machine.cpu[cpunum];
+            }
+        }
+
+        logerror("Out of CPU's!\n");
+        return null;
+    }
+    /*TODO*///
 /*TODO*///
 /*TODO*////*-------------------------------------------------
 /*TODO*///	machine_find_cpu - find a tagged CPU during
