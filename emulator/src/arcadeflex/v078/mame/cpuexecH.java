@@ -20,31 +20,61 @@ public class cpuexecH {
      *
      **************************************************************************
      */
+    /**
+     * ***********************************
+     *
+     * CPU description for drivers
+     *
+     ************************************
+     */
+    public static class MachineCPU {
 
-    /*TODO*////*************************************
-/*TODO*/// *
-/*TODO*/// *	CPU description for drivers
-/*TODO*/// *
-/*TODO*/// *************************************/
-/*TODO*///
-/*TODO*///struct MachineCPU
-/*TODO*///{
-/*TODO*///	int			cpu_type;					/* index for the CPU type */
-/*TODO*///	int			cpu_flags;					/* flags; see #defines below */
-/*TODO*///	int			cpu_clock;					/* in Hertz */
-/*TODO*///	const void *memory_read;				/* struct Memory_ReadAddress */
-/*TODO*///	const void *memory_write;				/* struct Memory_WriteAddress */
-/*TODO*///	const void *port_read;
-/*TODO*///	const void *port_write;
-/*TODO*///	void 		(*vblank_interrupt)(void);	/* for interrupts tied to VBLANK */
-/*TODO*///	int 		vblank_interrupts_per_frame;/* usually 1 */
-/*TODO*///	void 		(*timed_interrupt)(void);	/* for interrupts not tied to VBLANK */
-/*TODO*///	int 		timed_interrupts_per_second;
-/*TODO*///	void *		reset_param;				/* parameter for cpu_reset */
-/*TODO*///	const char *tag;
-/*TODO*///};
-/*TODO*///
-/*TODO*///
+        public MachineCPU(int cpu_type, int cpu_flags, int cpu_clock, Object memory_read, Object memory_write, Object port_read, Object port_write, InterruptHandlerPtr vblank_interrupt, int vblank_interrupts_per_frame, InterruptHandlerPtr timed_interrupt, int timed_interrupts_per_second, Object reset_param, String tag) {
+            this.cpu_type = cpu_type;
+            this.cpu_flags = cpu_flags;
+            this.cpu_clock = cpu_clock;
+            this.memory_read = memory_read;
+            this.memory_write = memory_write;
+            this.port_read = port_read;
+            this.port_write = port_write;
+            this.vblank_interrupt = vblank_interrupt;
+            this.vblank_interrupts_per_frame = vblank_interrupts_per_frame;
+            this.timed_interrupt = timed_interrupt;
+            this.timed_interrupts_per_second = timed_interrupts_per_second;
+            this.reset_param = reset_param;
+            this.tag = tag;
+        }
+
+        public MachineCPU() {
+            this(0, 0, 0, null, null, null, null, null, 0, null, 0, null, null);
+        }
+
+        public static MachineCPU[] create(int n) {
+            MachineCPU[] a = new MachineCPU[n];
+            for (int k = 0; k < n; k++) {
+                a[k] = new MachineCPU();
+            }
+            return a;
+        }
+        public int cpu_type;/* index for the CPU type */
+        public int cpu_flags;/* flags; see #defines below */
+        public int cpu_clock;/* in Hertz */
+        public Object memory_read;/* struct Memory_ReadAddress */
+        public Object memory_write;/* struct Memory_WriteAddress */
+        public Object port_read;
+        public Object port_write;
+        public InterruptHandlerPtr vblank_interrupt;/* for interrupts tied to VBLANK */
+        public int vblank_interrupts_per_frame;/* usually 1 */
+        public InterruptHandlerPtr timed_interrupt;/* for interrupts not tied to VBLANK */
+        public int timed_interrupts_per_second;
+        public Object reset_param;/* parameter for cpu_reset */
+        public String tag;
+
+        public MachineCPU(int CPU_Z80, int i, memoryH.Memory_ReadAddress[] readmem, memoryH.Memory_WriteAddress[] writemem, Object object, Object object0, InterruptHandlerPtr irq0_line_hold, int i0) {
+            throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        }
+    }
+
     /**
      * ***********************************
      *

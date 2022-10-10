@@ -63,30 +63,31 @@ public class minivadr {
         }
     };
 
-    /*TODO*///	static MACHINE_DRIVER_START( minivadr )
-/*TODO*///	
-/*TODO*///		/* basic machine hardware */
-/*TODO*///		MDRV_CPU_ADD(Z80,24000000 / 6)		 /* 4 MHz ? */
-/*TODO*///		MDRV_CPU_MEMORY(readmem,writemem)
-/*TODO*///		MDRV_CPU_VBLANK_INT(irq0_line_hold,1)
-/*TODO*///	
-/*TODO*///		MDRV_FRAMES_PER_SECOND(60)
-/*TODO*///		MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
-/*TODO*///	
-/*TODO*///		/* video hardware */
-/*TODO*///		MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
-/*TODO*///		MDRV_SCREEN_SIZE(256, 256)
-/*TODO*///		MDRV_VISIBLE_AREA(0, 256-1, 16, 240-1)
-/*TODO*///		MDRV_PALETTE_LENGTH(2)
-/*TODO*///	
-/*TODO*///		MDRV_PALETTE_INIT(minivadr)
-/*TODO*///		MDRV_VIDEO_START(generic)
-/*TODO*///		MDRV_VIDEO_UPDATE(minivadr)
-/*TODO*///	
-/*TODO*///		/* sound hardware */
-/*TODO*///	MACHINE_DRIVER_END
-/*TODO*///	
-/*TODO*///	
+    static MachineHandlerPtr machine_driver_minivadr = new MachineHandlerPtr() {/* basic machine hardware */
+        public void handler(InternalMachineDriver machine) {	
+		/* basic machine hardware */
+		MDRV_CPU_ADD(Z80,24000000 / 6);		 /* 4 MHz ? */
+		MDRV_CPU_MEMORY(readmem,writemem);
+		MDRV_CPU_VBLANK_INT(irq0_line_hold,1);
+	
+		MDRV_FRAMES_PER_SECOND(60);
+		MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION);
+	
+		/* video hardware */
+		MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER);
+		MDRV_SCREEN_SIZE(256, 256);
+		MDRV_VISIBLE_AREA(0, 256-1, 16, 240-1);
+		MDRV_PALETTE_LENGTH(2);
+	
+		MDRV_PALETTE_INIT(minivadr)
+		MDRV_VIDEO_START(generic)
+		MDRV_VIDEO_UPDATE(minivadr)
+	
+		/* sound hardware */
+            MACHINE_DRIVER_END();
+        }
+    };
+    /*TODO*///	
 /*TODO*///	/***************************************************************************
 /*TODO*///	
 /*TODO*///	  Game driver(s)

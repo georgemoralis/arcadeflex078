@@ -3,6 +3,7 @@
  */
 package mame056;
 
+import arcadeflex.v078.mame.cpuexecH.MachineCPU;
 import static arcadeflex056.fucPtr.*;
 import static common.util.*;
 import static mame056.commonH.*;
@@ -10,7 +11,6 @@ import static mame056.drawgfxH.*;
 import static mame056.inptportH.InputPortTiny;
 import static mame056.inptportH.input_macro;
 import static mame056.sndintrfH.*;
-import static mame056.cpuexecH.*;
 
 public class driverH {
 

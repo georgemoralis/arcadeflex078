@@ -23,6 +23,11 @@ public class funcPtr {
         public abstract void handler();
     }
 
+    public static abstract interface MachineHandlerPtr {
+
+        public abstract void handler(InternalMachineDriver machine);
+    }
+
     /**
      * memory related
      */
@@ -66,6 +71,7 @@ public class funcPtr {
 
         public abstract void handler(int i);
     }
+
     /**
      * Timer callback
      */

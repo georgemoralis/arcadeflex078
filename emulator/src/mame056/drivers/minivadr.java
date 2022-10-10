@@ -7,12 +7,12 @@ package mame056.drivers;
 import static arcadeflex.v078.drivers.minivadr.input_ports_minivadr;
 import static arcadeflex.v078.drivers.minivadr.readmem;
 import static arcadeflex.v078.drivers.minivadr.writemem;
+import arcadeflex.v078.mame.cpuexecH.MachineCPU;
 import static arcadeflex.v078.mame.cpuint.irq0_line_hold;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_Z80;
 import static arcadeflex056.fucPtr.*;
 
 import static mame056.commonH.*;
-import static mame056.cpuexecH.*;
 import static mame056.driverH.*;
 import static mame056.drawgfxH.*;
 import static mame056.vidhrdw.minivadr.*;
