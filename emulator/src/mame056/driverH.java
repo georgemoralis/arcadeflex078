@@ -21,7 +21,7 @@ public class driverH {
     public static final int MAX_SOUND = 5;/* MAX_SOUND is the maximum number of sound subsystems which can run at the same time. Currently, 5 is enough. */
 
 
-    public static class MachineDriver {
+  /*  public static class MachineDriver {
 
         public MachineDriver() {
         } //null implementation
@@ -59,7 +59,7 @@ public class driverH {
         }
 
         /* basic machine hardware */
-        public MachineCPU cpu[] = MachineCPU.create(MAX_CPU);
+/*        public MachineCPU cpu[] = MachineCPU.create(MAX_CPU);
         public float frames_per_second;
         public int vblank_duration;/* in microseconds - see description below */
         public int cpu_slices_per_frame;/* for multicpu games. 1 is the minimum, meaning */
@@ -69,33 +69,33 @@ public class driverH {
  /* and therefore the more accurate the emulation is. */
  /* However, an higher setting also means slower */
  /* performance. */
-        public InitMachinePtr machine_init;
+ /*       public InitMachinePtr machine_init;
 
         public InitMachinePtr machine_stop;//TEMP!!!!!
         /* video hardware */
-        public int screen_width, screen_height;
-        public rectangle default_visible_area;/* the visible area can be changed at */
+/*        public int screen_width, screen_height;
+/*        public rectangle default_visible_area;/* the visible area can be changed at */
  /* run time, but it should never be larger than the */
  /* one specified here, in order not to force the */
  /* OS dependant code to resize the display window. */
 
-        public GfxDecodeInfo[] gfxdecodeinfo;
+  /*      public GfxDecodeInfo[] gfxdecodeinfo;
         public int total_colors;/* palette is 3*total_colors bytes long */
-        public int color_table_len;
+ /*       public int color_table_len;
         /* length in bytes of the color lookup table */
-        public VhConvertColorPromPtr vh_init_palette;
+  /*      public VhConvertColorPromPtr vh_init_palette;
         public int video_attributes;
 
         public VhEofCallbackPtr vh_eof_callback;/* called every frame after osd_update_video_and_audio() */
  /* This is useful when there are operations that need */
  /* to be performed every frame regardless of frameskip, */
  /* e.g. sprite buffering or collision detection. */
-        public VhStartPtr vh_start;
+ /*       public VhStartPtr vh_start;
         public VhStopPtr vh_stop;
         public VhUpdatePtr vh_update;
 
         /* sound hardware */
-        public int sound_attributes;
+/*        public int sound_attributes;
         public int obsolete1;
         public int obsolete2;
         public int obsolete3;
@@ -110,8 +110,8 @@ public class driverH {
            file == 0, read_or_write != 0 -> not allowed
            file != 0, read_or_write != 0 -> save nvram to disk
          */
-        public nvramPtr nvram_handler;
-    }
+  //      public nvramPtr nvram_handler;
+ //   }
 
     /* VBlank is the period when the video beam is outside of the visible area and */
  /* returns from the bottom to the top of the screen to prepare for a new video frame. */

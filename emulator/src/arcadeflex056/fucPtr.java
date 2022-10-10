@@ -16,10 +16,7 @@ public class fucPtr {
         public abstract void handler(int offset, int data, int d2);
     }
 
-    public static abstract interface InitMachinePtr {
-
-        public abstract void handler();
-    }
+    
 
     public static abstract interface InitDriverPtr {
 

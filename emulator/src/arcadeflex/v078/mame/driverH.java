@@ -4,10 +4,9 @@
  */
 package arcadeflex.v078.mame;
 
-import arcadeflex.v078.generic.funcPtr.InterruptHandlerPtr;
+import static arcadeflex.v078.generic.funcPtr.*;
 import arcadeflex.v078.mame.cpuexecH.MachineCPU;
 import static arcadeflex.v078.mame.mame.machine_add_cpu;
-import arcadeflex056.fucPtr.InitMachinePtr;
 import arcadeflex056.fucPtr.VhConvertColorPromPtr;
 import arcadeflex056.fucPtr.VhStartPtr;
 import arcadeflex056.fucPtr.VhUpdatePtr;
@@ -324,8 +323,8 @@ public class driverH {
         public int vblank_duration;
         public int /*UINT32*/ cpu_slices_per_frame;
 /*TODO*///
-        public InitMachinePtr machine_init;
-        public InitMachinePtr machine_stop;
+        public MachineInitHandlerPtr machine_init;
+        public MachineStopHandlerPtr machine_stop;
         /*TODO*///	void (*nvram_handler)(mame_file *file, int read_or_write);
 /*TODO*///
         public int /*UINT32*/ video_attributes;

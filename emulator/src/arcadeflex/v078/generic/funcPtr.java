@@ -31,6 +31,16 @@ public class funcPtr {
         public abstract void handler(InternalMachineDriver machine);
     }
 
+    public static abstract interface MachineInitHandlerPtr {
+
+        public abstract void handler();
+    }
+
+    public static abstract interface MachineStopHandlerPtr {
+
+        public abstract void handler();
+    }
+
     /**
      * memory related
      */
