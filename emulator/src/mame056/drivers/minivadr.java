@@ -4,62 +4,21 @@
  */
 package mame056.drivers;
 
+import static arcadeflex.v078.drivers.minivadr.input_ports_minivadr;
+import static arcadeflex.v078.drivers.minivadr.readmem;
+import static arcadeflex.v078.drivers.minivadr.writemem;
 import static arcadeflex.v078.mame.cpuint.irq0_line_hold;
 import static arcadeflex.v078.mame.cpuintrfH.CPU_Z80;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_READ;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_DIRECTION_WRITE;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_MARKER;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_TYPE_MEM;
-import static arcadeflex.v078.mame.memoryH.MEMPORT_WIDTH_8;
-import static arcadeflex.v078.mame.memoryH.MRA_RAM;
-import static arcadeflex.v078.mame.memoryH.MRA_ROM;
-import static arcadeflex.v078.mame.memoryH.MWA_NOP;
-import static arcadeflex.v078.mame.memoryH.MWA_ROM;
-import arcadeflex.v078.mame.memoryH.Memory_ReadAddress;
-import arcadeflex.v078.mame.memoryH.Memory_WriteAddress;
 import static arcadeflex056.fucPtr.*;
 
 import static mame056.commonH.*;
-import static mame056.inptportH.*;
 import static mame056.cpuexecH.*;
 import static mame056.driverH.*;
-import static mame056.inptport.*;
 import static mame056.drawgfxH.*;
 import static mame056.vidhrdw.minivadr.*;
-import static mame056.vidhrdw.generic.*;
 
 public class minivadr {
 
-    public static Memory_ReadAddress readmem[] = {
-        new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
-        new Memory_ReadAddress(0x0000, 0x1fff, MRA_ROM),
-        new Memory_ReadAddress(0xa000, 0xbfff, MRA_RAM),
-        new Memory_ReadAddress(0xe008, 0xe008, input_port_0_r),
-        new Memory_ReadAddress(MEMPORT_MARKER, 0)
-    };
-
-    public static Memory_WriteAddress writemem[] = {
-        new Memory_WriteAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_WRITE | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
-        new Memory_WriteAddress(0x0000, 0x1fff, MWA_ROM),
-        new Memory_WriteAddress(0xa000, 0xbfff, minivadr_videoram_w, videoram, videoram_size),
-        new Memory_WriteAddress(0xe008, 0xe008, MWA_NOP), // ???
-        new Memory_WriteAddress(MEMPORT_MARKER, 0)
-    };
-
-    static InputPortPtr input_ports_minivadr = new InputPortPtr() {
-        public void handler() {
-            PORT_START();
-            PORT_BIT(0x01, IP_ACTIVE_LOW, IPT_JOYSTICK_LEFT);
-            PORT_BIT(0x02, IP_ACTIVE_LOW, IPT_JOYSTICK_RIGHT);
-            PORT_BIT(0x04, IP_ACTIVE_LOW, IPT_BUTTON1);
-            PORT_BIT(0x08, IP_ACTIVE_LOW, IPT_COIN1);
-            PORT_BIT(0x10, IP_ACTIVE_LOW, IPT_UNKNOWN);
-            PORT_BIT(0x20, IP_ACTIVE_LOW, IPT_UNKNOWN);
-            PORT_BIT(0x40, IP_ACTIVE_LOW, IPT_UNKNOWN);
-            PORT_BIT(0x80, IP_ACTIVE_LOW, IPT_UNKNOWN);
-            INPUT_PORTS_END();
-        }
-    };
 
     static MachineDriver machine_driver_minivadr = new MachineDriver(
             /* basic machine hardware */
