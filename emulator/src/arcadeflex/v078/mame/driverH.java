@@ -4,29 +4,21 @@
  */
 package arcadeflex.v078.mame;
 
+//generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
-import arcadeflex.v078.mame.cpuexecH.MachineCPU;
-import static arcadeflex.v078.mame.mame.machine_add_cpu;
+//mame imports
+import static arcadeflex.v078.mame.cpuexecH.*;
+import static arcadeflex.v078.mame.mame.*;
+//TODO
 import arcadeflex056.fucPtr.VhConvertColorPromPtr;
 import arcadeflex056.fucPtr.VhStartPtr;
 import arcadeflex056.fucPtr.VhUpdatePtr;
 import mame056.drawgfxH.rectangle;
+import mame056.sndintrfH.MachineSound;
 
 public class driverH {
 
     /*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///	driver.h
-/*TODO*///
-/*TODO*///	Include this with all MAME files. Includes all the core system pieces.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#ifndef DRIVER_H
-/*TODO*///#define DRIVER_H
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
 /*TODO*///
 /*TODO*///	Macros for declaring common callbacks
 /*TODO*///
@@ -59,43 +51,6 @@ public class driverH {
 /*TODO*///#define video_update_NULL 		NULL
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///	Core MAME includes
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#include "osd_cpu.h"
-/*TODO*///#include "memory.h"
-/*TODO*///#include "mamedbg.h"
-/*TODO*///#include "osdepend.h"
-/*TODO*///#include "mame.h"
-/*TODO*///#include "common.h"
-/*TODO*///#include "drawgfx.h"
-/*TODO*///#include "palette.h"
-/*TODO*///#include "cpuintrf.h"
-/*TODO*///#include "cpuexec.h"
-/*TODO*///#include "cpuint.h"
-/*TODO*///#include "sndintrf.h"
-/*TODO*///#include "input.h"
-/*TODO*///#include "inptport.h"
-/*TODO*///#include "usrintrf.h"
-/*TODO*///#include "cheat.h"
-/*TODO*///#include "tilemap.h"
-/*TODO*///#include "profiler.h"
-/*TODO*///
-/*TODO*///#ifdef MESS
-/*TODO*///#include "messdrv.h"
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///#ifdef MAME_NET
-/*TODO*///#include "network.h"
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///
-/*TODO*///#ifdef MMSND
-/*TODO*///#include "mmsnd/mmsnd.h"
-/*TODO*///#endif
 /*TODO*///
 /*TODO*///
 /*TODO*////***************************************************************************
@@ -233,7 +188,7 @@ public class driverH {
     }
 
     public static void MDRV_VISIBLE_AREA(int minx, int maxx, int miny, int maxy) {
-        temp_machine.default_visible_area=new rectangle();
+        temp_machine.default_visible_area = new rectangle();
         temp_machine.default_visible_area.min_x = (minx);
         temp_machine.default_visible_area.max_x = (maxx);
         temp_machine.default_visible_area.min_y = (miny);
@@ -322,11 +277,11 @@ public class driverH {
         public float frames_per_second;
         public int vblank_duration;
         public int /*UINT32*/ cpu_slices_per_frame;
-/*TODO*///
+
         public MachineInitHandlerPtr machine_init;
         public MachineStopHandlerPtr machine_stop;
         /*TODO*///	void (*nvram_handler)(mame_file *file, int read_or_write);
-/*TODO*///
+
         public int /*UINT32*/ video_attributes;
         public int /*UINT32*/ aspect_x, aspect_y;
         public int screen_width, screen_height;
@@ -340,14 +295,12 @@ public class driverH {
         /*TODO*///	void (*video_stop)(void);
 /*TODO*///	void (*video_eof)(void);
         public VhUpdatePtr video_update;
-        /*TODO*///
-/*TODO*///	UINT32 sound_attributes;
-/*TODO*///	struct MachineSound sound[MAX_SOUND];
+
+        public int /*UINT32*/ sound_attributes;
+        public MachineSound sound[] = MachineSound.create(MAX_SOUND);
     }
-    /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
+
+    /*TODO*////***************************************************************************
 /*TODO*///
 /*TODO*///	Machine driver constants and flags
 /*TODO*///

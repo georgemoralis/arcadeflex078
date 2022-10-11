@@ -7,31 +7,6 @@ package arcadeflex.v078.mame;
 public class mameH {
 /*TODO*////***************************************************************************
 /*TODO*///
-/*TODO*///	mame.h
-/*TODO*///
-/*TODO*///	Controls execution of the core MAME system.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#ifndef MACHINE_H
-/*TODO*///#define MACHINE_H
-/*TODO*///
-/*TODO*///#include <stdio.h>
-/*TODO*///#include <string.h>
-/*TODO*///#include <stdlib.h>
-/*TODO*///
-/*TODO*///#include "fileio.h"
-/*TODO*///#include "osdepend.h"
-/*TODO*///#include "drawgfx.h"
-/*TODO*///#include "palette.h"
-/*TODO*///
-/*TODO*///extern char build_version[];
-/*TODO*///extern int gbPriorityBitmapIsDirty;
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
 /*TODO*///	Parameters
 /*TODO*///
 /*TODO*///***************************************************************************/
