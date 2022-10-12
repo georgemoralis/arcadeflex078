@@ -1,7 +1,7 @@
 /**
- * ported to 0.37b7
+ * ported to 0.78
  */
-package arcadeflex037b7;
+package arcadeflex.v078.platform;
 
 import static common.util.*;
 import arcadeflex036.osdepend;
