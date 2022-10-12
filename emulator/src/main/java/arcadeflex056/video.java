@@ -37,7 +37,7 @@ import static mame056.mame.Machine;
 import static mame056.mame.schedule_full_refresh;
 import static mame056.usrintrf.set_ui_visarea;
 import static mame056.usrintrf.ui_text;
-import static mame056.version.build_version;
+import static arcadeflex.v078.mame.version.build_version;
 
 
 public class video {
