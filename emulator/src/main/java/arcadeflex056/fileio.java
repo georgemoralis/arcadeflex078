@@ -3,6 +3,7 @@
  */
 package arcadeflex056;
 
+import static arcadeflex.v078.mame.fileio.downloadFile;
 import arcadeflex036.osdepend;
 import static arcadeflex036.osdepend.*;
 import static common.ptr.*;
@@ -472,6 +473,12 @@ public class fileio {
 /*HACK*/ pathc = 1;
                     /*HACK*/ pathv = new String[1];
                     /*HACK*/ pathv[0] = "roms";
+                    
+                    if (!(new File(pathv[0] + File.separator + gamename + ".zip").exists())){
+                        //found=1;
+                        System.out.println(gamename+" not FOUND! Trying to download it");
+                        downloadFile(gamename, pathv[0]);
+                    }
                 }
                 for (indx = 0; indx < pathc && found == 0; ++indx) {
                     String dir_name = pathv[indx];

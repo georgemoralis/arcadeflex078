@@ -4,7 +4,31 @@
  */
 package arcadeflex.v078.mame;
 
+import arcadeflex056.settings;
+import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
+
 public class fileio {
+    
+    public static void downloadFile(String _rom, String _dstDir) {
+        String _url_ROM = settings.romUrl+_rom+".zip";
+        System.out.println("Downloading "+_url_ROM);
+        try (BufferedInputStream inputStream = new BufferedInputStream(new URL(_url_ROM).openStream());
+            FileOutputStream fileOS = new FileOutputStream(_dstDir+"/"+_rom+".zip")) {
+              byte data[] = new byte[1024];
+              int byteContent;
+              while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
+                  fileOS.write(data, 0, byteContent);
+              }
+              fileOS.close();
+              
+        } catch (IOException e) {
+              e.printStackTrace(System.out);
+        }
+    }
+    
     /*TODO*////***************************************************************************
 /*TODO*///	DEBUGGING
 /*TODO*///***************************************************************************/
