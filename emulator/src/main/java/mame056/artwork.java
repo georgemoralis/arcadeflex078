@@ -22,6 +22,7 @@
  */ 
 package mame056;
 
+import static arcadeflex.v078.mame.fileioH.*;
 import static common.ptr.*;
 import static mame056.artworkH.*;
 import static mame056.common.*;
@@ -34,7 +35,6 @@ import static mame056.palette.*;
 // refactor
 import static arcadeflex036.osdepend.logerror;
 import static common.subArrays.*;
-import static mame056.osdependH.*;
 import static mame056.pngH.*;
 import static mame056.png.*;
 import static arcadeflex056.fileio.*;
@@ -352,7 +352,7 @@ public class artwork
 /*TODO*///			strcat(file_name2, ".png");
 /*TODO*///		}
 	
-		if ((fp = osd_fopen(Machine.gamedrv.name, file_name2, OSD_FILETYPE_ARTWORK, 0)) == null)
+		if ((fp = osd_fopen(Machine.gamedrv.name, file_name2, FILETYPE_ARTWORK, 0)) == null)
 		{
 			logerror("Unable to open PNG %s\n", file_name);
 			return 0;

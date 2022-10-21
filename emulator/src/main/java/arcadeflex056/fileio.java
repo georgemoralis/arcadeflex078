@@ -4,6 +4,7 @@
 package arcadeflex056;
 
 import static arcadeflex.v078.mame.fileio.downloadFile;
+import static arcadeflex.v078.mame.fileioH.*;
 import arcadeflex036.osdepend;
 import static arcadeflex036.osdepend.*;
 import static common.ptr.*;
@@ -12,8 +13,6 @@ import static common.libc.cstdio.*;
 import static common.libc.cstring.*;
 import java.io.File;
 import static mame056.mame.mame_highscore_enabled;
-
-import static mame056.osdependH.*;
 
 public class fileio {
 
@@ -450,8 +449,8 @@ public class fileio {
 /*TODO*///	}
 
         switch (filetype) {
-            case OSD_FILETYPE_ROM:
-            case OSD_FILETYPE_SAMPLE:
+            case FILETYPE_ROM:
+            case FILETYPE_SAMPLE:
 
                 /* only for reading */
                 if (openforwrite != 0) {
@@ -459,7 +458,7 @@ public class fileio {
                     break;
                 }
 
-                if (filetype == OSD_FILETYPE_SAMPLE) {
+                if (filetype == FILETYPE_SAMPLE) {
                     /*TODO*///			LOG(("osd_fopen: using samplepath\n"));
 /*TODO*///			pathc = samplepathc;
 /*TODO*///			pathv = samplepathv;
@@ -489,7 +488,7 @@ public class fileio {
                         if (new File(name).isDirectory() && new File(name).exists()) {
                             name = sprintf("%s/%s/%s", dir_name, gamename, filename);
                             if (new File(name).exists()) {
-                                if (filetype == OSD_FILETYPE_ROM) {
+                                if (filetype == FILETYPE_ROM) {
                                     f.file = fopen(name, "rb");
                                     long size = ftell(f.file);
                                     f.data = new char[(int) size];
@@ -519,7 +518,7 @@ public class fileio {
                         if (new File(name).exists()) {
                             byte[] bytes = unZipFile(name, filename);
                             if (bytes != null) {
-                                if (filetype == OSD_FILETYPE_ROM) {
+                                if (filetype == FILETYPE_ROM) {
                                     f.file = fopen(bytes, filename, "rb");
                                     long size = ftell(f.file);
                                     f.data = new char[(int) size];
@@ -549,7 +548,7 @@ public class fileio {
                 }
                 break;
 
-            case OSD_FILETYPE_NVRAM:
+            case FILETYPE_NVRAM:
                 if (found == 0) {
                     name = sprintf("%s/%s.nv", nvdir, gamename);
                     f.type = kPlainFile;
@@ -558,7 +557,7 @@ public class fileio {
                 }
                 break;
 
-            case OSD_FILETYPE_HIGHSCORE:
+            case FILETYPE_HIGHSCORE:
                 if (mame_highscore_enabled() != 0) {
                     if (found == 0) {
                         name = sprintf("%s/%s.hi", hidir, gamename);
@@ -608,7 +607,7 @@ public class fileio {
 /*TODO*///		found = !(f->file == 0);
 /*TODO*///		break;
 
-	case OSD_FILETYPE_ARTWORK:
+	case FILETYPE_ARTWORK:
 		/* only for reading */
 		if( openforwrite != 0)
 		{

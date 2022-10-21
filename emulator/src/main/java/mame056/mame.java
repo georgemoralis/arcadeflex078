@@ -23,7 +23,6 @@ import static mame056.drawgfx.*;
 import static mame056.inptport.*;
 import static mame056.ui_text.*;
 import static mame056.usrintrf.*;
-import static mame056.osdependH.*;
 import static mame056.sndintrf.*;
 import static mame056.palette.*;
 

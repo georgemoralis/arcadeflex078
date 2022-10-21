@@ -10,7 +10,7 @@ import static arcadeflex.v078.mame.cpuintrf.cpunum_write_byte;
 import static common.ptr.*;
 import static mame056.mame.Machine;
 import arcadeflex056.util.hiscoreFileParser;
-import static mame056.osdependH.*;
+import static arcadeflex.v078.mame.fileioH.*;
 import static arcadeflex056.fileio.*;
 import static arcadeflex036.osdepend.logerror;
 
@@ -79,7 +79,7 @@ public class hiscore {
     }
 
     static void hs_load() {
-        Object f = osd_fopen(Machine.gamedrv.name, null, OSD_FILETYPE_HIGHSCORE, 0);
+        Object f = osd_fopen(Machine.gamedrv.name, null, FILETYPE_HIGHSCORE, 0);
         state.hiscores_have_been_loaded = 1;
         logerror("hs_load\n");
         if (f != null) {
@@ -103,7 +103,7 @@ public class hiscore {
     }
 
     static void hs_save() {
-        Object f = osd_fopen(Machine.gamedrv.name, null, OSD_FILETYPE_HIGHSCORE, 1);
+        Object f = osd_fopen(Machine.gamedrv.name, null, FILETYPE_HIGHSCORE, 1);
         logerror("hs_save\n");
         if (f != null) {
             mem_range mem_range = state.mem_range;

@@ -9,29 +9,29 @@ public class fileioH {
 /*TODO*////* file types */
 /*TODO*///enum
 /*TODO*///{
-/*TODO*///	FILETYPE_RAW = 0,
-/*TODO*///	FILETYPE_ROM,
-/*TODO*///	FILETYPE_IMAGE,
-/*TODO*///	FILETYPE_IMAGE_DIFF,
-/*TODO*///	FILETYPE_SAMPLE,
-/*TODO*///	FILETYPE_ARTWORK,
-/*TODO*///	FILETYPE_NVRAM,
-/*TODO*///	FILETYPE_HIGHSCORE,
-/*TODO*///	FILETYPE_HIGHSCORE_DB,
-/*TODO*///	FILETYPE_CONFIG,
-/*TODO*///	FILETYPE_INPUTLOG,
-/*TODO*///	FILETYPE_STATE,
-/*TODO*///	FILETYPE_MEMCARD,
-/*TODO*///	FILETYPE_SCREENSHOT,
-/*TODO*///	FILETYPE_HISTORY,
-/*TODO*///	FILETYPE_CHEAT,
-/*TODO*///	FILETYPE_LANGUAGE,
-/*TODO*///	FILETYPE_CTRLR,
-/*TODO*///	FILETYPE_INI,
+    public static final int FILETYPE_RAW            = 0;
+    public static final int FILETYPE_ROM            = 1;
+    public static final int FILETYPE_IMAGE          = 2;
+    public static final int FILETYPE_IMAGE_DIFF     = 3;
+    public static final int FILETYPE_SAMPLE         = 4;
+    public static final int FILETYPE_ARTWORK        = 5;
+    public static final int FILETYPE_NVRAM          = 6;
+    public static final int FILETYPE_HIGHSCORE      = 7;
+    public static final int FILETYPE_HIGHSCORE_DB   = 8;
+    public static final int FILETYPE_CONFIG         = 9;
+    public static final int FILETYPE_INPUTLOG       = 10;
+    public static final int FILETYPE_STATE          = 11;
+    public static final int FILETYPE_MEMCARD        = 12;
+    public static final int FILETYPE_SCREENSHOT     = 13;
+    public static final int FILETYPE_HISTORY        = 14;
+    public static final int FILETYPE_CHEAT          = 15;
+    public static final int FILETYPE_LANGUAGE       = 16;
+    public static final int FILETYPE_CTRLR          = 17;
+    public static final int FILETYPE_INI            = 18;
 /*TODO*///#ifdef MESS
-/*TODO*///	FILETYPE_CRC,
+    public static final int FILETYPE_CRC            = 19;
 /*TODO*///#endif
-/*TODO*///	FILETYPE_end /* dummy last entry */
+    public static final int FILETYPE_end            = 20; /* dummy last entry */
 /*TODO*///};
 /*TODO*///
 /*TODO*///

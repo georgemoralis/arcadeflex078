@@ -18,7 +18,7 @@ import static common.libc.cstring.*;
 
 import static mame056.commonH.*;
 import static mame056.driverH.*;
-import static mame056.osdependH.*;
+import static arcadeflex.v078.mame.fileioH.*;
 import static mame056.mame.*;
 import static mame056.mameH.*;
 import static mame056.drawgfxH.*;
@@ -285,9 +285,9 @@ public class common {
             Object f;
 
             if (samplenames[i + skipfirst].length() > 0 && samplenames[i + skipfirst].charAt(0) != '\0') {
-                if ((f = osd_fopen(basename, samplenames[i + skipfirst], OSD_FILETYPE_SAMPLE, 0)) == null) {
+                if ((f = osd_fopen(basename, samplenames[i + skipfirst], FILETYPE_SAMPLE, 0)) == null) {
                     if (skipfirst != 0) {
-                        f = osd_fopen(samplenames[0].substring(1, samplenames[0].length())/*samplenames[0] + 1*/, samplenames[i + skipfirst], OSD_FILETYPE_SAMPLE, 0);
+                        f = osd_fopen(samplenames[0].substring(1, samplenames[0].length())/*samplenames[0] + 1*/, samplenames[i + skipfirst], FILETYPE_SAMPLE, 0);
                     }
                 }
                 if (f != null) {
@@ -1061,7 +1061,7 @@ public class common {
         romdata.file = null;
         for (drv = Machine.gamedrv; romdata.file == null && drv != null; drv = drv.clone_of) {
             if (drv.name != null && drv.name.length() > 0) {
-                romdata.file = osd_fopen(drv.name, ROM_GETNAME(romp, rom_ptr), OSD_FILETYPE_ROM, 0);
+                romdata.file = osd_fopen(drv.name, ROM_GETNAME(romp, rom_ptr), FILETYPE_ROM, 0);
             }
         }
 
@@ -1069,7 +1069,7 @@ public class common {
         crc = sprintf("%08x", ROM_GETCRC(romp, rom_ptr));
         for (drv = Machine.gamedrv; romdata.file == null && drv != null; drv = drv.clone_of) {
             if (drv.name != null && drv.name.length() > 0) {
-                romdata.file = osd_fopen(drv.name, crc, OSD_FILETYPE_ROM, 0);
+                romdata.file = osd_fopen(drv.name, crc, FILETYPE_ROM, 0);
             }
         }
 
