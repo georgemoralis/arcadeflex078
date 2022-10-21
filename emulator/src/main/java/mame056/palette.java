@@ -8,7 +8,7 @@ import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import static arcadeflex056.video.osd_allocate_colors;
 import static arcadeflex056.video.osd_modify_pen;
 import static common.subArrays.*;
-import static mame056.commonH.REGION_PROMS;
+import static arcadeflex.v078.mame.commonH.REGION_PROMS;
 import static mame056.common.memory_region;
 import static mame056.usrintrf.usrintf_showmessage;
 import static arcadeflex036.osdepend.logerror;

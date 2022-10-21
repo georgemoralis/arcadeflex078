@@ -17,6 +17,7 @@ import static common.libc.cstdlib.*;
 import static common.libc.cstring.*;
 
 import static mame056.commonH.*;
+import static arcadeflex.v078.mame.commonH.*;
 import static mame056.driverH.*;
 import static arcadeflex.v078.mame.fileioH.*;
 import static mame056.mame.*;

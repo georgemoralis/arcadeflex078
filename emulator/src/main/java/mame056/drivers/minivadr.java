@@ -9,6 +9,7 @@ import static arcadeflex.v078.drivers.minivadr.machine_driver_minivadr;
 import static arcadeflex056.fucPtr.*;
 
 import static mame056.commonH.*;
+import static arcadeflex.v078.mame.commonH.*;
 import static mame056.driverH.*;
 
 public class minivadr {

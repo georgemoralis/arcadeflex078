@@ -83,57 +83,56 @@ public class commonH {
 /*TODO*///	int total;	/* total number of samples */
 /*TODO*///	struct GameSample *sample[1];	/* extendable */
 /*TODO*///};
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///	Constants and macros
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///enum
-/*TODO*///{
-/*TODO*///	REGION_INVALID = 0x80,
-/*TODO*///	REGION_CPU1,
-/*TODO*///	REGION_CPU2,
-/*TODO*///	REGION_CPU3,
-/*TODO*///	REGION_CPU4,
-/*TODO*///	REGION_CPU5,
-/*TODO*///	REGION_CPU6,
-/*TODO*///	REGION_CPU7,
-/*TODO*///	REGION_CPU8,
-/*TODO*///	REGION_GFX1,
-/*TODO*///	REGION_GFX2,
-/*TODO*///	REGION_GFX3,
-/*TODO*///	REGION_GFX4,
-/*TODO*///	REGION_GFX5,
-/*TODO*///	REGION_GFX6,
-/*TODO*///	REGION_GFX7,
-/*TODO*///	REGION_GFX8,
-/*TODO*///	REGION_PROMS,
-/*TODO*///	REGION_SOUND1,
-/*TODO*///	REGION_SOUND2,
-/*TODO*///	REGION_SOUND3,
-/*TODO*///	REGION_SOUND4,
-/*TODO*///	REGION_SOUND5,
-/*TODO*///	REGION_SOUND6,
-/*TODO*///	REGION_SOUND7,
-/*TODO*///	REGION_SOUND8,
-/*TODO*///	REGION_USER1,
-/*TODO*///	REGION_USER2,
-/*TODO*///	REGION_USER3,
-/*TODO*///	REGION_USER4,
-/*TODO*///	REGION_USER5,
-/*TODO*///	REGION_USER6,
-/*TODO*///	REGION_USER7,
-/*TODO*///	REGION_USER8,
-/*TODO*///	REGION_DISKS,
-/*TODO*///	REGION_MAX
-/*TODO*///};
-/*TODO*///
-/*TODO*///#define BADCRC( crc ) (~(crc))
-/*TODO*///
+
+
+
+    /***************************************************************************
+
+            Constants and macros
+
+    ***************************************************************************/
+   
+    public static final int REGION_INVALID = 0x80;
+    public static final int REGION_CPU1 = 0x81;
+    public static final int REGION_CPU2 = 0x82;
+    public static final int REGION_CPU3 = 0x83;
+    public static final int REGION_CPU4 = 0x84;
+    public static final int REGION_CPU5 = 0x85;
+    public static final int REGION_CPU6 = 0x86;
+    public static final int REGION_CPU7 = 0x87;
+    public static final int REGION_CPU8 = 0x88;
+    public static final int REGION_GFX1 = 0x89;
+    public static final int REGION_GFX2 = 0x8a;
+    public static final int REGION_GFX3 = 0x8b;
+    public static final int REGION_GFX4 = 0x8c;
+    public static final int REGION_GFX5 = 0x8d;
+    public static final int REGION_GFX6 = 0x8e;
+    public static final int REGION_GFX7 = 0x8f;
+    public static final int REGION_GFX8 = 0x90;
+    public static final int REGION_PROMS = 0x91;
+    public static final int REGION_SOUND1 = 0x92;
+    public static final int REGION_SOUND2 = 0x93;
+    public static final int REGION_SOUND3 = 0x94;
+    public static final int REGION_SOUND4 = 0x95;
+    public static final int REGION_SOUND5 = 0x96;
+    public static final int REGION_SOUND6 = 0x97;
+    public static final int REGION_SOUND7 = 0x98;
+    public static final int REGION_SOUND8 = 0x99;
+    public static final int REGION_USER1 = 0x9a;
+    public static final int REGION_USER2 = 0x9b;
+    public static final int REGION_USER3 = 0x9c;
+    public static final int REGION_USER4 = 0x9d;
+    public static final int REGION_USER5 = 0x9e;
+    public static final int REGION_USER6 = 0x9f;
+    public static final int REGION_USER7 = 0xa0;
+    public static final int REGION_USER8 = 0xa1;
+    public static final int REGION_DISKS = 0xa2;
+    public static final int REGION_MAX = 0xa3;
+
+    public static int BADCRC(int crc) {
+        return ~crc;
+    }
+
 /*TODO*///#define ROMMD5(md5) ("MD5" #md5)
 /*TODO*///
 /*TODO*///
