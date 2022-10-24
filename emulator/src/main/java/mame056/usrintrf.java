@@ -27,6 +27,7 @@ import static mame056.mameH.*;
 import static mame056.ui_text.*;
 import static mame056.ui_textH.*;
 import static mame056.usrintrfH.*;
+import static arcadeflex.v078.mame.inputH.*;
 import static mame056.inptport.*;
 import static arcadeflex.v078.mame.version.*;
 import static mame056.driver.*;

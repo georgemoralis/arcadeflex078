@@ -31,6 +31,7 @@ import static mame056.inputH.*;
 import static mame056.mame.*;
 import static arcadeflex.v078.mame.fileioH.*;
 import static arcadeflex.v078.mame.osdependH.*;
+import static arcadeflex.v078.mame.inputH.*;
 
 public class inptport {
 

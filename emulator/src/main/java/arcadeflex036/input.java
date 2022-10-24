@@ -2,6 +2,7 @@
 package arcadeflex036;
 
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import static arcadeflex.v078.mame.inputH.*;
 import java.awt.event.KeyEvent;
 
 import static arcadeflex056.video.screen;

@@ -8,6 +8,7 @@ import static common.libc.ctime.*;
 import static mame056.inptport.*;
 import static mame056.inptportH.*;
 import static mame056.inputH.*;
+import static arcadeflex.v078.mame.inputH.*;
 import static mame056.mame.*;
 
 //to refactor

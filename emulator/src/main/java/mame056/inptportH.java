@@ -6,6 +6,7 @@ package mame056;
 import java.util.ArrayList;
 import static mame056.inptport.*;
 import static mame056.inputH.*;
+import static arcadeflex.v078.mame.inputH.*;
 
 public class inptportH {
 

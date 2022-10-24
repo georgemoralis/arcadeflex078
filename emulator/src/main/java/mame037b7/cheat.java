@@ -8,6 +8,7 @@ import static arcadeflex.v078.mame.cpuintrf.cpunum_address_mask;
 import static arcadeflex.v078.mame.cpuintrf.cpunum_read_byte;
 import static arcadeflex.v078.mame.cpuintrf.cpunum_write_byte;
 import static arcadeflex.v078.mame.cpuintrfH.cpu_gettotalcpu;
+import static arcadeflex.v078.mame.inputH.KEYCODE_LSHIFT;
 import static common.libc.cstdio.sprintf;
 import arcadeflex037b7.util.cheatFileParser;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import static mame056.ui_textH.*;
 import static mame056.inptportH.*;
 import static mame056.mame.*;
 import static mame056.input.*;
-import static mame056.inputH.*;
+import static arcadeflex.v078.mame.inputH.*;
 import static mame056.usrintrf.*;
 
 public class cheat {
