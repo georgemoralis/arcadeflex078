@@ -18,7 +18,7 @@ import static mame056.common.*;
 import static mame056.commonH.*;
 import static mame056.drawgfxH.*;
 import static mame056.driverH.*;
-import static mame056.input.*;
+import static arcadeflex.v078.mame.input.*;
 import static mame056.drawgfx.*;
 import static mame056.inptport.*;
 import static mame056.ui_text.*;

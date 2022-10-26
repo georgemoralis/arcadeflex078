@@ -3,6 +3,7 @@
  */
 package arcadeflex056;
 
+import static arcadeflex.v078.mame.input.input_ui_pressed;
 import static arcadeflex036.libc_old.strlen;
 import arcadeflex036.osdepend;
 import static arcadeflex036.ticker.TICKS_PER_SEC;
@@ -32,7 +33,6 @@ import java.awt.event.WindowEvent;
 import static java.lang.Math.pow;
 import mame056.commonH.mame_bitmap;
 import static mame056.inptportH.*;
-import static mame056.input.*;
 import static mame056.mame.Machine;
 import static mame056.mame.schedule_full_refresh;
 import static mame056.usrintrf.set_ui_visarea;

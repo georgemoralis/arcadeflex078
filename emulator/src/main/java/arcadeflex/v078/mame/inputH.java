@@ -4,7 +4,8 @@
  */
 package arcadeflex.v078.mame;
 
-import static mame056.input.code_pressed_memory;
+import static arcadeflex.v078.mame.input.code_pressed_memory;
+
 
 public class inputH {
 /*TODO*///#ifndef INPUT_H

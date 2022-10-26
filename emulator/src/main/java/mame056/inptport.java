@@ -26,7 +26,7 @@ import static arcadeflex036.osdepend.logerror;
 import static mame056.common.*;
 import static mame056.commonH.*;
 import static mame056.inptportH.*;
-import static mame056.input.*;
+import static arcadeflex.v078.mame.input.*;
 import static mame056.mame.*;
 import static arcadeflex.v078.mame.fileioH.*;
 import static arcadeflex.v078.mame.osdependH.*;

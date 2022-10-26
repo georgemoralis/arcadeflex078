@@ -19,7 +19,7 @@ import static mame056.sndintrf.*;
 import static mame056.driverH.*;
 import static mame056.common.*;
 import static mame056.commonH.*;
-import static mame056.input.*;
+import static arcadeflex.v078.mame.input.*;
 import static mame056.inptportH.*;
 import static mame056.mame.*;
 import static mame056.mameH.*;
