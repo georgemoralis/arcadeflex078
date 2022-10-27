@@ -18,6 +18,7 @@ import static common.libc.cstring.*;
 
 import static mame056.commonH.*;
 import static arcadeflex.v078.mame.commonH.*;
+import static arcadeflex.v078.mame.fileio.mame_fread;
 import static mame056.driverH.*;
 import static arcadeflex.v078.mame.fileioH.*;
 import static mame056.mame.*;
@@ -1086,7 +1087,7 @@ public class common {
     static int rom_fread(rom_load_data romdata, UBytePtr buffer, int length) {
         /* files just pass through */
         if (romdata.file != null) {
-            return osd_fread(romdata.file, buffer, length);
+            return mame_fread(romdata.file, buffer, length);
         } /* otherwise, fill with randomness */ else {
             fill_random(buffer, length);
         }

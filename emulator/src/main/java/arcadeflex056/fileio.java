@@ -5,6 +5,7 @@ package arcadeflex056;
 
 import static arcadeflex.v078.mame.fileio.downloadFile;
 import arcadeflex.v078.mame.fileio.mame_file;
+import static arcadeflex.v078.mame.fileio.mame_fread;
 import static arcadeflex.v078.mame.fileioH.*;
 import arcadeflex036.osdepend;
 import static arcadeflex036.osdepend.*;
@@ -735,40 +736,15 @@ public class fileio {
         return f;
     }
 
-    public static int osd_fread(Object file, char[] buffer, int offset, int length) {
-        mame_file f = (mame_file) file;
-
-        switch (f.type) {
-            case kPlainFile:
-                return fread(buffer, offset, 1, length, f.file);
-            case kZippedFile:
-            case kRAMFile:
-                /* reading from the RAM image of a file */
-                if (f.data != null) {
-                    if (length + f.offset > f.length) {
-                        length = f.length - f.offset;
-                    }
-                    memcpy(buffer, offset, f.data, f.offset, length);
-                    f.offset += length;
-                    return length;
-                }
-                break;
-        }
-
-        return 0;
-    }
-
-    public static int osd_fread(Object file, UBytePtr buffer, int length) {
-        return osd_fread(file, buffer.memory, buffer.offset, length);
-    }
+    
 
     public static int osd_fread_lsbfirst(Object file, char[] buffer, int length) {
-        return osd_fread(file, buffer, 0, length);
+        return mame_fread(file, buffer, 0, length);
     }
 
     public static int osd_fread_lsbfirst(Object file, byte[] buffer, int length) {
         char[] buf = new char[length];
-        int r = osd_fread(file, buf, 0, length);
+        int r = mame_fread(file, buf, 0, length);
         for (int i = 0; i < buf.length; i++) {
             buffer[i] = (byte) buf[i];
         }
@@ -776,12 +752,12 @@ public class fileio {
     }
 
     public static int osd_fread(Object file, char[] buffer, int length) {
-        return osd_fread(file, buffer, 0, length);
+        return mame_fread(file, buffer, 0, length);
     }
 
     public static int osd_fread(Object file, byte[] buffer, int length) {
         char[] buf = new char[length];
-        int r = osd_fread(file, buf, 0, length);
+        int r = mame_fread(file, buf, 0, length);
         for (int i = 0; i < buf.length; i++) {
             buffer[i] = (byte) buf[i];
         }
@@ -789,7 +765,7 @@ public class fileio {
     }
 
     public static int osd_fread(Object file, UBytePtr buffer, int offset, int length) {
-        osd_fread(file, buffer.memory, buffer.offset + offset, length);
+        mame_fread(file, buffer.memory, buffer.offset + offset, length);
         return 0;
     }
 

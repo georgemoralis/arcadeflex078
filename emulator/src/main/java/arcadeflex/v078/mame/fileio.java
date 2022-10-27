@@ -4,8 +4,13 @@
  */
 package arcadeflex.v078.mame;
 
+import static arcadeflex056.fileio.osd_fread;
 import arcadeflex056.settings;
 import common.libc.cstdio.FILE;
+import static common.libc.cstdio.fread;
+import static common.libc.cstring.memcpy;
+import common.ptr;
+import common.ptr.UBytePtr;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -43,18 +48,18 @@ public class fileio {
 /*TODO*///#else
 /*TODO*///#define LOG(x)
 /*TODO*///#endif
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///	CONSTANTS
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#define PLAIN_FILE				0
-/*TODO*///#define RAM_FILE				1
-/*TODO*///#define ZIPPED_FILE				2
-/*TODO*///#define UNLOADED_ZIPPED_FILE	3
-/*TODO*///
+
+
+
+    /***************************************************************************
+            CONSTANTS
+    ***************************************************************************/
+
+    public static final int PLAIN_FILE              = 0;
+    public static final int RAM_FILE                = 1;
+    public static final int ZIPPED_FILE             = 2;
+    public static final int UNLOADED_ZIPPED_FILE    = 3;
+
 /*TODO*///#define FILEFLAG_OPENREAD		0x01
 /*TODO*///#define FILEFLAG_OPENWRITE		0x02
 /*TODO*///#define FILEFLAG_HASH			0x04
@@ -87,7 +92,7 @@ public class fileio {
         public char[] data = new char[1];
         public /*UINT64*/ int offset;
         public /*UINT64*/ int length;
-        /*TODO*///	UINT8 eof;
+        public /*UINT8*/int eof;
         public /*UINT8*/int type;
 /*TODO*///	char hash[HASH_BUF_SIZE];
         public /*unsigned*/ int hash;
@@ -363,41 +368,54 @@ public class fileio {
 /*TODO*///	/* no match */
 /*TODO*///	return 0;
 /*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///	mame_fread
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///UINT32 mame_fread(mame_file *file, void *buffer, UINT32 length)
-/*TODO*///{
-/*TODO*///	/* switch off the file type */
-/*TODO*///	switch (file->type)
-/*TODO*///	{
-/*TODO*///		case PLAIN_FILE:
-/*TODO*///			return osd_fread(file->file, buffer, length);
-/*TODO*///
-/*TODO*///		case ZIPPED_FILE:
-/*TODO*///		case RAM_FILE:
-/*TODO*///			if (file->data)
-/*TODO*///			{
-/*TODO*///				if (file->offset + length > file->length)
-/*TODO*///				{
-/*TODO*///					length = file->length - file->offset;
-/*TODO*///					file->eof = 1;
-/*TODO*///				}
-/*TODO*///				memcpy(buffer, file->data + file->offset, length);
-/*TODO*///				file->offset += length;
-/*TODO*///				return length;
-/*TODO*///			}
-/*TODO*///			break;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	return 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
+
+
+
+    /***************************************************************************
+            mame_fread
+    ***************************************************************************/
+
+    public static int mame_fread(Object f, char[] buffer, int offset, int length)
+    {
+    	System.out.println("mame_fread");
+        mame_file file = (mame_file) f;
+
+        /* switch off the file type */
+        switch (file.type) {
+    		case PLAIN_FILE:
+    /*TODO*///			return osd_fread(file->file, buffer, length);
+                    return fread(buffer, offset, 1, length, file.file);
+    
+    		case ZIPPED_FILE:
+    		case RAM_FILE:
+    			if (file.data != null)
+    			{
+    				if (offset + length > file.length)
+    				{
+    					length = file.length - offset;
+    					file.eof = 1;
+    				}
+    /*TODO*///				memcpy(buffer, file->data + file->offset, length);
+                                memcpy(buffer, offset, file.data, file.offset, length);
+    				offset += length;
+    				return length;
+    			}
+    			break;
+    	}
+    
+    	return 0;
+    }
+
+    public static int mame_fread(Object f, char[] buffer, int length)
+    {
+        mame_file file = (mame_file) f;
+        return mame_fread(f, buffer, file.offset, length);
+    }
+    
+    public static int mame_fread(Object file, UBytePtr buffer, int length) {
+        return mame_fread(file, buffer.memory, buffer.offset, length);
+    }
+
 /*TODO*///
 /*TODO*////***************************************************************************
 /*TODO*///	mame_fwrite

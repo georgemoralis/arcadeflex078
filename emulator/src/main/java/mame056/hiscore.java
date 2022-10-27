@@ -7,6 +7,7 @@ package mame056;
 
 import static arcadeflex.v078.mame.cpuintrf.cpunum_read_byte;
 import static arcadeflex.v078.mame.cpuintrf.cpunum_write_byte;
+import static arcadeflex.v078.mame.fileio.mame_fread;
 import static common.ptr.*;
 import static mame056.mame.Machine;
 import arcadeflex056.util.hiscoreFileParser;
@@ -92,7 +93,7 @@ public class hiscore {
 					enough to be dynamically allocated, but let's
 					avoid memory trashing just in case
                      */
-                    osd_fread(f, data, mem_range.num_bytes);
+                    mame_fread(f, data, mem_range.num_bytes);
                     copy_to_memory(mem_range.cpu, mem_range.addr, data, mem_range.num_bytes);
                     data = null;
                 }
