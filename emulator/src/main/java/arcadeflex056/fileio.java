@@ -4,6 +4,7 @@
 package arcadeflex056;
 
 import static arcadeflex.v078.mame.fileio.downloadFile;
+import arcadeflex.v078.mame.fileio.mame_file;
 import static arcadeflex.v078.mame.fileioH.*;
 import arcadeflex036.osdepend;
 import static arcadeflex036.osdepend.*;
@@ -81,15 +82,6 @@ public class fileio {
     public static final int kRAMFile = 1;
     public static final int kZippedFile = 2;
 
-    public static class FakeFileHandle {
-
-        public FILE file;
-        public char[] data = new char[1];
-        public /*unsigned*/ int offset;
-        public /*unsigned*/ int length;
-        public int type;
-        public /*unsigned*/ int crc;
-    }
     
     public static void memmove(UBytePtr dest, UBytePtr src, int numBytes){
         for (int i=0 ; i<numBytes ; i++)
@@ -422,12 +414,12 @@ public class fileio {
         String gamename;
         int found = 0;
         int indx;
-        FakeFileHandle f;
+        mame_file f;
         int pathc = 0;
         String[] pathv = null;
 
         /*TODO*///	decompose_paths_if_needed();
-        f = new FakeFileHandle();
+        f = new mame_file();
         if (f == null) {
             logerror("osd_fopen: failed to malloc FakeFileHandle!\n");
             return null;
@@ -502,7 +494,7 @@ public class fileio {
                                     }
                                     //copy values where they belong
                                     f.length = tlen[0];
-                                    f.crc = tcrc[0];
+                                    f.hash = tcrc[0];
                                 } else {
                                     f.type = kPlainFile;
                                     f.file = fopen(name, "rb");
@@ -532,7 +524,7 @@ public class fileio {
                                     }
                                     //copy values where they belong
                                     f.length = tlen[0];
-                                    f.crc = tcrc[0];
+                                    f.hash = tcrc[0];
                                 } else {
                                     f.type = kPlainFile;
                                     f.file = fopen(bytes, filename, "rb");
@@ -744,7 +736,7 @@ public class fileio {
     }
 
     public static int osd_fread(Object file, char[] buffer, int offset, int length) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
 
         switch (f.type) {
             case kPlainFile:
@@ -835,7 +827,7 @@ public class fileio {
     }
 
     public static void osd_fwrite(Object file, char[] buffer, int offset, int length) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
 
         switch (f.type) {
             case kPlainFile:
@@ -926,7 +918,7 @@ public class fileio {
 /*TODO*///
 /*TODO*////* JB 980920 update */
     public static int osd_fseek(Object file, int offset, int whence) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
         int err = 0;
 
         switch (f.type) {
@@ -963,7 +955,7 @@ public class fileio {
     }
 
     public static void osd_fclose(Object file) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
 
         switch (f.type) {
             case kPlainFile:
@@ -1089,7 +1081,7 @@ public class fileio {
 /*TODO*///}
 /*TODO*///
     public static int osd_fsize(Object file) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
 
         if (f.type == kRAMFile || f.type == kZippedFile) {
             return f.length;
@@ -1104,9 +1096,9 @@ public class fileio {
     }
 
     public static int osd_fcrc(Object file) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
 
-        return f.crc;
+        return f.hash;
     }
 
     /*TODO*///
@@ -1151,7 +1143,7 @@ public class fileio {
 /*TODO*///}
 /*TODO*///
     public static long osd_ftell(Object file) {
-        FakeFileHandle f = (FakeFileHandle) file;
+        mame_file f = (mame_file) file;
 
         if (f.type == kPlainFile && f.file != null) {
             return ftell(f.file);

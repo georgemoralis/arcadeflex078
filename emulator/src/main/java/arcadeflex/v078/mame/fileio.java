@@ -5,6 +5,7 @@
 package arcadeflex.v078.mame;
 
 import arcadeflex056.settings;
+import common.libc.cstdio.FILE;
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -76,21 +77,23 @@ public class fileio {
 /*TODO*///	TYPE DEFINITIONS
 /*TODO*///***************************************************************************/
 /*TODO*///
-/*TODO*///struct _mame_file
-/*TODO*///{
+    public static class mame_file
+    {
 /*TODO*///#ifdef DEBUG_COOKIE
 /*TODO*///	UINT32 debug_cookie;
 /*TODO*///#endif
 /*TODO*///	osd_file *file;
-/*TODO*///	UINT8 *data;
-/*TODO*///	UINT64 offset;
-/*TODO*///	UINT64 length;
-/*TODO*///	UINT8 eof;
-/*TODO*///	UINT8 type;
+        public FILE file;
+        public char[] data = new char[1];
+        public /*UINT64*/ int offset;
+        public /*UINT64*/ int length;
+        /*TODO*///	UINT8 eof;
+        public /*UINT8*/int type;
 /*TODO*///	char hash[HASH_BUF_SIZE];
-/*TODO*///};
-/*TODO*///
-/*TODO*///
+        public /*unsigned*/ int hash;
+    };
+
+
 /*TODO*///
 /*TODO*////***************************************************************************
 /*TODO*///	PROTOTYPES
