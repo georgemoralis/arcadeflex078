@@ -13,6 +13,7 @@ import static arcadeflex.v078.mame.mame.*;
 import arcadeflex056.fucPtr.VhConvertColorPromPtr;
 import arcadeflex056.fucPtr.VhStartPtr;
 import arcadeflex056.fucPtr.VhUpdatePtr;
+import mame056.drawgfxH.GfxDecodeInfo;
 import mame056.drawgfxH.rectangle;
 import mame056.sndintrfH.MachineSound;
 
@@ -109,12 +110,13 @@ public class driverH {
 /*TODO*///		cpu->cpu_clock = (clock);										\
 /*TODO*///	}																	\
 /*TODO*///
-/*TODO*///
-/*TODO*////* CPU parameters */
-/*TODO*///#define MDRV_CPU_FLAGS(flags)											\
-/*TODO*///	if (cpu)															\
-/*TODO*///		cpu->cpu_flags = (flags);										\
-/*TODO*///
+
+    /* CPU parameters */
+    public static void MDRV_CPU_FLAGS(int flags) {
+	if (temp_cpu != null)
+		temp_cpu.cpu_flags = (flags);
+    }
+    
 /*TODO*///#define MDRV_CPU_CONFIG(config)											\
 /*TODO*///	if (cpu)															\
 /*TODO*///		cpu->reset_param = &(config);									\
@@ -196,17 +198,18 @@ public class driverH {
     }
 
 
-    /*TODO*///#define MDRV_GFXDECODE(gfx)												\
-/*TODO*///	machine->gfxdecodeinfo = (gfx);										\
-/*TODO*///
+    public static void MDRV_GFXDECODE(GfxDecodeInfo[] gfx) {
+	temp_machine.gfxdecodeinfo = (gfx);
+    }
+    
     public static void MDRV_PALETTE_LENGTH(int length) {
         temp_machine.total_colors = (length);
     }
 
-    /*TODO*///#define MDRV_COLORTABLE_LENGTH(length)									\
-/*TODO*///	machine->color_table_len = (length);								\
-/*TODO*///
-/*TODO*///
+    public static void MDRV_COLORTABLE_LENGTH(int length) {
+	temp_machine.color_table_len = (length);
+    }
+
     /* core video functions */
     public static void MDRV_PALETTE_INIT(VhConvertColorPromPtr name) {
         temp_machine.init_palette = name;
@@ -286,7 +289,7 @@ public class driverH {
         public int /*UINT32*/ aspect_x, aspect_y;
         public int screen_width, screen_height;
         public rectangle default_visible_area;
-        /*TODO*///	struct GfxDecodeInfo *gfxdecodeinfo;
+        public GfxDecodeInfo[] gfxdecodeinfo;
         public int /*UINT32*/ total_colors;
         public int /*UINT32*/ color_table_len;
         /*TODO*///

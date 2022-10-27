@@ -377,7 +377,7 @@ public class fileio {
 
     public static int mame_fread(Object f, char[] buffer, int offset, int length)
     {
-    	System.out.println("mame_fread");
+    	
         mame_file file = (mame_file) f;
 
         /* switch off the file type */

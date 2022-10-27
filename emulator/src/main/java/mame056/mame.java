@@ -401,7 +401,7 @@ public class mame {
         /* convert the gfx ROMs into character sets. This is done BEFORE calling the driver's */
  /* convert_color_prom() routine (in palette_init()) because it might need to check the */
  /* Machine.gfx[] data */
-/*        if (drv.gfxdecodeinfo != null) {
+        if (drv.gfxdecodeinfo != null) {
             for (i = 0; i < MAX_GFX_ELEMENTS && drv.gfxdecodeinfo[i].memory_region != -1; i++) {
                 int reglen = 8 * memory_region_length(drv.gfxdecodeinfo[i].memory_region);
                 GfxLayout glcopy;
@@ -442,7 +442,7 @@ public class mame {
                 Machine.gfx[i].total_colors = drv.gfxdecodeinfo[i].total_color_codes;
             }
         }
-*/
+
         bmwidth[0] = drv.screen_width;
         bmheight[0] = drv.screen_height;
 

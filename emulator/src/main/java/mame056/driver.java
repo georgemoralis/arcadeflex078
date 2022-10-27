@@ -4,6 +4,7 @@
 package mame056;
 
 import static mame056.driverH.*;
+import static mame056.drivers._1942.driver_1942;
 
 import static mame056.drivers.minivadr.*;
 
@@ -13,7 +14,8 @@ public class driver {
         /**
          * Working
          */
-        /*minivadr*/driver_minivadr,  
+        /*minivadr*/driver_minivadr,
+        driver_1942,
         null
     };
 }
