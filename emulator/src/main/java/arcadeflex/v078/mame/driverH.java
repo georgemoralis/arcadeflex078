@@ -9,6 +9,7 @@ import static arcadeflex.v078.generic.funcPtr.*;
 //mame imports
 import static arcadeflex.v078.mame.cpuexecH.*;
 import static arcadeflex.v078.mame.mame.*;
+import static arcadeflex.v078.mame.memoryH.*;
 //TODO
 import arcadeflex056.fucPtr.VhConvertColorPromPtr;
 import arcadeflex056.fucPtr.VhStartPtr;
@@ -128,14 +129,14 @@ public class driverH {
         }
     }
 
-    /*TODO*///
-/*TODO*///#define MDRV_CPU_PORTS(readport, writeport)								\
-/*TODO*///	if (cpu)															\
-/*TODO*///	{																	\
-/*TODO*///		cpu->port_read = (readport);									\
-/*TODO*///		cpu->port_write = (writeport);									\
-/*TODO*///	}																	\
-/*TODO*///
+
+    public static void MDRV_CPU_PORTS(IO_ReadPort[] readport, IO_WritePort[] writeport) {
+	if (temp_cpu != null) {
+		temp_cpu.port_read = (readport);
+		temp_cpu.port_write = (writeport);
+	}
+    }
+
     public static void MDRV_CPU_VBLANK_INT(InterruptHandlerPtr func, int rate) {
         if (temp_cpu != null) {
             temp_cpu.vblank_interrupt = func;

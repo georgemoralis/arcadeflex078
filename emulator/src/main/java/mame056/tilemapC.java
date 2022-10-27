@@ -920,7 +920,7 @@ public class tilemapC {
             //System.out.println(tilemap.transparency_data);
             //System.out.println(tilemap.draw_tile);
             
-            /*TODO*///tilemap.transparency_data.write(cached_indx, tilemap.draw_tile.handler(tilemap,x0,y0,flags ));
+            tilemap.transparency_data.write(cached_indx, tilemap.draw_tile.handler(tilemap,x0,y0,flags ));
             //System.out.println("draw_tile.handler");
 
 /*TODO*///profiler_mark(PROFILER_END);
@@ -3072,7 +3072,7 @@ public class tilemapC {
             mame_bitmap pixmap = tilemap.pixmap;
             mame_bitmap transparency_bitmap = tilemap.transparency_bitmap;
             int pitch = tile_width + tile_info.skip;
-/*TODO*///	PAL_INIT;
+            PAL_INIT();
             IntArray pPenToPixel = new IntArray(tilemap.pPenToPixel, flags&(TILE_SWAPXY|TILE_FLIPY|TILE_FLIPX));
             UBytePtr pPenData = new UBytePtr(tile_info.pen_data);
             UBytePtr pSource;
@@ -3115,20 +3115,21 @@ public class tilemapC {
             else
             {
                 System.out.println("BB");
-/*TODO*///		for( ty=tile_height; ty!=0; ty-- )
-/*TODO*///		{
-/*TODO*///			pSource = pPenData;
-/*TODO*///			for( tx=tile_width; tx!=0; tx-- )
-/*TODO*///			{
-/*TODO*///				pen = *pSource++;
-/*TODO*///				yx = *pPenToPixel++;
-/*TODO*///				x = x0+(yx%MAX_TILESIZE);
-/*TODO*///				y = y0+(yx/MAX_TILESIZE);
-/*TODO*///				*(x+(UINT16 *)pixmap.line[y]) = PAL_GET(pen);
-/*TODO*///				((UINT8 *)transparency_bitmap.line[y])[x] = code_opaque;
-/*TODO*///			}
-/*TODO*///			pPenData += pitch;
-/*TODO*///		}
+		for( ty=tile_height; ty!=0; ty-- )
+		{
+			pSource = new UBytePtr(pPenData);
+			for( tx=tile_width; tx!=0; tx-- )
+			{
+				pen = pSource.readinc();
+				yx = pPenToPixel.read();
+                                pPenToPixel.offset++;
+				x = x0+(yx%MAX_TILESIZE);
+				y = y0+(yx/MAX_TILESIZE);
+				(new UShortPtr(pixmap.line[y], x)).write( (char) PAL_GET(pen) );
+				(new UBytePtr(transparency_bitmap.line[y])).write(x, code_opaque);
+			}
+			pPenData.inc( pitch );
+		}
             }
             return 0;
         }

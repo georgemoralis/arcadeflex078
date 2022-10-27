@@ -19,7 +19,7 @@ import static arcadeflex056.fucPtr.*;
 import common.ptr.UBytePtr;
 import static mame056.common.coin_counter_w;
 import static mame056.mame.*;
-import static mame056.tilemapC.*;
+import static mame037b11.mame.tilemapC.*;
 import static mame056.tilemapH.*;
 import static arcadeflex.v078.vidhrdw.generic.*;
 import static mame056.commonH.flip_screen;
@@ -175,7 +175,8 @@ public class _1942
 		if (fg_tilemap==null || bg_tilemap==null)
 			return 1;
 	
-		tilemap_set_transparent_pen(fg_tilemap,0);
+/*TODO*///		tilemap_set_transparent_pen(fg_tilemap,0);
+                    fg_tilemap.transparent_pen = 0;
 	
 		return 0;
 	} };
@@ -282,8 +283,8 @@ public class _1942
 	
 	public static VhUpdatePtr c1942_vh_screenrefresh = new VhUpdatePtr() { public void handler(mame_bitmap bitmap,int full_refresh) 
 	{
-		tilemap_draw(bitmap,bg_tilemap,0,0);
+		tilemap_draw(bitmap,bg_tilemap,0/*,0*/);
 		draw_sprites(bitmap);
-		tilemap_draw(bitmap,fg_tilemap,0,0);
+		tilemap_draw(bitmap,fg_tilemap,0/*,0*/);
 	} };
 }
