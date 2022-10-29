@@ -1,11 +1,20 @@
 /*
  * ported to v0.78
  * 
- */ 
+ */
 package arcadeflex.v078.mame;
 
+import arcadeflex.v078.generic.funcPtr.PaletteInitHandlerPtr;
+import common.ptr.UBytePtr;
+import static mame056.mame.Machine;
+import static mame056.palette.DIRECT_15BIT;
+import static mame056.palette.DIRECT_32BIT;
+import static mame056.palette.PALETTIZED_16BIT;
+import static mame056.palette.palette_set_color;
+
 public class palette {
-/*TODO*///#define VERBOSE 0
+
+    /*TODO*///#define VERBOSE 0
 /*TODO*///
 /*TODO*///
 /*TODO*////*-------------------------------------------------
@@ -41,21 +50,21 @@ public class palette {
 /*TODO*////*-------------------------------------------------
 /*TODO*///	LOCAL VARIABLES
 /*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static rgb_t *game_palette;			/* RGB palette as set by the driver */
-/*TODO*///static rgb_t *adjusted_palette;		/* actual RGB palette after brightness/gamma adjustments */
-/*TODO*///static UINT32 *dirty_palette;
+    static int[]/*rgb_t*/ game_palette;/* RGB palette as set by the driver */
+    static int[]/*rgb_t*/ adjusted_palette;/* actual RGB palette after brightness/gamma adjustments */
+ /*TODO*///static UINT32 *dirty_palette;
 /*TODO*///static UINT16 *pen_brightness;
 /*TODO*///
-/*TODO*///static UINT8 adjusted_palette_dirty;
-/*TODO*///static UINT8 debug_palette_dirty;
+    static int/*UINT8*/ adjusted_palette_dirty;
+    /*TODO*///static UINT8 debug_palette_dirty;
 /*TODO*///
 /*TODO*///static UINT16 shadow_factor, highlight_factor;
 /*TODO*///static double global_brightness, global_brightness_adjust, global_gamma;
 /*TODO*///
-/*TODO*///static UINT8 colormode, highlight_method;
-/*TODO*///static pen_t total_colors;
-/*TODO*///static pen_t total_colors_with_ui;
+    static int/*UINT8*/ colormode, highlight_method;
+    static int/*pen_t*/ total_colors;
+
+    /*TODO*///static pen_t total_colors_with_ui;
 /*TODO*///
 /*TODO*///static UINT8 color_correct_table[(MAX_PEN_BRIGHTNESS * MAX_PEN_BRIGHTNESS) >> PEN_BRIGHTNESS_BITS];
 /*TODO*///
@@ -99,33 +108,29 @@ public class palette {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	adjust_palette_entry - adjust a palette
-/*TODO*///	entry for brightness and gamma
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///INLINE rgb_t adjust_palette_entry(rgb_t entry, int pen_bright)
-/*TODO*///{
-/*TODO*///	int r = color_correct_table[(RGB_RED(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
+
+    /*-------------------------------------------------
+	adjust_palette_entry - adjust a palette
+	entry for brightness and gamma
+    -------------------------------------------------*/
+    static int/*rgb_t*/ adjust_palette_entry(int/*rgb_t*/ entry, int pen_bright) {
+        throw new UnsupportedOperationException("Unsupported");
+        /*TODO*///	int r = color_correct_table[(RGB_RED(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
 /*TODO*///	int g = color_correct_table[(RGB_GREEN(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
 /*TODO*///	int b = color_correct_table[(RGB_BLUE(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
 /*TODO*///	return MAKE_RGB(r,g,b);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	mark_pen_dirty - mark a given pen index dirty
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///INLINE void mark_pen_dirty(int pen)
-/*TODO*///{
-/*TODO*///	dirty_palette[pen / 32] |= 1 << (pen % 32);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
+    }
+
+    /*-------------------------------------------------
+	mark_pen_dirty - mark a given pen index dirty
+    -------------------------------------------------*/
+    static void mark_pen_dirty(int pen) {
+        throw new UnsupportedOperationException("Unsupported");
+        /*TODO*///	dirty_palette[pen / 32] |= 1 << (pen % 32);
+    }
+
+
+    /*TODO*///
 /*TODO*////*-------------------------------------------------
 /*TODO*///	palette_start - palette initialization that
 /*TODO*///	takes place before the display is created
@@ -815,51 +820,50 @@ public class palette {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	internal_modify_single_pen - change a single
-/*TODO*///	pen and recompute its adjusted RGB value
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///static void internal_modify_single_pen(pen_t pen, rgb_t color, int pen_bright)
-/*TODO*///{
-/*TODO*///	rgb_t adjusted_color;
-/*TODO*///
-/*TODO*///	/* skip if out of bounds or not ready */
-/*TODO*///	if (pen >= total_colors)
-/*TODO*///		return;
-/*TODO*///
-/*TODO*///	/* update the raw palette */
-/*TODO*///	game_palette[pen] = color;
-/*TODO*///
-/*TODO*///	/* now update the adjusted color if it's different */
-/*TODO*///	adjusted_color = adjust_palette_entry(color, pen_bright);
-/*TODO*///	if (adjusted_color != adjusted_palette[pen])
-/*TODO*///	{
-/*TODO*///		/* change the adjusted palette entry */
-/*TODO*///		adjusted_palette[pen] = adjusted_color;
-/*TODO*///		adjusted_palette_dirty = 1;
-/*TODO*///
-/*TODO*///		/* update the pen value or mark the palette dirty */
-/*TODO*///		switch (colormode)
-/*TODO*///		{
-/*TODO*///			/* 16-bit palettized: just mark it dirty for later */
-/*TODO*///			case PALETTIZED_16BIT:
-/*TODO*///				mark_pen_dirty(pen);
+
+    /*-------------------------------------------------
+	internal_modify_single_pen - change a single
+	pen and recompute its adjusted RGB value
+-------------------------------------------------*/
+    static void internal_modify_single_pen(int/*pen_t*/ pen, int/*rgb_t*/ color, int pen_bright) {
+        int/*rgb_t*/ adjusted_color;
+
+        /* skip if out of bounds or not ready */
+        if (pen >= total_colors) {
+            return;
+        }
+
+        /* update the raw palette */
+        game_palette[pen] = color;
+
+        /* now update the adjusted color if it's different */
+        adjusted_color = adjust_palette_entry(color, pen_bright);
+        if (adjusted_color != adjusted_palette[pen]) {
+            /* change the adjusted palette entry */
+            adjusted_palette[pen] = adjusted_color;
+            adjusted_palette_dirty = 1;
+
+            /* update the pen value or mark the palette dirty */
+            switch (colormode) {
+                /* 16-bit palettized: just mark it dirty for later */
+                case PALETTIZED_16BIT:
+                    mark_pen_dirty(pen);
+                    break;
+
+                /* 15/32-bit direct: update the Machine->pens array */
+                case DIRECT_15BIT:
+                    throw new UnsupportedOperationException("Unsupported");
+                /*TODO*///				Machine->pens[pen] = rgb_to_direct15(adjusted_color);
 /*TODO*///				break;
-/*TODO*///
-/*TODO*///			/* 15/32-bit direct: update the Machine->pens array */
-/*TODO*///			case DIRECT_15BIT:
-/*TODO*///				Machine->pens[pen] = rgb_to_direct15(adjusted_color);
+
+                case DIRECT_32BIT:
+                    throw new UnsupportedOperationException("Unsupported");
+                /*TODO*///				Machine->pens[pen] = rgb_to_direct32(adjusted_color);
 /*TODO*///				break;
-/*TODO*///
-/*TODO*///			case DIRECT_32BIT:
-/*TODO*///				Machine->pens[pen] = rgb_to_direct32(adjusted_color);
-/*TODO*///				break;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
+            }
+        }
+    }
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////*-------------------------------------------------
@@ -1883,70 +1887,68 @@ public class palette {
 /*TODO*///	changecolor_RRRRGGGGBBBBRGBx(offset,paletteram16[offset]);
 /*TODO*///}
 /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////******************************************************************************
-/*TODO*///
-/*TODO*/// Commonly used color PROM handling functions
-/*TODO*///
-/*TODO*///******************************************************************************/
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///	Standard black and white palette.
-/*TODO*///	Color 0 is pure black, color 1 is pure white.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///PALETTE_INIT( black_and_white )
-/*TODO*///{
-/*TODO*///	palette_set_color(0,0x00,0x00,0x00); /* black */
-/*TODO*///	palette_set_color(1,0xff,0xff,0xff); /* white */
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///  This assumes the commonly used resistor values:
-/*TODO*///
-/*TODO*///  bit 3 -- 220 ohm resistor  -- RED/GREEN/BLUE
-/*TODO*///        -- 470 ohm resistor  -- RED/GREEN/BLUE
-/*TODO*///        -- 1  kohm resistor  -- RED/GREEN/BLUE
-/*TODO*///  bit 0 -- 2.2kohm resistor  -- RED/GREEN/BLUE
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///PALETTE_INIT( RRRR_GGGG_BBBB )
-/*TODO*///{
-/*TODO*///	int i;
-/*TODO*///
-/*TODO*///
-/*TODO*///	for (i = 0;i < Machine->drv->total_colors;i++)
-/*TODO*///	{
-/*TODO*///		int bit0,bit1,bit2,bit3,r,g,b;
-/*TODO*///
-/*TODO*///		/* red component */
-/*TODO*///		bit0 = (color_prom[i] >> 0) & 0x01;
-/*TODO*///		bit1 = (color_prom[i] >> 1) & 0x01;
-/*TODO*///		bit2 = (color_prom[i] >> 2) & 0x01;
-/*TODO*///		bit3 = (color_prom[i] >> 3) & 0x01;
-/*TODO*///		r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-/*TODO*///		/* green component */
-/*TODO*///		bit0 = (color_prom[i + Machine->drv->total_colors] >> 0) & 0x01;
-/*TODO*///		bit1 = (color_prom[i + Machine->drv->total_colors] >> 1) & 0x01;
-/*TODO*///		bit2 = (color_prom[i + Machine->drv->total_colors] >> 2) & 0x01;
-/*TODO*///		bit3 = (color_prom[i + Machine->drv->total_colors] >> 3) & 0x01;
-/*TODO*///		g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-/*TODO*///		/* blue component */
-/*TODO*///		bit0 = (color_prom[i + 2*Machine->drv->total_colors] >> 0) & 0x01;
-/*TODO*///		bit1 = (color_prom[i + 2*Machine->drv->total_colors] >> 1) & 0x01;
-/*TODO*///		bit2 = (color_prom[i + 2*Machine->drv->total_colors] >> 2) & 0x01;
-/*TODO*///		bit3 = (color_prom[i + 2*Machine->drv->total_colors] >> 3) & 0x01;
-/*TODO*///		b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
-/*TODO*///
-/*TODO*///		palette_set_color(i,r,g,b);
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///    
+    /**
+     * ****************************************************************************
+     *
+     * Commonly used color PROM handling functions
+     *
+     *****************************************************************************
+     */
+    /**
+     * *************************************************************************
+     *
+     * Standard black and white palette. Color 0 is pure black, color 1 is pure
+     * white.
+     *
+     **************************************************************************
+     */
+    public static PaletteInitHandlerPtr black_and_white = new PaletteInitHandlerPtr() {
+        public void handler(char[] colortable, UBytePtr color_prom) {
+            palette_set_color(0, 0x00, 0x00, 0x00);/* black */
+            palette_set_color(1, 0xff, 0xff, 0xff);/* white */
+        }
+    };
+
+    /**
+     * *************************************************************************
+     *
+     * This assumes the commonly used resistor values:
+     *
+     * bit 3 -- 220 ohm resistor -- RED/GREEN/BLUE -- 470 ohm resistor --
+     * RED/GREEN/BLUE -- 1 kohm resistor -- RED/GREEN/BLUE bit 0 -- 2.2kohm
+     * resistor -- RED/GREEN/BLUE
+     *
+     **************************************************************************
+     */
+    public static PaletteInitHandlerPtr RRRR_GGGG_BBBB = new PaletteInitHandlerPtr() {
+        public void handler(char[] colortable, UBytePtr color_prom) {
+            int i;
+
+            for (i = 0; i < Machine.drv.total_colors; i++) {
+                int bit0, bit1, bit2, bit3, r, g, b;
+
+                /* red component */
+                bit0 = (color_prom.read(i) >> 0) & 0x01;
+                bit1 = (color_prom.read(i) >> 1) & 0x01;
+                bit2 = (color_prom.read(i) >> 2) & 0x01;
+                bit3 = (color_prom.read(i) >> 3) & 0x01;
+                r = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
+                /* green component */
+                bit0 = (color_prom.read(i + Machine.drv.total_colors) >> 0) & 0x01;
+                bit1 = (color_prom.read(i + Machine.drv.total_colors) >> 1) & 0x01;
+                bit2 = (color_prom.read(i + Machine.drv.total_colors) >> 2) & 0x01;
+                bit3 = (color_prom.read(i + Machine.drv.total_colors) >> 3) & 0x01;
+                g = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
+                /* blue component */
+                bit0 = (color_prom.read(i + 2 * Machine.drv.total_colors) >> 0) & 0x01;
+                bit1 = (color_prom.read(i + 2 * Machine.drv.total_colors) >> 1) & 0x01;
+                bit2 = (color_prom.read(i + 2 * Machine.drv.total_colors) >> 2) & 0x01;
+                bit3 = (color_prom.read(i + 2 * Machine.drv.total_colors) >> 3) & 0x01;
+                b = 0x0e * bit0 + 0x1f * bit1 + 0x43 * bit2 + 0x8f * bit3;
+
+                palette_set_color(i, r, g, b);
+            }
+        }
+    };
+
 }
