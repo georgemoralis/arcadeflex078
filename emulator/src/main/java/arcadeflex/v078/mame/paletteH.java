@@ -1,11 +1,12 @@
 /*
  * ported to v0.78
  * 
- */ 
+ */
 package arcadeflex.v078.mame;
 
 public class paletteH {
-/*TODO*///struct mame_display;		/* declared elsewhere */
+
+    /*TODO*///struct mame_display;		/* declared elsewhere */
 /*TODO*///
 /*TODO*///typedef UINT32 pen_t;
 /*TODO*///typedef UINT32 rgb_t;
@@ -28,11 +29,22 @@ public class paletteH {
 /*TODO*///	MACROS
 /*TODO*///-------------------------------------------------*/
 /*TODO*///
-/*TODO*///#define MAKE_RGB(r,g,b) 	((((r) & 0xff) << 16) | (((g) & 0xff) << 8) | ((b) & 0xff))
-/*TODO*///#define MAKE_ARGB(a,r,g,b)	(MAKE_RGB(r,g,b) | (((a) & 0xff) << 24))
+    public static int MAKE_RGB(int r, int g, int b) {
+        return ((((r) & 0xff) << 16) | (((g) & 0xff) << 8) | ((b) & 0xff));
+    }
+
+    /*TODO*///#define MAKE_ARGB(a,r,g,b)	(MAKE_RGB(r,g,b) | (((a) & 0xff) << 24))
 /*TODO*///#define RGB_ALPHA(rgb)		(((rgb) >> 24) & 0xff)
-/*TODO*///#define RGB_RED(rgb)		(((rgb) >> 16) & 0xff)
-/*TODO*///#define RGB_GREEN(rgb)		(((rgb) >> 8) & 0xff)
-/*TODO*///#define RGB_BLUE(rgb)		((rgb) & 0xff)
-/*TODO*///    
+    public static int RGB_RED(int rgb) {
+        return (((rgb) >> 16) & 0xff);
+    }
+
+    public static int RGB_GREEN(int rgb) {
+        return (((rgb) >> 8) & 0xff);
+    }
+
+    public static int RGB_BLUE(int rgb) {
+        return ((rgb) & 0xff);
+    }
+
 }
