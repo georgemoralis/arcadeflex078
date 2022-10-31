@@ -35,6 +35,7 @@ import static mame056.common.bitmap_free;
 import mame056.commonH.mame_bitmap;
 import static mame056.driverH.*;
 import static mame056.mame.Machine;
+import static common.libc.cstring.memcpy;
 
 public class tilemapC
 {
@@ -129,10 +130,10 @@ public class tilemapC
 	
 /*TODO*///	static UINT32 g_mask32[32];
         
-    public static abstract interface blitmask_t { public abstract void handler(UShortPtr dest, UShortPtr source, UShortPtr pMask, int mask, int value, int count, UShortPtr pri, int pcode); }
+    public static abstract interface blitmask_t { public abstract void handler(UShortPtr dest, UShortPtr source, UBytePtr pMask, int mask, int value, int count, UBytePtr pri, int pcode); }
     //typedef void (*blitmask_t)( void *dest, const void *source, const UINT8 *pMask, int mask, int value, int count, UINT8 *pri, UINT32 pcode );
     //typedef void (*blitopaque_t)( void *dest, const void *source, int count, UINT8 *pri, UINT32 pcode );
-    public static abstract interface blitopaque_t { public abstract void handler(UShortPtr dest, UShortPtr source, int count, UShortPtr pri, int pcode); }
+    public static abstract interface blitopaque_t { public abstract void handler(UShortPtr dest, UShortPtr source, int count, UBytePtr pri, int pcode); }
 
     /* the following parameters are constant across tilemap_draw calls */
     public static class _blit
@@ -450,8 +451,13 @@ public class tilemapC
 /*TODO*///		}
 /*TODO*///	}
 /*TODO*///	#endif
-/*TODO*///	
-/*TODO*///	#ifndef pdo16np
+	
+    public static blitopaque_t pdo16np = new blitopaque_t() {
+        @Override
+        public void handler(UShortPtr dest, UShortPtr source, int count, UBytePtr pri, int pcode) {
+            memcpy( dest,source,count );
+        }
+    };
 /*TODO*///	static void pdo16np( UINT16 *dest, const UINT16 *source, int count, UINT8 *pri, UINT32 pcode )
 /*TODO*///	{
 /*TODO*///		memcpy( dest,source,count*sizeof(UINT16) );
@@ -529,7 +535,20 @@ public class tilemapC
 /*TODO*///			}
 /*TODO*///		}
 /*TODO*///	}
-/*TODO*///	#endif
+/*TODO*///	
+    public static blitmask_t pdt16 = new blitmask_t() {
+        public void handler( UShortPtr dest, UShortPtr source, UBytePtr pMask, int mask, int value, int count, UBytePtr pri, int pcode ) {
+            int i;
+            for( i=0; i<count/**2*/; i++ )
+            {
+                    if( (pMask.read(i)&mask)==value )
+                    {
+                            dest.write(i, source.read(i));
+                            pri.write(i, (pri.read(i) | pcode));
+                    }
+            }
+        }
+    };
 /*TODO*///	
 /*TODO*///	#ifndef pdt16pal
 /*TODO*///	static void pdt16pal( UINT16 *dest, const UINT16 *source, const UINT8 *pMask, int mask, int value, int count, UINT8 *pri, UINT32 pcode )
@@ -547,17 +566,22 @@ public class tilemapC
 /*TODO*///		}
 /*TODO*///	}
 /*TODO*///	#endif
-/*TODO*///	
-/*TODO*///	#ifndef pdt16np
+	
+    public static blitmask_t pdt16np = new blitmask_t() {
+        @Override
+        public void handler(UShortPtr dest, UShortPtr source, UBytePtr pMask, int mask, int value, int count, UBytePtr pri, int pcode) {
+            	int i;
+	
+		for( i=0; i<count; i++ )
+		{
+			if( (pMask.read(i)&mask)==value )
+				dest.write(i, source.read(i));
+		}
+        }
+    };
 /*TODO*///	static void pdt16np( UINT16 *dest, const UINT16 *source, const UINT8 *pMask, int mask, int value, int count, UINT8 *pri, UINT32 pcode )
 /*TODO*///	{
-/*TODO*///		int i;
-/*TODO*///	
-/*TODO*///		for( i=0; i<count; i++ )
-/*TODO*///		{
-/*TODO*///			if( (pMask[i]&mask)==value )
-/*TODO*///				dest[i] = source[i];
-/*TODO*///		}
+
 /*TODO*///	}
 /*TODO*///	#endif
 /*TODO*///	
@@ -1372,24 +1396,26 @@ public class tilemapC
 /*TODO*///					break;
 	
 				case 16:
-                                    throw new UnsupportedOperationException("Not Implemented!");
-/*TODO*///					if (tilemap.palette_offset)
-/*TODO*///					{
+                                    
+					if (tilemap.palette_offset != 0)
+					{
+                                            throw new UnsupportedOperationException("Not Implemented!");
 /*TODO*///						blit.draw_masked = (blitmask_t)pdt16pal;
 /*TODO*///						blit.draw_opaque = (blitopaque_t)pdo16pal;
-/*TODO*///					}
-/*TODO*///					else if (priority)
-/*TODO*///					{
+					}
+					else if (priority != 0)
+					{
+                                            throw new UnsupportedOperationException("Not Implemented!");
 /*TODO*///						blit.draw_masked = (blitmask_t)pdt16;
 /*TODO*///						blit.draw_opaque = (blitopaque_t)pdo16;
-/*TODO*///					}
-/*TODO*///					else
-/*TODO*///					{
-/*TODO*///						blit.draw_masked = (blitmask_t)pdt16np;
-/*TODO*///						blit.draw_opaque = (blitopaque_t)pdo16np;
-/*TODO*///					}
-/*TODO*///					blit.screen_bitmap_pitch_line /= 2;
-/*TODO*///					break;
+					}
+					else
+					{
+                                            	blit.draw_masked = (blitmask_t)pdt16np;
+						blit.draw_opaque = (blitopaque_t)pdo16np;
+					}
+					blit.screen_bitmap_pitch_line /= 2;
+					break;
 	
 				default:
 					System.exit(1);
