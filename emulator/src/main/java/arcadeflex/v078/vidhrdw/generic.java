@@ -4,13 +4,11 @@
  */
 package arcadeflex.v078.vidhrdw;
 
-import static mame037b11.mame.tilemapC.tilemap_set_flip;
+import static arcadeflex.v078.mame.tilemapC.tilemap_set_flip;
+import static arcadeflex.v078.mame.tilemapH.*;
 import static mame056.common.set_vh_global_attribute;
 import static mame056.common.set_visible_area;
 import static mame056.mame.Machine;
-import static mame056.tilemapH.ALL_TILEMAPS;
-import static mame056.tilemapH.TILEMAP_FLIPX;
-import static mame056.tilemapH.TILEMAP_FLIPY;
 
 public class generic {
 

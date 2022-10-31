@@ -15,7 +15,7 @@ import arcadeflex056.fucPtr.VhConvertColorPromPtr;
 import arcadeflex056.fucPtr.VhStartPtr;
 import arcadeflex056.fucPtr.VhUpdatePtr;
 import mame056.drawgfxH.GfxDecodeInfo;
-import mame056.drawgfxH.rectangle;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import mame056.sndintrfH.MachineSound;
 
 public class driverH {

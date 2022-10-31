@@ -13,11 +13,11 @@
 package arcadeflex.v078.vidhrdw;
 
 import static arcadeflex.v078.generic.funcPtr.*;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
+import static arcadeflex.v078.mame.tilemapC.*;
+import static arcadeflex.v078.mame.tilemapH.*;
 import static arcadeflex056.fucPtr.*;
 import static mame056.commonH.*;
-import mame056.drawgfxH.rectangle;
-import static mame037b11.mame.tilemapC.*;
-import static mame056.tilemapH.*;
 import static mame056.vidhrdw.generic.*;
 
 public class _4enraya
@@ -47,17 +47,15 @@ public class _4enraya
 	public static VhStartPtr video_start_4enraya = new VhStartPtr() {
             @Override
             public int handler() {
-                tilemap = tilemap_create( get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32 );
+                tilemap = (struct_tilemap) tilemap_create( get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,32,32 );
 		return video_start_generic.handler();
             }
         };
 		
-	public static VhUpdatePtr video_update_4enraya = new VhUpdatePtr() {
-            @Override
-            public void handler(mame_bitmap bitmap, int full_refresh) {
-/*TODO*///                tilemap_draw(bitmap,cliprect,tilemap, 0,0);
-                rectangle cliprect = new rectangle();
-                tilemap_draw(bitmap,/*cliprect,*/tilemap, 0/*,0*/);
+	public static VhUpdatePtr video_update_4enraya = new VhUpdatePtr() { public void handler(mame_bitmap bitmap,rectangle cliprect) 
+	{
+                tilemap_draw(bitmap,cliprect,tilemap, 0,0);
+                tilemap_draw(bitmap, cliprect, tilemap, 0, 0);
             }
         };
 	

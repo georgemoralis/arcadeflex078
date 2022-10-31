@@ -6,6 +6,7 @@
 package mame056.vidhrdw;
 
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import arcadeflex.v078.mame.drawgfxH;
 import static arcadeflex056.fucPtr.*;
 
 import static common.ptr.*;
@@ -70,16 +71,18 @@ public class minivadr {
         }
     };
 
-    public static VhUpdatePtr video_update_minivadr = new VhUpdatePtr() {
-        public void handler(mame_bitmap bitmap, int full_refresh) {
-            if (full_refresh != 0) {
+    public static VhUpdatePtr video_update_minivadr = new VhUpdatePtr() 
+    { 
+        public void handler(mame_bitmap bitmap,drawgfxH.rectangle cliprect) 
+        {
+            //if (full_refresh != 0) {
                 int offs;
 
                 /* redraw bitmap */
                 for (offs = 0; offs < videoram_size[0]; offs++) {
                     minivadr_videoram_w.handler(offs, videoram.read(offs));
                 }
-            }
+            //}
         }
     };
 

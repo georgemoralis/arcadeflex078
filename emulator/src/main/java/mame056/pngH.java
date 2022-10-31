@@ -4,6 +4,7 @@
  */
 package mame056;
 
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static common.ptr.*;
 import static mame056.drawgfxH.*;
 

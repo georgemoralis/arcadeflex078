@@ -105,8 +105,10 @@ public class tilemapH {
 /*TODO*////* TILE_SPLIT is for use with TILEMAP_SPLIT layers.  It selects transparency type. */
 /*TODO*///#define TILE_SPLIT_OFFSET			5
 /*TODO*///#define TILE_SPLIT(T)				((T)<<TILE_SPLIT_OFFSET)
-/*TODO*///
-/*TODO*///#define TILE_FLIPYX(YX)				(YX)
+
+    public static int TILE_FLIPYX(int YX) {
+        return YX;
+    }
 /*TODO*///#define TILE_FLIPXY(XY)				((((XY)>>1)|((XY)<<1))&3)
 /*TODO*////*
 /*TODO*///	TILE_FLIPYX is a shortcut that can be used by approx 80% of games,

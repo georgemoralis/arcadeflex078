@@ -45,7 +45,8 @@ import static arcadeflex056.fileio.*;
 import common.subArrays.IntArray;
 import static mame056.common.bitmap_alloc_depth;
 //import static mame056.tilemapC.*;
-import static mame037b11.mame.tilemapC.*;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
+import static arcadeflex.v078.mame.tilemapC.*;
 //import static mame037b11.mame.tilemapH.*;
 
 public class mame {
@@ -594,7 +595,7 @@ public class mame {
             osd_mark_dirty(Machine.uixmin, Machine.uiymin, Machine.uixmin + Machine.uiwidth - 1, Machine.uiymin + Machine.uiheight - 1);
         }
 
-        Machine.drv.video_update.handler(Machine.scrbitmap, bitmap_dirty);
+        Machine.drv.video_update.handler(Machine.scrbitmap, Machine.visible_area);
         /* update screen */
 
  /*TODO*///	if (artwork_backdrop || artwork_overlay)

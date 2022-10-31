@@ -18,15 +18,15 @@ import static common.libc.cstring.*;
 
 import static mame056.commonH.*;
 import static arcadeflex.v078.mame.commonH.*;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static arcadeflex.v078.mame.fileio.mame_fread;
 import static mame056.driverH.*;
 import static arcadeflex.v078.mame.fileioH.*;
 import static mame056.mame.*;
 import static mame056.mameH.*;
 import static mame056.drawgfxH.*;
-import static mame056.tilemapH.*;
+//import static mame056.tilemapH.*;
 //import static mame056.tilemapC.*;
-import static mame037b11.mame.tilemapC.*;
 //import static mame037b11.mame.tilemapH.*;
 import static arcadeflex056.video.osd_set_visible_area;
 

@@ -15,12 +15,14 @@ package mame056.vidhrdw;
 import static arcadeflex.v078.generic.funcPtr.*;
 import static arcadeflex.v078.mame.cpuexecH.*;
 import static arcadeflex.v078.mame.cpuintrfH.*;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
+import static arcadeflex.v078.mame.tilemapH.*;
 import static arcadeflex056.fucPtr.*;
 import common.ptr.UBytePtr;
 import static mame056.common.coin_counter_w;
 import static mame056.mame.*;
-import static mame037b11.mame.tilemapC.*;
-import static mame056.tilemapH.*;
+import static arcadeflex.v078.mame.tilemapC.*;
+//import static mame056.tilemapH.*;
 import static arcadeflex.v078.vidhrdw.generic.*;
 import static mame056.commonH.flip_screen;
 import mame056.commonH.mame_bitmap;
@@ -239,7 +241,7 @@ public class _1942
 	
 	***************************************************************************/
 	
-	static void draw_sprites(mame_bitmap bitmap)
+	static void draw_sprites(mame_bitmap bitmap, rectangle cliprect)
 	{
 		int offs;
 	
@@ -249,10 +251,10 @@ public class _1942
 			int i,code,col,sx,sy,dir;
 	
 	
-			code = (spriteram.read(offs)& 0x7f) + 4*(spriteram.read(offs + 1)& 0x20)
-					+ 2*(spriteram.read(offs)& 0x80);
-			col = spriteram.read(offs + 1)& 0x0f;
-			sx = spriteram.read(offs + 3)- 0x10 * (spriteram.read(offs + 1)& 0x10);
+			code = (spriteram.read(offs) & 0x7f) + 4*(spriteram.read(offs + 1) & 0x20)
+					+ 2*(spriteram.read(offs) & 0x80);
+			col = spriteram.read(offs + 1) & 0x0f;
+			sx = spriteram.read(offs + 3) - 0x10 * (spriteram.read(offs + 1) & 0x10);
 			sy = spriteram.read(offs + 2);
 			dir = 1;
 			if (flip_screen() != 0)
@@ -263,7 +265,7 @@ public class _1942
 			}
 	
 			/* handle double / quadruple height */
-			i = (spriteram.read(offs + 1)& 0xc0) >> 6;
+			i = (spriteram.read(offs + 1) & 0xc0) >> 6;
 			if (i == 2) i = 3;
 	
 			do
@@ -272,7 +274,7 @@ public class _1942
 						code + i,col,
 						flip_screen(),flip_screen(),
 						sx,sy + 16 * i * dir,
-						Machine.visible_area,TRANSPARENCY_PEN,15);
+						cliprect,TRANSPARENCY_PEN,15);
 	
 				i--;
 			} while (i >= 0);
@@ -281,10 +283,10 @@ public class _1942
 	
 	}
 	
-	public static VhUpdatePtr c1942_vh_screenrefresh = new VhUpdatePtr() { public void handler(mame_bitmap bitmap,int full_refresh) 
+	public static VhUpdatePtr c1942_vh_screenrefresh = new VhUpdatePtr() { public void handler(mame_bitmap bitmap,rectangle cliprect) 
 	{
-		tilemap_draw(bitmap,bg_tilemap,0/*,0*/);
-		draw_sprites(bitmap);
-		tilemap_draw(bitmap,fg_tilemap,0/*,0*/);
+		tilemap_draw(bitmap,cliprect,bg_tilemap,0,0);
+		draw_sprites(bitmap,cliprect);
+		tilemap_draw(bitmap,cliprect,fg_tilemap,0,0);
 	} };
 }

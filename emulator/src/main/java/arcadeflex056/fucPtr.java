@@ -1,5 +1,6 @@
 package arcadeflex056;
 
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static common.ptr.*;
 import static mame056.sndintrfH.*;
 import static mame056.commonH.*;
@@ -45,7 +46,7 @@ public class fucPtr {
 
     public static abstract interface VhUpdatePtr {
 
-        public abstract void handler(mame_bitmap bitmap, int full_refresh);
+        public abstract void handler(mame_bitmap bitmap, rectangle cliprect);
     }
 
     public static abstract interface ShStartPtr {

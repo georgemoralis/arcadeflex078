@@ -22,13 +22,15 @@
  */ 
 package arcadeflex.v078.mame;
 
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static arcadeflex.v078.mame.tilemapH.*;
 import static common.libc.cstring.memset;
 import common.ptr.UBytePtr;
 import common.subArrays.IntArray;
 import static mame056.common.bitmap_alloc_depth;
+import static mame056.common.bitmap_free;
 import mame056.commonH.mame_bitmap;
-import static mame056.driverH.ORIENTATION_SWAP_XY;
+import static mame056.driverH.*;
 import static mame056.mame.Machine;
 
 public class tilemapC
@@ -114,14 +116,14 @@ public class tilemapC
             public struct_tilemap next;/* resource tracking */
 	};
 
-/*TODO*///	struct mame_bitmap *		priority_bitmap;
-/*TODO*///	UINT32					priority_bitmap_pitch_line;
-/*TODO*///	UINT32					priority_bitmap_pitch_row;
+	public static mame_bitmap		priority_bitmap;
+	public static int			priority_bitmap_pitch_line;
+        public static int			priority_bitmap_pitch_row;
 	
 	static struct_tilemap	first_tilemap = null; /* resource tracking */
-/*TODO*///	static UINT32			screen_width, screen_height;
+	static int			screen_width, screen_height;
 	public static struct_tile_info tile_info = new struct_tile_info();
-/*TODO*///	
+	
 /*TODO*///	static UINT32 g_mask32[32];
 /*TODO*///	
 /*TODO*///	typedef void (*blitmask_t)( void *dest, const void *source, const UINT8 *pMask, int mask, int value, int count, UINT8 *pri, UINT32 pcode );
@@ -249,15 +251,17 @@ public class tilemapC
 /*TODO*///			tilemap->tile_granularity = tile_granularity;
 /*TODO*///		}
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	/***********************************************************************************/
-/*TODO*///	/* some common mappings */
-/*TODO*///	
-/*TODO*///	UINT32 tilemap_scan_rows( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows )
-/*TODO*///	{
-/*TODO*///		/* logical (col,row) -> memory offset */
-/*TODO*///		return row*num_cols + col;
-/*TODO*///	}
+	
+	/***********************************************************************************/
+	/* some common mappings */
+	
+
+        public static GetMemoryOffsetPtr tilemap_scan_rows = new GetMemoryOffsetPtr() {
+            public int handler(int u32_col, int u32_row, int u32_num_cols, int u32_num_rows) {
+		/* logical (col,row) -> memory offset */
+		return u32_row*u32_num_cols + u32_col;
+            }
+        };
 /*TODO*///	UINT32 tilemap_scan_rows_flip_x( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows )
 /*TODO*///	{
 /*TODO*///		/* logical (col,row) -> memory offset */
@@ -273,12 +277,13 @@ public class tilemapC
 /*TODO*///		/* logical (col,row) -> memory offset */
 /*TODO*///		return (num_rows-row-1)*num_cols + (num_cols-col-1);
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	UINT32 tilemap_scan_cols( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows )
-/*TODO*///	{
-/*TODO*///		/* logical (col,row) -> memory offset */
-/*TODO*///		return col*num_rows + row;
-/*TODO*///	}
+
+        public static GetMemoryOffsetPtr tilemap_scan_cols = new GetMemoryOffsetPtr() {
+            public int handler(int u32_col, int u32_row, int u32_num_cols, int u32_num_rows) {
+                /* logical (col,row) -> memory offset */
+                return u32_col * u32_num_rows + u32_row;
+            }
+        };
 /*TODO*///	UINT32 tilemap_scan_cols_flip_x( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows )
 /*TODO*///	{
 /*TODO*///		/* logical (col,row) -> memory offset */
@@ -784,37 +789,37 @@ public class tilemapC
 /*TODO*///	{
 /*TODO*///		tilemap_mark_all_tiles_dirty(ALL_TILEMAPS);
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	int tilemap_init( void )
-/*TODO*///	{
-/*TODO*///		screen_width	= Machine->scrbitmap->width;
-/*TODO*///		screen_height	= Machine->scrbitmap->height;
-/*TODO*///		first_tilemap	= NULL;
-/*TODO*///	
+	
+	public static int tilemap_init()
+	{
+		screen_width	= Machine.scrbitmap.width;
+		screen_height	= Machine.scrbitmap.height;
+		first_tilemap	= null;
+	
 /*TODO*///		state_save_register_func_postload(tilemap_reset);
-/*TODO*///		priority_bitmap = bitmap_alloc_depth( screen_width, screen_height, -8 );
-/*TODO*///		if( priority_bitmap )
-/*TODO*///		{
-/*TODO*///			priority_bitmap_pitch_line = ((UINT8 *)priority_bitmap->line[1]) - ((UINT8 *)priority_bitmap->line[0]);
-/*TODO*///			return 0;
-/*TODO*///		}
+		priority_bitmap = bitmap_alloc_depth( screen_width, screen_height, -8 );
+		if( priority_bitmap != null )
+		{
+			priority_bitmap_pitch_line = priority_bitmap.line[1].offset - priority_bitmap.line[0].offset;
+			return 0;
+		}
 /*TODO*///		InitMask32();
-/*TODO*///		return -1;
-/*TODO*///	}
-/*TODO*///	
-/*TODO*///	void tilemap_close( void )
-/*TODO*///	{
-/*TODO*///		struct tilemap *next;
-/*TODO*///	
-/*TODO*///		while( first_tilemap )
-/*TODO*///		{
-/*TODO*///			next = first_tilemap->next;
-/*TODO*///			tilemap_dispose( first_tilemap );
-/*TODO*///			first_tilemap = next;
-/*TODO*///		}
-/*TODO*///		bitmap_free( priority_bitmap );
-/*TODO*///	}
-/*TODO*///	
+		return -1;
+	}
+	
+	public static void tilemap_close()
+	{
+		struct_tilemap next;
+	
+		while( first_tilemap != null )
+		{
+			next = first_tilemap.next;
+			tilemap_dispose( first_tilemap );
+			first_tilemap = next;
+		}
+		bitmap_free( priority_bitmap );
+	}
+	
 	/***********************************************************************************/
 
         public static struct_tilemap tilemap_create(GetTileInfoPtr tile_get_info,
@@ -950,39 +955,39 @@ public class tilemapC
 /*TODO*///	{
 /*TODO*///		tilemap->enable = enable?1:0;
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	
-/*TODO*///	void tilemap_set_flip( struct tilemap *tilemap, int attributes )
-/*TODO*///	{
-/*TODO*///		if( tilemap==ALL_TILEMAPS )
-/*TODO*///		{
-/*TODO*///			tilemap = first_tilemap;
-/*TODO*///			while( tilemap )
-/*TODO*///			{
-/*TODO*///				tilemap_set_flip( tilemap, attributes );
-/*TODO*///				tilemap = tilemap->next;
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///		else if( tilemap->attributes!=attributes )
-/*TODO*///		{
-/*TODO*///			tilemap->attributes = attributes;
-/*TODO*///			tilemap->orientation = Machine->orientation;
-/*TODO*///			if( attributes&TILEMAP_FLIPY )
-/*TODO*///			{
-/*TODO*///				tilemap->orientation ^= ORIENTATION_FLIP_Y;
-/*TODO*///			}
-/*TODO*///	
-/*TODO*///			if( attributes&TILEMAP_FLIPX )
-/*TODO*///			{
-/*TODO*///				tilemap->orientation ^= ORIENTATION_FLIP_X;
-/*TODO*///			}
-/*TODO*///	
-/*TODO*///			mappings_update( tilemap );
-/*TODO*///			recalculate_scroll( tilemap );
-/*TODO*///			tilemap_mark_all_tiles_dirty( tilemap );
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	
+	
+	
+	public static void tilemap_set_flip( struct_tilemap tilemap, int attributes )
+	{
+		if( tilemap==ALL_TILEMAPS )
+		{
+			tilemap = first_tilemap;
+			while( tilemap != null )
+			{
+				tilemap_set_flip( tilemap, attributes );
+				tilemap = tilemap.next;
+			}
+		}
+		else if( tilemap.attributes!=attributes )
+		{
+			tilemap.attributes = attributes;
+			tilemap.orientation = Machine.orientation;
+			if(( attributes&TILEMAP_FLIPY ) != 0)
+			{
+				tilemap.orientation ^= ORIENTATION_FLIP_Y;
+			}
+	
+			if(( attributes&TILEMAP_FLIPX ) != 0)
+			{
+				tilemap.orientation ^= ORIENTATION_FLIP_X;
+			}
+	
+			mappings_update( tilemap );
+			recalculate_scroll( tilemap );
+			tilemap_mark_all_tiles_dirty( tilemap );
+		}
+	}
+	
 /*TODO*///	/***********************************************************************************/
 /*TODO*///	
 /*TODO*///	void tilemap_set_scroll_cols( struct tilemap *tilemap, int n )
@@ -1010,40 +1015,40 @@ public class tilemapC
 /*TODO*///			tilemap->cached_scroll_rows = n;
 /*TODO*///		}
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	/***********************************************************************************/
-/*TODO*///	
-/*TODO*///	void tilemap_mark_tile_dirty( struct tilemap *tilemap, int memory_offset )
-/*TODO*///	{
-/*TODO*///		if( memory_offset<tilemap->max_memory_offset )
-/*TODO*///		{
-/*TODO*///			int cached_indx = tilemap->memory_offset_to_cached_indx[memory_offset];
-/*TODO*///			if( cached_indx>=0 )
-/*TODO*///			{
-/*TODO*///				tilemap->transparency_data[cached_indx] = TILE_FLAG_DIRTY;
-/*TODO*///				tilemap->all_tiles_clean = 0;
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	
-/*TODO*///	void tilemap_mark_all_tiles_dirty( struct tilemap *tilemap )
-/*TODO*///	{
-/*TODO*///		if( tilemap==ALL_TILEMAPS )
-/*TODO*///		{
-/*TODO*///			tilemap = first_tilemap;
-/*TODO*///			while( tilemap )
-/*TODO*///			{
-/*TODO*///				tilemap_mark_all_tiles_dirty( tilemap );
-/*TODO*///				tilemap = tilemap->next;
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///		else
-/*TODO*///		{
-/*TODO*///			tilemap->all_tiles_dirty = 1;
-/*TODO*///			tilemap->all_tiles_clean = 0;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	
+	
+	/***********************************************************************************/
+	
+	public static void tilemap_mark_tile_dirty( struct_tilemap tilemap, int memory_offset )
+	{
+		if( memory_offset<tilemap.max_memory_offset )
+		{
+			int cached_indx = tilemap.memory_offset_to_cached_indx[memory_offset];
+			if( cached_indx>=0 )
+			{
+				tilemap.transparency_data.write(cached_indx, TILE_FLAG_DIRTY);
+				tilemap.all_tiles_clean = 0;
+			}
+		}
+	}
+	
+	public static void tilemap_mark_all_tiles_dirty( struct_tilemap tilemap )
+	{
+		if( tilemap==ALL_TILEMAPS )
+		{
+			tilemap = first_tilemap;
+			while( tilemap != null )
+			{
+				tilemap_mark_all_tiles_dirty( tilemap );
+				tilemap = tilemap.next;
+			}
+		}
+		else
+		{
+			tilemap.all_tiles_dirty = 1;
+			tilemap.all_tiles_clean = 0;
+		}
+	}
+	
 /*TODO*///	/***********************************************************************************/
 /*TODO*///	
 /*TODO*///	static void update_tile_info( struct tilemap *tilemap, UINT32 cached_indx, UINT32 col, UINT32 row )
@@ -1151,43 +1156,43 @@ public class tilemapC
 /*TODO*///		tilemap->dy_if_flipped = dy_if_flipped;
 /*TODO*///		recalculate_scroll( tilemap );
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	void tilemap_set_scrollx( struct tilemap *tilemap, int which, int value )
-/*TODO*///	{
-/*TODO*///		tilemap->logical_rowscroll[which] = value;
-/*TODO*///		value = tilemap->scrollx_delta-value; /* adjust */
-/*TODO*///	
-/*TODO*///		if( tilemap->orientation & ORIENTATION_SWAP_XY )
-/*TODO*///		{
-/*TODO*///			/* if xy are swapped, we are actually panning the screen bitmap vertically */
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_X )
-/*TODO*///			{
-/*TODO*///				/* adjust affected col */
-/*TODO*///				which = tilemap->cached_scroll_cols-1 - which;
-/*TODO*///			}
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_Y )
-/*TODO*///			{
-/*TODO*///				/* adjust scroll amount */
-/*TODO*///				value = screen_height-tilemap->cached_height-value;
-/*TODO*///			}
-/*TODO*///			tilemap->cached_colscroll[which] = value;
-/*TODO*///		}
-/*TODO*///		else
-/*TODO*///		{
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_Y )
-/*TODO*///			{
-/*TODO*///				/* adjust affected row */
-/*TODO*///				which = tilemap->cached_scroll_rows-1 - which;
-/*TODO*///			}
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_X )
-/*TODO*///			{
-/*TODO*///				/* adjust scroll amount */
-/*TODO*///				value = screen_width-tilemap->cached_width-value;
-/*TODO*///			}
-/*TODO*///			tilemap->cached_rowscroll[which] = value;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	
+	
+	public static void tilemap_set_scrollx( struct_tilemap tilemap, int which, int value )
+	{
+		tilemap.logical_rowscroll[which] = value;
+		value = tilemap.scrollx_delta-value; /* adjust */
+	
+		if(( tilemap.orientation & ORIENTATION_SWAP_XY ) != 0)
+		{
+			/* if xy are swapped, we are actually panning the screen bitmap vertically */
+			if(( tilemap.orientation & ORIENTATION_FLIP_X ) != 0)
+			{
+				/* adjust affected col */
+				which = tilemap.cached_scroll_cols-1 - which;
+			}
+			if(( tilemap.orientation & ORIENTATION_FLIP_Y ) != 0)
+			{
+				/* adjust scroll amount */
+				value = screen_height-tilemap.cached_height-value;
+			}
+			tilemap.cached_colscroll[which] = value;
+		}
+		else
+		{
+			if(( tilemap.orientation & ORIENTATION_FLIP_Y ) != 0)
+			{
+				/* adjust affected row */
+				which = tilemap.cached_scroll_rows-1 - which;
+			}
+			if(( tilemap.orientation & ORIENTATION_FLIP_X ) != 0)
+			{
+				/* adjust scroll amount */
+				value = screen_width-tilemap.cached_width-value;
+			}
+			tilemap.cached_rowscroll[which] = value;
+		}
+	}
+	
 /*TODO*///	void tilemap_set_scrolly( struct tilemap *tilemap, int which, int value )
 /*TODO*///	{
 /*TODO*///		tilemap->logical_colscroll[which] = value;
@@ -1230,11 +1235,12 @@ public class tilemapC
 /*TODO*///	{
 /*TODO*///		tilemap->palette_offset = offset;
 /*TODO*///	}
-/*TODO*///	
-/*TODO*///	/***********************************************************************************/
-/*TODO*///	
-/*TODO*///	void tilemap_draw( struct mame_bitmap *dest, const struct rectangle *cliprect, struct tilemap *tilemap, UINT32 flags, UINT32 priority )
-/*TODO*///	{
+	
+	/***********************************************************************************/
+	
+	public static void tilemap_draw( mame_bitmap dest, rectangle cliprect, struct_tilemap tilemap, int flags, int priority )
+	{
+            throw new UnsupportedOperationException("Not supported yet.");
 /*TODO*///		tilemap_draw_func drawfunc = pick_draw_func(dest);
 /*TODO*///		int xpos,ypos,mask,value;
 /*TODO*///		int rows, cols;
@@ -1567,8 +1573,8 @@ public class tilemapC
 /*TODO*///			}
 /*TODO*///		}
 /*TODO*///	profiler_mark(PROFILER_END);
-/*TODO*///	}
-/*TODO*///	
+	}
+	
 /*TODO*///	/* notes:
 /*TODO*///	   - startx and starty MUST be UINT32 for calculations to work correctly
 /*TODO*///	   - srcbitmap->width and height are assumed to be a power of 2 to speed up wraparound

@@ -4,6 +4,8 @@
 package mame056;
 
 import static arcadeflex.v078.mame.cpuexec.cpu_getcurrentframe;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
+import static arcadeflex.v078.mame.tilemapC.priority_bitmap;
 import arcadeflex036.libc_old.IntPtr;
 import java.util.Arrays;
 
@@ -20,7 +22,6 @@ import static arcadeflex056.video.*;
 import static common.libc.expressions.NOT;
 import common.subArrays.IntArray;
 import common.subArrays.UShortArray;
-import static mame056.tilemapC.priority_bitmap;
 
 public class drawgfx {
 

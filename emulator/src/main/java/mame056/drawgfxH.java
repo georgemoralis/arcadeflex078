@@ -175,28 +175,6 @@ public class drawgfxH {
         public int total_color_codes;/* total number of color codes */
     }
 
-    public static class rectangle {
-
-        public rectangle() {
-        }
-
-        public rectangle(int min_x, int max_x, int min_y, int max_y) {
-            this.min_x = min_x;
-            this.max_x = max_x;
-            this.min_y = min_y;
-            this.max_y = max_y;
-        }
-
-        public rectangle(rectangle rec) {
-            min_x = rec.min_x;
-            max_x = rec.max_x;
-            min_y = rec.min_y;
-            max_y = rec.max_y;
-        }
-
-        public int min_x, max_x;
-        public int min_y, max_y;
-    }
     
     public static class _alpha_cache {
             public int[] alphas;

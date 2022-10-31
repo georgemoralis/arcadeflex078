@@ -3,6 +3,7 @@
  */
 package mame056;
 
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import arcadeflex.v078.mame.driverH.InternalMachineDriver;
 import static common.ptr.*;
 import common.subArrays.IntArray;

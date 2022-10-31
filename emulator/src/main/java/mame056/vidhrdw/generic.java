@@ -5,6 +5,7 @@ package mame056.vidhrdw;
 
 import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static arcadeflex056.fucPtr.*;
 
 import static common.libc.cstring.*;
@@ -127,11 +128,11 @@ public class generic {
      * games not using sprites.
      * *************************************************************************
      */
-    public static VhUpdatePtr generic_bitmapped_vh_screenrefresh = new VhUpdatePtr() {
-        public void handler(mame_bitmap bitmap, int full_refresh) {
-            if (full_refresh != 0) {
+    public static VhUpdatePtr generic_bitmapped_vh_screenrefresh = new VhUpdatePtr() { public void handler(mame_bitmap bitmap,rectangle cliprect) 
+	{
+            //if (full_refresh != 0) {
                 copybitmap(bitmap, tmpbitmap, 0, 0, 0, 0, Machine.visible_area, TRANSPARENCY_NONE, 0);
-            }
+            //}
         }
     };
     public static ReadHandlerPtr videoram_r = new ReadHandlerPtr() {

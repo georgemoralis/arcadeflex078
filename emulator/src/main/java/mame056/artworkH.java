@@ -15,6 +15,7 @@
  */
 package mame056;
 
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static common.subArrays.*;
 import static mame056.commonH.*;
 import static mame056.drawgfxH.*;
