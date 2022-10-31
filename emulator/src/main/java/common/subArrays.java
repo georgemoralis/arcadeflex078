@@ -93,6 +93,10 @@ public class subArrays {
         public int read(int index) {
             return buffer[index + offset];
         }
+        
+        public int readinc() {
+            return buffer[offset++];
+        }
 
         public void write(int value) {
             buffer[offset] = value;

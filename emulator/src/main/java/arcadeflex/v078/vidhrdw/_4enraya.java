@@ -35,7 +35,7 @@ public class _4enraya
 	
 	static GetTileInfoPtr get_tile_info = new GetTileInfoPtr() {
             public void handler(int tile_index) {
-                System.out.println("get_tile_info!!!!");
+                //System.out.println("get_tile_info!!!!");
 		int code = videoram.read(tile_index*2)+(videoram.read(tile_index*2+1)<<8);
 		SET_TILE_INFO(
 			0,
