@@ -94,12 +94,12 @@ public class tilemapH {
         }*/
     }
 
-/*TODO*////* tile flags, set by get_tile_info callback */
-/*TODO*////* TILE_IGNORE_TRANSPARENCY is used if you need an opaque tile in a transparent layer. */
-/*TODO*///#define TILE_FLIPX					0x01
-/*TODO*///#define TILE_FLIPY					0x02
-/*TODO*///#define TILE_IGNORE_TRANSPARENCY	0x08
-    public static final int TILE_4BPP       = 0x10;
+    /* tile flags, set by get_tile_info callback */
+    /* TILE_IGNORE_TRANSPARENCY is used if you need an opaque tile in a transparent layer. */
+    public static final int TILE_FLIPX                  = 0x01;
+    public static final int TILE_FLIPY                  = 0x02;
+    public static final int TILE_IGNORE_TRANSPARENCY	= 0x08;
+    public static final int TILE_4BPP                   = 0x10;
 /*TODO*////*		TILE_SPLIT					0x60 */
 /*TODO*///
 /*TODO*////* TILE_SPLIT is for use with TILEMAP_SPLIT layers.  It selects transparency type. */
@@ -116,7 +116,7 @@ public class tilemapH {
 /*TODO*///	tile attributes byte.
 /*TODO*///*/
 /*TODO*///
-/*TODO*///#define TILE_LINE_DISABLED 0x80000000
+    public static final int TILE_LINE_DISABLED = 0x80000000;
 /*TODO*///
 /*TODO*///
 /*TODO*////* don't call these from drivers - they are called from mame.c */
@@ -160,17 +160,17 @@ public class tilemapH {
 /*TODO*///		UINT32 startx,UINT32 starty,int incxx,int incxy,int incyx,int incyy,
 /*TODO*///		int wraparound,
 /*TODO*///		UINT32 flags, UINT32 priority );
-/*TODO*///
-/*TODO*////* ----xxxx tile priority
-/*TODO*/// * ---x---- opaque in foreground
-/*TODO*/// * --x----- opaque in background
-/*TODO*/// * -x------ reserved
-/*TODO*/// * x------- tile-is-dirty
-/*TODO*/// */
-/*TODO*///#define TILE_FLAG_TILE_PRIORITY	(0x0f)
-/*TODO*///#define TILE_FLAG_FG_OPAQUE		(0x10)
-/*TODO*///#define TILE_FLAG_BG_OPAQUE		(0x20)
-/*TODO*///
+
+    /* ----xxxx tile priority
+     * ---x---- opaque in foreground
+     * --x----- opaque in background
+     * -x------ reserved
+     * x------- tile-is-dirty
+     */
+    public static final int TILE_FLAG_TILE_PRIORITY	= (0x0f);
+    public static final int TILE_FLAG_FG_OPAQUE		= (0x10);
+    public static final int TILE_FLAG_BG_OPAQUE		= (0x20);
+
 /*TODO*///struct mame_bitmap *tilemap_get_pixmap( struct tilemap * tilemap );
 /*TODO*///struct mame_bitmap *tilemap_get_transparency_bitmap( struct tilemap * tilemap );
 /*TODO*///UINT8 *tilemap_get_transparency_data( struct tilemap * tilemap );  //*

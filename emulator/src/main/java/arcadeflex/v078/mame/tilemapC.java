@@ -24,9 +24,12 @@ package arcadeflex.v078.mame;
 
 import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static arcadeflex.v078.mame.tilemapH.*;
+import arcadeflex056.blit;
 import static common.libc.cstring.memset;
 import common.ptr.UBytePtr;
+import common.ptr.UShortPtr;
 import common.subArrays.IntArray;
+import static java.lang.Math.abs;
 import static mame056.common.bitmap_alloc_depth;
 import static mame056.common.bitmap_free;
 import mame056.commonH.mame_bitmap;
@@ -35,17 +38,17 @@ import static mame056.mame.Machine;
 
 public class tilemapC
 {
-/*TODO*///	
-/*TODO*///	#define SWAP(X,Y) { UINT32 temp=X; X=Y; Y=temp; }
-/*TODO*///	#define MAX_TILESIZE 64
 	
-	public static final int TILE_FLAG_DIRTY	= (0x80);
+    public static void SWAP(int X, int Y) { int temp=X; X=Y; Y=temp; }
+    public static final int MAX_TILESIZE = 64;
+	
+    public static final int TILE_FLAG_DIRTY	= (0x80);
 	
 /*TODO*///	typedef enum { eWHOLLY_TRANSPARENT, eWHOLLY_OPAQUE, eMASKED } trans_t;
 /*TODO*///	
 /*TODO*///	typedef void (*tilemap_draw_func)( struct tilemap *tilemap, int xpos, int ypos, int mask, int value );
     
-        public static abstract interface DrawHandlerPtr { public abstract void handler(struct_tilemap tilemap, int xpos, int ypos, int mask, int value); }
+        public static abstract interface tilemap_draw_func { public abstract void handler(struct_tilemap tilemap, int xpos, int ypos, int mask, int value); }
         public static abstract interface DrawTileHandlerPtr { public abstract int handler( struct_tilemap tilemap, int col, int row, int flags );}
 
 	public static class struct_tilemap
@@ -125,22 +128,26 @@ public class tilemapC
 	public static struct_tile_info tile_info = new struct_tile_info();
 	
 /*TODO*///	static UINT32 g_mask32[32];
-/*TODO*///	
-/*TODO*///	typedef void (*blitmask_t)( void *dest, const void *source, const UINT8 *pMask, int mask, int value, int count, UINT8 *pri, UINT32 pcode );
-/*TODO*///	typedef void (*blitopaque_t)( void *dest, const void *source, int count, UINT8 *pri, UINT32 pcode );
-/*TODO*///	
-/*TODO*///	/* the following parameters are constant across tilemap_draw calls */
-/*TODO*///	static struct
-/*TODO*///	{
-/*TODO*///		blitmask_t draw_masked;
-/*TODO*///		blitopaque_t draw_opaque;
-/*TODO*///		int clip_left, clip_top, clip_right, clip_bottom;
-/*TODO*///		UINT32 tilemap_priority_code;
-/*TODO*///		struct mame_bitmap *	screen_bitmap;
-/*TODO*///		UINT32				screen_bitmap_pitch_line;
-/*TODO*///		UINT32				screen_bitmap_pitch_row;
-/*TODO*///	} blit;
-/*TODO*///	
+        
+    public static abstract interface blitmask_t { public abstract void handler(UShortPtr dest, UShortPtr source, UShortPtr pMask, int mask, int value, int count, UShortPtr pri, int pcode); }
+    //typedef void (*blitmask_t)( void *dest, const void *source, const UINT8 *pMask, int mask, int value, int count, UINT8 *pri, UINT32 pcode );
+    //typedef void (*blitopaque_t)( void *dest, const void *source, int count, UINT8 *pri, UINT32 pcode );
+    public static abstract interface blitopaque_t { public abstract void handler(UShortPtr dest, UShortPtr source, int count, UShortPtr pri, int pcode); }
+
+    /* the following parameters are constant across tilemap_draw calls */
+    public static class _blit
+    {
+        public blitmask_t draw_masked;
+        public blitopaque_t draw_opaque;
+	public int clip_left, clip_top, clip_right, clip_bottom;
+	public int tilemap_priority_code;
+	public mame_bitmap screen_bitmap;
+	public int screen_bitmap_pitch_line;
+	public int screen_bitmap_pitch_row;
+    };
+    
+    public static _blit blit = new _blit();
+    
 /*TODO*///	/***********************************************************************************/
 /*TODO*///	
 /*TODO*///	static int PenToPixel_Init( struct tilemap *tilemap );
@@ -165,36 +172,36 @@ public class tilemapC
 			If performance is an issue, we can always (re)introduce
 			customized code for each case and forgo tables.
 		*/
-            throw new UnsupportedOperationException("Not supported yet.");
-/*TODO*///		int i,x,y,tx,ty;
-/*TODO*///		UINT32 *pPenToPixel;
-/*TODO*///		int lError;
-/*TODO*///	
-/*TODO*///		lError = 0;
-/*TODO*///		for( i=0; i<4; i++ )
-/*TODO*///		{
-/*TODO*///			pPenToPixel = malloc( tilemap->num_pens*sizeof(UINT32) );
-/*TODO*///			if( pPenToPixel==NULL )
-/*TODO*///			{
-/*TODO*///				lError = 1;
-/*TODO*///			}
-/*TODO*///			else
-/*TODO*///			{
-/*TODO*///				tilemap->pPenToPixel[i] = pPenToPixel;
-/*TODO*///				for( ty=0; ty<tilemap->cached_tile_height; ty++ )
-/*TODO*///				{
-/*TODO*///					for( tx=0; tx<tilemap->cached_tile_width; tx++ )
-/*TODO*///					{
-/*TODO*///						x = tx;
-/*TODO*///						y = ty;
-/*TODO*///						if( i&TILE_FLIPX ) x = tilemap->cached_tile_width-1-x;
-/*TODO*///						if( i&TILE_FLIPY ) y = tilemap->cached_tile_height-1-y;
-/*TODO*///						*pPenToPixel++ = x+y*MAX_TILESIZE;
-/*TODO*///					}
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///		return lError;
+            
+		int i,x,y,tx,ty;
+		IntArray pPenToPixel;
+		int lError;
+	
+		lError = 0;
+		for( i=0; i<4; i++ )
+		{
+			pPenToPixel = new IntArray( tilemap.num_pens );
+			if( pPenToPixel==null )
+			{
+				lError = 1;
+			}
+			else
+			{
+				tilemap.pPenToPixel.write(i, pPenToPixel.read());
+				for( ty=0; ty<tilemap.cached_tile_height; ty++ )
+				{
+					for( tx=0; tx<tilemap.cached_tile_width; tx++ )
+					{
+						x = tx;
+						y = ty;
+						if(( i&TILE_FLIPX )!=0) x = tilemap.cached_tile_width-1-x;
+						if(( i&TILE_FLIPY )!=0) y = tilemap.cached_tile_height-1-y;
+						pPenToPixel.writeinc( x+y*MAX_TILESIZE );
+					}
+				}
+			}
+		}
+		return lError;
 	}
 	
 /*TODO*///	static void PenToPixel_Term( struct tilemap *tilemap )
@@ -324,7 +331,7 @@ public class tilemapC
 		if( tilemap.memory_offset_to_cached_indx != null )
 		{
 			/* cached to logical (get_tile_info) */
-			tilemap.cached_indx_to_memory_offset = new int[tilemap.num_tiles];
+			tilemap.cached_indx_to_memory_offset = new int[tilemap.num_tiles * 2];
 			if( tilemap.cached_indx_to_memory_offset != null ) return 0; /* no error */
 			tilemap.memory_offset_to_cached_indx = null;
 		}
@@ -339,56 +346,55 @@ public class tilemapC
 	
 	static void mappings_update( struct_tilemap tilemap )
 	{
-            throw new UnsupportedOperationException("Not supported yet.");
-        
-/*TODO*///		int logical_flip;
-/*TODO*///		UINT32 logical_indx, cached_indx;
-/*TODO*///		UINT32 num_cached_rows = tilemap->num_cached_rows;
-/*TODO*///		UINT32 num_cached_cols = tilemap->num_cached_cols;
-/*TODO*///		UINT32 num_logical_rows = tilemap->num_logical_rows;
-/*TODO*///		UINT32 num_logical_cols = tilemap->num_logical_cols;
-/*TODO*///		for( logical_indx=0; logical_indx<tilemap->max_memory_offset; logical_indx++ )
-/*TODO*///		{
-/*TODO*///			tilemap->memory_offset_to_cached_indx[logical_indx] = -1;
-/*TODO*///		}
-/*TODO*///	
-/*TODO*///		for( logical_indx=0; logical_indx<tilemap->num_tiles; logical_indx++ )
-/*TODO*///		{
-/*TODO*///			UINT32 logical_col = logical_indx%num_logical_cols;
-/*TODO*///			UINT32 logical_row = logical_indx/num_logical_cols;
-/*TODO*///			int memory_offset = tilemap->get_memory_offset( logical_col, logical_row, num_logical_cols, num_logical_rows );
-/*TODO*///			UINT32 cached_col = logical_col;
-/*TODO*///			UINT32 cached_row = logical_row;
-/*TODO*///			if( tilemap->orientation & ORIENTATION_SWAP_XY ) SWAP(cached_col,cached_row)
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_X ) cached_col = (num_cached_cols-1)-cached_col;
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_Y ) cached_row = (num_cached_rows-1)-cached_row;
-/*TODO*///			cached_indx = cached_row*num_cached_cols+cached_col;
-/*TODO*///			tilemap->memory_offset_to_cached_indx[memory_offset] = cached_indx;
-/*TODO*///			tilemap->cached_indx_to_memory_offset[cached_indx] = memory_offset;
-/*TODO*///		}
-/*TODO*///		for( logical_flip = 0; logical_flip<4; logical_flip++ )
-/*TODO*///		{
-/*TODO*///			int cached_flip = logical_flip;
-/*TODO*///			if( tilemap->attributes&TILEMAP_FLIPX ) cached_flip ^= TILE_FLIPX;
-/*TODO*///			if( tilemap->attributes&TILEMAP_FLIPY ) cached_flip ^= TILE_FLIPY;
+            
+		int logical_flip;
+		int logical_indx, cached_indx;
+		int num_cached_rows = tilemap.num_cached_rows;
+		int num_cached_cols = tilemap.num_cached_cols;
+		int num_logical_rows = tilemap.num_logical_rows;
+		int num_logical_cols = tilemap.num_logical_cols;
+		for( logical_indx=0; logical_indx<tilemap.max_memory_offset; logical_indx++ )
+		{
+			tilemap.memory_offset_to_cached_indx[logical_indx] = -1;
+		}
+	
+		for( logical_indx=0; logical_indx<tilemap.num_tiles; logical_indx++ )
+		{
+			int logical_col = logical_indx%num_logical_cols;
+			int logical_row = logical_indx/num_logical_cols;
+			int memory_offset = tilemap.get_memory_offset.handler( logical_col, logical_row, num_logical_cols, num_logical_rows );
+			int cached_col = logical_col;
+			int cached_row = logical_row;
+			if(( tilemap.orientation & ORIENTATION_SWAP_XY ) != 0) SWAP(cached_col,cached_row);
+			if(( tilemap.orientation & ORIENTATION_FLIP_X ) != 0) cached_col = (num_cached_cols-1)-cached_col;
+			if(( tilemap.orientation & ORIENTATION_FLIP_Y ) != 0) cached_row = (num_cached_rows-1)-cached_row;
+			cached_indx = abs(cached_row*num_cached_cols+cached_col);
+			tilemap.memory_offset_to_cached_indx[memory_offset] = cached_indx;
+			tilemap.cached_indx_to_memory_offset[cached_indx] = memory_offset;
+		}
+		for( logical_flip = 0; logical_flip<4; logical_flip++ )
+		{
+			int cached_flip = logical_flip;
+			if(( tilemap.attributes&TILEMAP_FLIPX ) != 0) cached_flip ^= TILE_FLIPX;
+			if(( tilemap.attributes&TILEMAP_FLIPY ) != 0) cached_flip ^= TILE_FLIPY;
 /*TODO*///	#ifndef PREROTATE_GFX
-/*TODO*///			if( Machine->orientation & ORIENTATION_SWAP_XY )
+/*TODO*///			if( Machine.orientation & ORIENTATION_SWAP_XY )
 /*TODO*///			{
-/*TODO*///				if( Machine->orientation & ORIENTATION_FLIP_X ) cached_flip ^= TILE_FLIPY;
-/*TODO*///				if( Machine->orientation & ORIENTATION_FLIP_Y ) cached_flip ^= TILE_FLIPX;
+/*TODO*///				if( Machine.orientation & ORIENTATION_FLIP_X ) cached_flip ^= TILE_FLIPY;
+/*TODO*///				if( Machine.orientation & ORIENTATION_FLIP_Y ) cached_flip ^= TILE_FLIPX;
 /*TODO*///			}
 /*TODO*///			else
 /*TODO*///			{
-/*TODO*///				if( Machine->orientation & ORIENTATION_FLIP_X ) cached_flip ^= TILE_FLIPX;
-/*TODO*///				if( Machine->orientation & ORIENTATION_FLIP_Y ) cached_flip ^= TILE_FLIPY;
+/*TODO*///				if( Machine.orientation & ORIENTATION_FLIP_X ) cached_flip ^= TILE_FLIPX;
+/*TODO*///				if( Machine.orientation & ORIENTATION_FLIP_Y ) cached_flip ^= TILE_FLIPY;
 /*TODO*///			}
 /*TODO*///	#endif
-/*TODO*///			if( tilemap->orientation & ORIENTATION_SWAP_XY )
-/*TODO*///			{
-/*TODO*///				cached_flip = ((cached_flip&1)<<1) | ((cached_flip&2)>>1);
-/*TODO*///			}
-/*TODO*///			tilemap->logical_flip_to_cached_flip[logical_flip] = cached_flip;
-/*TODO*///		}
+			if(( tilemap.orientation & ORIENTATION_SWAP_XY ) != 0)
+			{
+				cached_flip = ((cached_flip&1)<<1) | ((cached_flip&2)>>1);
+			}
+			tilemap.logical_flip_to_cached_flip[logical_flip] = cached_flip;
+		}
 	}
 	
 /*TODO*///	/***********************************************************************************/
@@ -733,54 +739,53 @@ public class tilemapC
 	
 	static void install_draw_handlers( struct_tilemap tilemap )
 	{
-            throw new UnsupportedOperationException("Not supported yet.");
-        
-/*TODO*///		if( Machine->game_colortable )
-/*TODO*///		{
-/*TODO*///			if( tilemap->type & TILEMAP_BITMASK )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyBitmask_ind;
-/*TODO*///			else if( tilemap->type & TILEMAP_SPLIT_PENBIT )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyPenBit_ind;
-/*TODO*///			else if( tilemap->type & TILEMAP_SPLIT )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyPens_ind;
-/*TODO*///			else if( tilemap->type==TILEMAP_TRANSPARENT )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyPen_ind;
-/*TODO*///			else if( tilemap->type==TILEMAP_TRANSPARENT_COLOR )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyColor_ind;
-/*TODO*///			else
-/*TODO*///				tilemap->draw_tile = HandleTransparencyNone_ind;
-/*TODO*///		}
-/*TODO*///		else
-/*TODO*///		{
-/*TODO*///			if( tilemap->type & TILEMAP_BITMASK )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyBitmask_raw;
-/*TODO*///			else if( tilemap->type & TILEMAP_SPLIT_PENBIT )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyPenBit_raw;
-/*TODO*///			else if( tilemap->type & TILEMAP_SPLIT )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyPens_raw;
-/*TODO*///			else if( tilemap->type==TILEMAP_TRANSPARENT )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyPen_raw;
-/*TODO*///			else if( tilemap->type==TILEMAP_TRANSPARENT_COLOR )
-/*TODO*///				tilemap->draw_tile = HandleTransparencyColor_raw;
-/*TODO*///			else
-/*TODO*///				tilemap->draw_tile = HandleTransparencyNone_raw;
-/*TODO*///		}
+            
+		if( Machine.game_colortable != null )
+		{
+			if(( tilemap.type & TILEMAP_BITMASK ) != 0)
+				tilemap.draw_tile = HandleTransparencyBitmask_ind;
+			else if(( tilemap.type & TILEMAP_SPLIT_PENBIT ) != 0)
+				tilemap.draw_tile = HandleTransparencyPenBit_ind;
+			else if(( tilemap.type & TILEMAP_SPLIT ) != 0)
+				tilemap.draw_tile = HandleTransparencyPens_ind;
+			else if( tilemap.type==TILEMAP_TRANSPARENT )
+				tilemap.draw_tile = HandleTransparencyPen_ind;
+			else if( tilemap.type==TILEMAP_TRANSPARENT_COLOR )
+				tilemap.draw_tile = HandleTransparencyColor_ind;
+			else
+				tilemap.draw_tile = HandleTransparencyNone_ind;
+		}
+		else
+		{
+			if(( tilemap.type & TILEMAP_BITMASK ) != 0)
+				tilemap.draw_tile = HandleTransparencyBitmask_raw;
+			else if(( tilemap.type & TILEMAP_SPLIT_PENBIT ) != 0)
+				tilemap.draw_tile = HandleTransparencyPenBit_raw;
+			else if(( tilemap.type & TILEMAP_SPLIT ) != 0)
+				tilemap.draw_tile = HandleTransparencyPens_raw;
+			else if( tilemap.type==TILEMAP_TRANSPARENT )
+				tilemap.draw_tile = HandleTransparencyPen_raw;
+			else if( tilemap.type==TILEMAP_TRANSPARENT_COLOR )
+				tilemap.draw_tile = HandleTransparencyColor_raw;
+			else
+				tilemap.draw_tile = HandleTransparencyNone_raw;
+		}
 	}
 
-/*TODO*///	INLINE tilemap_draw_func pick_draw_func( struct mame_bitmap *dest )
-/*TODO*///	{
-/*TODO*///		switch (dest ? dest->depth : Machine->scrbitmap->depth)
-/*TODO*///		{
+	static tilemap_draw_func pick_draw_func( mame_bitmap dest )
+	{
+		switch (dest!=null ? dest.depth : Machine.scrbitmap.depth)
+		{
 /*TODO*///			case 32:
 /*TODO*///				return draw32BPP;
 /*TODO*///	
-/*TODO*///			case 16:
-/*TODO*///			case 15:
-/*TODO*///				return draw16BPP;
-/*TODO*///		}
-/*TODO*///		exit(1);
-/*TODO*///		return NULL;
-/*TODO*///	}
+			case 16:
+			case 15:
+				return draw16BPP;
+		}
+		System.exit(1);
+		return null;
+	}
 /*TODO*///	
 /*TODO*///	
 /*TODO*///	/***********************************************************************************/
@@ -1125,20 +1130,20 @@ public class tilemapC
 	
 	static void recalculate_scroll( struct_tilemap tilemap )
 	{
-            throw new UnsupportedOperationException("Not supported yet.");
-/*TODO*///		int i;
-/*TODO*///	
-/*TODO*///		tilemap->scrollx_delta = (tilemap->attributes & TILEMAP_FLIPX )?tilemap->dx_if_flipped:tilemap->dx;
-/*TODO*///		tilemap->scrolly_delta = (tilemap->attributes & TILEMAP_FLIPY )?tilemap->dy_if_flipped:tilemap->dy;
-/*TODO*///	
-/*TODO*///		for( i=0; i<tilemap->logical_scroll_rows; i++ )
-/*TODO*///		{
-/*TODO*///			tilemap_set_scrollx( tilemap, i, tilemap->logical_rowscroll[i] );
-/*TODO*///		}
-/*TODO*///		for( i=0; i<tilemap->logical_scroll_cols; i++ )
-/*TODO*///		{
-/*TODO*///			tilemap_set_scrolly( tilemap, i, tilemap->logical_colscroll[i] );
-/*TODO*///		}
+            
+		int i;
+	
+		tilemap.scrollx_delta = (tilemap.attributes & TILEMAP_FLIPX )!=0?tilemap.dx_if_flipped:tilemap.dx;
+		tilemap.scrolly_delta = (tilemap.attributes & TILEMAP_FLIPY )!=0?tilemap.dy_if_flipped:tilemap.dy;
+	
+		for( i=0; i<tilemap.logical_scroll_rows; i++ )
+		{
+			tilemap_set_scrollx( tilemap, i, tilemap.logical_rowscroll[i] );
+		}
+		for( i=0; i<tilemap.logical_scroll_cols; i++ )
+		{
+			tilemap_set_scrolly( tilemap, i, tilemap.logical_colscroll[i] );
+		}
 	}
 /*TODO*///	
 /*TODO*///	void
@@ -1193,42 +1198,42 @@ public class tilemapC
 		}
 	}
 	
-/*TODO*///	void tilemap_set_scrolly( struct tilemap *tilemap, int which, int value )
-/*TODO*///	{
-/*TODO*///		tilemap->logical_colscroll[which] = value;
-/*TODO*///		value = tilemap->scrolly_delta - value; /* adjust */
-/*TODO*///	
-/*TODO*///		if( tilemap->orientation & ORIENTATION_SWAP_XY )
-/*TODO*///		{
-/*TODO*///			/* if xy are swapped, we are actually panning the screen bitmap horizontally */
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_Y )
-/*TODO*///			{
-/*TODO*///				/* adjust affected row */
-/*TODO*///				which = tilemap->cached_scroll_rows-1 - which;
-/*TODO*///			}
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_X )
-/*TODO*///			{
-/*TODO*///				/* adjust scroll amount */
-/*TODO*///				value = screen_width-tilemap->cached_width-value;
-/*TODO*///			}
-/*TODO*///			tilemap->cached_rowscroll[which] = value;
-/*TODO*///		}
-/*TODO*///		else
-/*TODO*///		{
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_X )
-/*TODO*///			{
-/*TODO*///				/* adjust affected col */
-/*TODO*///				which = tilemap->cached_scroll_cols-1 - which;
-/*TODO*///			}
-/*TODO*///			if( tilemap->orientation & ORIENTATION_FLIP_Y )
-/*TODO*///			{
-/*TODO*///				/* adjust scroll amount */
-/*TODO*///				value = screen_height-tilemap->cached_height-value;
-/*TODO*///			}
-/*TODO*///			tilemap->cached_colscroll[which] = value;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///	
+	public static void tilemap_set_scrolly( struct_tilemap tilemap, int which, int value )
+	{
+		tilemap.logical_colscroll[which] = value;
+		value = tilemap.scrolly_delta - value; /* adjust */
+	
+		if(( tilemap.orientation & ORIENTATION_SWAP_XY ) != 0)
+		{
+			/* if xy are swapped, we are actually panning the screen bitmap horizontally */
+			if(( tilemap.orientation & ORIENTATION_FLIP_Y ) != 0)
+			{
+				/* adjust affected row */
+				which = tilemap.cached_scroll_rows-1 - which;
+			}
+			if(( tilemap.orientation & ORIENTATION_FLIP_X ) != 0)
+			{
+				/* adjust scroll amount */
+				value = screen_width-tilemap.cached_width-value;
+			}
+			tilemap.cached_rowscroll[which] = value;
+		}
+		else
+		{
+			if(( tilemap.orientation & ORIENTATION_FLIP_X ) != 0)
+			{
+				/* adjust affected col */
+				which = tilemap.cached_scroll_cols-1 - which;
+			}
+			if(( tilemap.orientation & ORIENTATION_FLIP_Y ) != 0)
+			{
+				/* adjust scroll amount */
+				value = screen_height-tilemap.cached_height-value;
+			}
+			tilemap.cached_colscroll[which] = value;
+		}
+	}
+	
 /*TODO*///	/***********************************************************************************/
 /*TODO*///	
 /*TODO*///	void tilemap_set_palette_offset( struct tilemap *tilemap, int offset )
@@ -1240,86 +1245,88 @@ public class tilemapC
 	
 	public static void tilemap_draw( mame_bitmap dest, rectangle cliprect, struct_tilemap tilemap, int flags, int priority )
 	{
-            throw new UnsupportedOperationException("Not supported yet.");
-/*TODO*///		tilemap_draw_func drawfunc = pick_draw_func(dest);
-/*TODO*///		int xpos,ypos,mask,value;
-/*TODO*///		int rows, cols;
-/*TODO*///		const int *rowscroll, *colscroll;
-/*TODO*///		int left, right, top, bottom;
-/*TODO*///	
+
+		tilemap_draw_func drawfunc = pick_draw_func(dest);
+		int xpos,ypos,mask,value;
+		int rows, cols;
+		int[] rowscroll, colscroll;
+		int left, right, top, bottom;
+	
 /*TODO*///	profiler_mark(PROFILER_TILEMAP_DRAW);
-/*TODO*///		if( tilemap->enable )
-/*TODO*///		{
-/*TODO*///			/* scroll registers */
-/*TODO*///			rows		= tilemap->cached_scroll_rows;
-/*TODO*///			cols		= tilemap->cached_scroll_cols;
-/*TODO*///			rowscroll	= tilemap->cached_rowscroll;
-/*TODO*///			colscroll	= tilemap->cached_colscroll;
-/*TODO*///	
-/*TODO*///			/* clipping */
-/*TODO*///			if( cliprect )
-/*TODO*///			{
-/*TODO*///				left	= cliprect->min_x;
-/*TODO*///				top		= cliprect->min_y;
-/*TODO*///				right	= cliprect->max_x+1;
-/*TODO*///				bottom	= cliprect->max_y+1;
-/*TODO*///	
-/*TODO*///				if( Machine->orientation & ORIENTATION_SWAP_XY )
+		if( tilemap.enable != 0 )
+		{
+			/* scroll registers */
+			rows		= tilemap.cached_scroll_rows;
+			cols		= tilemap.cached_scroll_cols;
+			rowscroll	= tilemap.cached_rowscroll;
+			colscroll	= tilemap.cached_colscroll;
+	
+			/* clipping */
+			if( cliprect != null )
+			{
+				left	= cliprect.min_x;
+				top	= cliprect.min_y;
+				right	= cliprect.max_x+1;
+				bottom	= cliprect.max_y+1;
+	
+/*TODO*///				if( Machine.orientation & ORIENTATION_SWAP_XY )
 /*TODO*///				{
 /*TODO*///					SWAP(left,top)
 /*TODO*///					SWAP(right,bottom)
 /*TODO*///				}
 /*TODO*///	
-/*TODO*///				if( Machine->orientation & ORIENTATION_FLIP_X )
+/*TODO*///				if( Machine.orientation & ORIENTATION_FLIP_X )
 /*TODO*///				{
 /*TODO*///					SWAP(left,right)
 /*TODO*///					left	= screen_width-left;
 /*TODO*///					right	= screen_width-right;
 /*TODO*///				}
 /*TODO*///	
-/*TODO*///				if( Machine->orientation & ORIENTATION_FLIP_Y )
+/*TODO*///				if( Machine.orientation & ORIENTATION_FLIP_Y )
 /*TODO*///				{
 /*TODO*///					SWAP(top,bottom)
 /*TODO*///					top		= screen_height-top;
 /*TODO*///					bottom	= screen_height-bottom;
 /*TODO*///				}
-/*TODO*///			}
-/*TODO*///			else
-/*TODO*///			{
-/*TODO*///				left	= 0;
-/*TODO*///				top		= 0;
-/*TODO*///				right	= tilemap->cached_width;
-/*TODO*///				bottom	= tilemap->cached_height;
-/*TODO*///			}
-/*TODO*///	
-/*TODO*///			/* tile priority */
-/*TODO*///			mask		= TILE_FLAG_TILE_PRIORITY;
-/*TODO*///			value		= TILE_FLAG_TILE_PRIORITY&flags;
-/*TODO*///	
+			}
+			else
+			{
+				left	= 0;
+				top		= 0;
+				right	= tilemap.cached_width;
+				bottom	= tilemap.cached_height;
+			}
+	
+			/* tile priority */
+			mask		= TILE_FLAG_TILE_PRIORITY;
+			value		= TILE_FLAG_TILE_PRIORITY&flags;
+	
 /*TODO*///			/* initialize defaults */
 /*TODO*///			memset( &tile_info, 0x00, sizeof(tile_info) );
-/*TODO*///	
-/*TODO*///			/* if the whole map is dirty, mark it as such */
-/*TODO*///			if (tilemap->all_tiles_dirty)
-/*TODO*///			{
-/*TODO*///				memset( tilemap->transparency_data, TILE_FLAG_DIRTY, tilemap->num_tiles );
-/*TODO*///				tilemap->all_tiles_dirty = 0;
-/*TODO*///			}
-/*TODO*///	
-/*TODO*///			/* priority_bitmap_pitch_row is tilemap-specific */
-/*TODO*///			priority_bitmap_pitch_row = priority_bitmap_pitch_line*tilemap->cached_tile_height;
-/*TODO*///	
-/*TODO*///			blit.screen_bitmap = dest;
-/*TODO*///			if( dest == NULL )
-/*TODO*///			{
+	
+			/* if the whole map is dirty, mark it as such */
+			if (tilemap.all_tiles_dirty != 0)
+			{
+				memset( tilemap.transparency_data, TILE_FLAG_DIRTY, tilemap.num_tiles );
+				tilemap.all_tiles_dirty = 0;
+			}
+	
+			/* priority_bitmap_pitch_row is tilemap-specific */
+			priority_bitmap_pitch_row = priority_bitmap_pitch_line*tilemap.cached_tile_height;
+	
+			blit.screen_bitmap = dest;
+			if( dest == null )
+			{
+                            
+                            throw new UnsupportedOperationException("Not implemented!");
 /*TODO*///				blit.draw_masked = (blitmask_t)pit;
 /*TODO*///				blit.draw_opaque = (blitopaque_t)pio;
-/*TODO*///			}
-/*TODO*///			else
-/*TODO*///			{
-/*TODO*///				blit.screen_bitmap_pitch_line = ((UINT8 *)dest->line[1]) - ((UINT8 *)dest->line[0]);
-/*TODO*///				switch( dest->depth )
-/*TODO*///				{
+			}
+			else
+			{
+				blit.screen_bitmap_pitch_line = (new UBytePtr(dest.line[1]).read()) - (new UBytePtr(dest.line[0]).read());
+				switch( dest.depth )
+				{
 /*TODO*///				case 32:
 /*TODO*///					if (priority)
 /*TODO*///					{
@@ -1363,9 +1370,10 @@ public class tilemapC
 /*TODO*///					}
 /*TODO*///					blit.screen_bitmap_pitch_line /= 2;
 /*TODO*///					break;
-/*TODO*///	
-/*TODO*///				case 16:
-/*TODO*///					if (tilemap->palette_offset)
+	
+				case 16:
+                                    throw new UnsupportedOperationException("Not Implemented!");
+/*TODO*///					if (tilemap.palette_offset)
 /*TODO*///					{
 /*TODO*///						blit.draw_masked = (blitmask_t)pdt16pal;
 /*TODO*///						blit.draw_opaque = (blitopaque_t)pdo16pal;
@@ -1382,16 +1390,17 @@ public class tilemapC
 /*TODO*///					}
 /*TODO*///					blit.screen_bitmap_pitch_line /= 2;
 /*TODO*///					break;
-/*TODO*///	
-/*TODO*///				default:
-/*TODO*///					exit(1);
-/*TODO*///					break;
-/*TODO*///				}
-/*TODO*///				blit.screen_bitmap_pitch_row = blit.screen_bitmap_pitch_line*tilemap->cached_tile_height;
-/*TODO*///			} /* dest == bitmap */
-/*TODO*///	
-/*TODO*///			if( !(tilemap->type==TILEMAP_OPAQUE || (flags&TILEMAP_IGNORE_TRANSPARENCY)) )
-/*TODO*///			{
+	
+				default:
+					System.exit(1);
+					break;
+				}
+				blit.screen_bitmap_pitch_row = blit.screen_bitmap_pitch_line*tilemap.cached_tile_height;
+			} /* dest == bitmap */
+	
+			if( !(tilemap.type==TILEMAP_OPAQUE || ((flags&TILEMAP_IGNORE_TRANSPARENCY)!=0)) )
+			{
+                            throw new UnsupportedOperationException("Not implemented!");
 /*TODO*///				if( flags&TILEMAP_BACK )
 /*TODO*///				{
 /*TODO*///					mask	|= TILE_FLAG_BG_OPAQUE;
@@ -1402,176 +1411,176 @@ public class tilemapC
 /*TODO*///					mask	|= TILE_FLAG_FG_OPAQUE;
 /*TODO*///					value	|= TILE_FLAG_FG_OPAQUE;
 /*TODO*///				}
-/*TODO*///			}
-/*TODO*///	
-/*TODO*///			blit.tilemap_priority_code = (priority & 0xffff) | (tilemap->palette_offset << 16);
-/*TODO*///	
-/*TODO*///			if( rows == 1 && cols == 1 )
-/*TODO*///			{ /* XY scrolling playfield */
-/*TODO*///				int scrollx = rowscroll[0];
-/*TODO*///				int scrolly = colscroll[0];
-/*TODO*///	
-/*TODO*///				if( scrollx < 0 )
-/*TODO*///				{
-/*TODO*///					scrollx = tilemap->cached_width - (-scrollx) % tilemap->cached_width;
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					scrollx = scrollx % tilemap->cached_width;
-/*TODO*///				}
-/*TODO*///	
-/*TODO*///				if( scrolly < 0 )
-/*TODO*///				{
-/*TODO*///					scrolly = tilemap->cached_height - (-scrolly) % tilemap->cached_height;
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					scrolly = scrolly % tilemap->cached_height;
-/*TODO*///				}
-/*TODO*///	
-/*TODO*///		 		blit.clip_left		= left;
-/*TODO*///		 		blit.clip_top		= top;
-/*TODO*///		 		blit.clip_right		= right;
-/*TODO*///		 		blit.clip_bottom	= bottom;
-/*TODO*///	
-/*TODO*///				for(
-/*TODO*///					ypos = scrolly - tilemap->cached_height;
-/*TODO*///					ypos < blit.clip_bottom;
-/*TODO*///					ypos += tilemap->cached_height )
-/*TODO*///				{
-/*TODO*///					for(
-/*TODO*///						xpos = scrollx - tilemap->cached_width;
-/*TODO*///						xpos < blit.clip_right;
-/*TODO*///						xpos += tilemap->cached_width )
-/*TODO*///					{
-/*TODO*///						drawfunc( tilemap, xpos, ypos, mask, value );
-/*TODO*///					}
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///			else if( rows == 1 )
-/*TODO*///			{ /* scrolling columns + horizontal scroll */
-/*TODO*///				int col = 0;
-/*TODO*///				int colwidth = tilemap->cached_width / cols;
-/*TODO*///				int scrollx = rowscroll[0];
-/*TODO*///	
-/*TODO*///				if( scrollx < 0 )
-/*TODO*///				{
-/*TODO*///					scrollx = tilemap->cached_width - (-scrollx) % tilemap->cached_width;
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					scrollx = scrollx % tilemap->cached_width;
-/*TODO*///				}
-/*TODO*///	
-/*TODO*///				blit.clip_top		= top;
-/*TODO*///				blit.clip_bottom	= bottom;
-/*TODO*///	
-/*TODO*///				while( col < cols )
-/*TODO*///				{
-/*TODO*///					int cons	= 1;
-/*TODO*///					int scrolly	= colscroll[col];
-/*TODO*///	
-/*TODO*///		 			/* count consecutive columns scrolled by the same amount */
-/*TODO*///					if( scrolly != TILE_LINE_DISABLED )
-/*TODO*///					{
-/*TODO*///						while( col + cons < cols &&	colscroll[col + cons] == scrolly ) cons++;
-/*TODO*///	
-/*TODO*///						if( scrolly < 0 )
-/*TODO*///						{
-/*TODO*///							scrolly = tilemap->cached_height - (-scrolly) % tilemap->cached_height;
-/*TODO*///						}
-/*TODO*///						else
-/*TODO*///						{
-/*TODO*///							scrolly %= tilemap->cached_height;
-/*TODO*///						}
-/*TODO*///	
-/*TODO*///						blit.clip_left = col * colwidth + scrollx;
-/*TODO*///						if (blit.clip_left < left) blit.clip_left = left;
-/*TODO*///						blit.clip_right = (col + cons) * colwidth + scrollx;
-/*TODO*///						if (blit.clip_right > right) blit.clip_right = right;
-/*TODO*///	
-/*TODO*///						for(
-/*TODO*///							ypos = scrolly - tilemap->cached_height;
-/*TODO*///							ypos < blit.clip_bottom;
-/*TODO*///							ypos += tilemap->cached_height )
-/*TODO*///						{
-/*TODO*///							drawfunc( tilemap, scrollx, ypos, mask, value );
-/*TODO*///						}
-/*TODO*///	
-/*TODO*///						blit.clip_left = col * colwidth + scrollx - tilemap->cached_width;
-/*TODO*///						if (blit.clip_left < left) blit.clip_left = left;
-/*TODO*///						blit.clip_right = (col + cons) * colwidth + scrollx - tilemap->cached_width;
-/*TODO*///						if (blit.clip_right > right) blit.clip_right = right;
-/*TODO*///	
-/*TODO*///						for(
-/*TODO*///							ypos = scrolly - tilemap->cached_height;
-/*TODO*///							ypos < blit.clip_bottom;
-/*TODO*///							ypos += tilemap->cached_height )
-/*TODO*///						{
-/*TODO*///							drawfunc( tilemap, scrollx - tilemap->cached_width, ypos, mask, value );
-/*TODO*///						}
-/*TODO*///					}
-/*TODO*///					col += cons;
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///			else if( cols == 1 )
-/*TODO*///			{ /* scrolling rows + vertical scroll */
-/*TODO*///				int row = 0;
-/*TODO*///				int rowheight = tilemap->cached_height / rows;
-/*TODO*///				int scrolly = colscroll[0];
-/*TODO*///				if( scrolly < 0 )
-/*TODO*///				{
-/*TODO*///					scrolly = tilemap->cached_height - (-scrolly) % tilemap->cached_height;
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					scrolly = scrolly % tilemap->cached_height;
-/*TODO*///				}
-/*TODO*///				blit.clip_left = left;
-/*TODO*///				blit.clip_right = right;
-/*TODO*///				while( row < rows )
-/*TODO*///				{
-/*TODO*///					int cons = 1;
-/*TODO*///					int scrollx = rowscroll[row];
-/*TODO*///					/* count consecutive rows scrolled by the same amount */
-/*TODO*///					if( scrollx != TILE_LINE_DISABLED )
-/*TODO*///					{
-/*TODO*///						while( row + cons < rows &&	rowscroll[row + cons] == scrollx ) cons++;
-/*TODO*///						if( scrollx < 0)
-/*TODO*///						{
-/*TODO*///							scrollx = tilemap->cached_width - (-scrollx) % tilemap->cached_width;
-/*TODO*///						}
-/*TODO*///						else
-/*TODO*///						{
-/*TODO*///							scrollx %= tilemap->cached_width;
-/*TODO*///						}
-/*TODO*///						blit.clip_top = row * rowheight + scrolly;
-/*TODO*///						if (blit.clip_top < top) blit.clip_top = top;
-/*TODO*///						blit.clip_bottom = (row + cons) * rowheight + scrolly;
-/*TODO*///						if (blit.clip_bottom > bottom) blit.clip_bottom = bottom;
-/*TODO*///						for(
-/*TODO*///							xpos = scrollx - tilemap->cached_width;
-/*TODO*///							xpos < blit.clip_right;
-/*TODO*///							xpos += tilemap->cached_width )
-/*TODO*///						{
-/*TODO*///							drawfunc( tilemap, xpos, scrolly, mask, value );
-/*TODO*///						}
-/*TODO*///						blit.clip_top = row * rowheight + scrolly - tilemap->cached_height;
-/*TODO*///						if (blit.clip_top < top) blit.clip_top = top;
-/*TODO*///						blit.clip_bottom = (row + cons) * rowheight + scrolly - tilemap->cached_height;
-/*TODO*///						if (blit.clip_bottom > bottom) blit.clip_bottom = bottom;
-/*TODO*///						for(
-/*TODO*///							xpos = scrollx - tilemap->cached_width;
-/*TODO*///							xpos < blit.clip_right;
-/*TODO*///							xpos += tilemap->cached_width )
-/*TODO*///						{
-/*TODO*///							drawfunc( tilemap, xpos, scrolly - tilemap->cached_height, mask, value );
-/*TODO*///						}
-/*TODO*///					}
-/*TODO*///					row += cons;
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///		}
+			}
+	
+			blit.tilemap_priority_code = (priority & 0xffff) | (tilemap.palette_offset << 16);
+	
+			if( rows == 1 && cols == 1 )
+			{ /* XY scrolling playfield */
+				int scrollx = rowscroll[0];
+				int scrolly = colscroll[0];
+	
+				if( scrollx < 0 )
+				{
+					scrollx = tilemap.cached_width - (-scrollx) % tilemap.cached_width;
+				}
+				else
+				{
+					scrollx = scrollx % tilemap.cached_width;
+				}
+	
+				if( scrolly < 0 )
+				{
+					scrolly = tilemap.cached_height - (-scrolly) % tilemap.cached_height;
+				}
+				else
+				{
+					scrolly = scrolly % tilemap.cached_height;
+				}
+	
+		 		blit.clip_left		= left;
+		 		blit.clip_top		= top;
+		 		blit.clip_right		= right;
+		 		blit.clip_bottom	= bottom;
+	
+				for(
+					ypos = scrolly - tilemap.cached_height;
+					ypos < blit.clip_bottom;
+					ypos += tilemap.cached_height )
+				{
+					for(
+						xpos = scrollx - tilemap.cached_width;
+						xpos < blit.clip_right;
+						xpos += tilemap.cached_width )
+					{
+						drawfunc.handler( tilemap, xpos, ypos, mask, value );
+					}
+				}
+			}
+			else if( rows == 1 )
+			{ /* scrolling columns + horizontal scroll */
+				int col = 0;
+				int colwidth = tilemap.cached_width / cols;
+				int scrollx = rowscroll[0];
+	
+				if( scrollx < 0 )
+				{
+					scrollx = tilemap.cached_width - (-scrollx) % tilemap.cached_width;
+				}
+				else
+				{
+					scrollx = scrollx % tilemap.cached_width;
+				}
+	
+				blit.clip_top		= top;
+				blit.clip_bottom	= bottom;
+	
+				while( col < cols )
+				{
+					int cons	= 1;
+					int scrolly	= colscroll[col];
+	
+		 			/* count consecutive columns scrolled by the same amount */
+					if( scrolly != TILE_LINE_DISABLED )
+					{
+						while( col + cons < cols &&	colscroll[col + cons] == scrolly ) cons++;
+	
+						if( scrolly < 0 )
+						{
+							scrolly = tilemap.cached_height - (-scrolly) % tilemap.cached_height;
+						}
+						else
+						{
+							scrolly %= tilemap.cached_height;
+						}
+	
+						blit.clip_left = col * colwidth + scrollx;
+						if (blit.clip_left < left) blit.clip_left = left;
+						blit.clip_right = (col + cons) * colwidth + scrollx;
+						if (blit.clip_right > right) blit.clip_right = right;
+	
+						for(
+							ypos = scrolly - tilemap.cached_height;
+							ypos < blit.clip_bottom;
+							ypos += tilemap.cached_height )
+						{
+							drawfunc.handler( tilemap, scrollx, ypos, mask, value );
+						}
+	
+						blit.clip_left = col * colwidth + scrollx - tilemap.cached_width;
+						if (blit.clip_left < left) blit.clip_left = left;
+						blit.clip_right = (col + cons) * colwidth + scrollx - tilemap.cached_width;
+						if (blit.clip_right > right) blit.clip_right = right;
+	
+						for(
+							ypos = scrolly - tilemap.cached_height;
+							ypos < blit.clip_bottom;
+							ypos += tilemap.cached_height )
+						{
+							drawfunc.handler( tilemap, scrollx - tilemap.cached_width, ypos, mask, value );
+						}
+					}
+					col += cons;
+				}
+			}
+			else if( cols == 1 )
+			{ /* scrolling rows + vertical scroll */
+				int row = 0;
+				int rowheight = tilemap.cached_height / rows;
+				int scrolly = colscroll[0];
+				if( scrolly < 0 )
+				{
+					scrolly = tilemap.cached_height - (-scrolly) % tilemap.cached_height;
+				}
+				else
+				{
+					scrolly = scrolly % tilemap.cached_height;
+				}
+				blit.clip_left = left;
+				blit.clip_right = right;
+				while( row < rows )
+				{
+					int cons = 1;
+					int scrollx = rowscroll[row];
+					/* count consecutive rows scrolled by the same amount */
+					if( scrollx != TILE_LINE_DISABLED )
+					{
+						while( row + cons < rows &&	rowscroll[row + cons] == scrollx ) cons++;
+						if( scrollx < 0)
+						{
+							scrollx = tilemap.cached_width - (-scrollx) % tilemap.cached_width;
+						}
+						else
+						{
+							scrollx %= tilemap.cached_width;
+						}
+						blit.clip_top = row * rowheight + scrolly;
+						if (blit.clip_top < top) blit.clip_top = top;
+						blit.clip_bottom = (row + cons) * rowheight + scrolly;
+						if (blit.clip_bottom > bottom) blit.clip_bottom = bottom;
+						for(
+							xpos = scrollx - tilemap.cached_width;
+							xpos < blit.clip_right;
+							xpos += tilemap.cached_width )
+						{
+							drawfunc.handler( tilemap, xpos, scrolly, mask, value );
+						}
+						blit.clip_top = row * rowheight + scrolly - tilemap.cached_height;
+						if (blit.clip_top < top) blit.clip_top = top;
+						blit.clip_bottom = (row + cons) * rowheight + scrolly - tilemap.cached_height;
+						if (blit.clip_bottom > bottom) blit.clip_bottom = bottom;
+						for(
+							xpos = scrollx - tilemap.cached_width;
+							xpos < blit.clip_right;
+							xpos += tilemap.cached_width )
+						{
+							drawfunc.handler( tilemap, xpos, scrolly - tilemap.cached_height, mask, value );
+						}
+					}
+					row += cons;
+				}
+			}
+		}
 /*TODO*///	profiler_mark(PROFILER_END);
 	}
 	
@@ -1984,6 +1993,13 @@ public class tilemapC
 /*TODO*///	#define osd_pend() do { } while (0)
 /*TODO*///	#endif
 /*TODO*///	
+        static tilemap_draw_func draw16BPP = new tilemap_draw_func() {
+            @Override
+            public void handler(struct_tilemap tilemap, int xpos, int ypos, int mask, int value) {
+                //throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+                System.out.println("draw16BPP");
+            }
+        };
 /*TODO*///	DECLARE( draw, (struct tilemap *tilemap, int xpos, int ypos, int mask, int value ),
 /*TODO*///	{
 /*TODO*///		trans_t transPrev;
@@ -2179,6 +2195,18 @@ public class tilemapC
 /*TODO*///	 * in that tile have the same masked transparency value.
 /*TODO*///	 */
 /*TODO*///	
+        public static DrawTileHandlerPtr HandleTransparencyBitmask_ind = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyBitmask_ind");
+                return 0;
+            }
+        };
+        public static DrawTileHandlerPtr HandleTransparencyBitmask_raw = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyBitmask_ind");
+                return 0;
+            }
+        };
 /*TODO*///	static UINT8 TRANSP(HandleTransparencyBitmask)(struct tilemap *tilemap, UINT32 x0, UINT32 y0, UINT32 flags)
 /*TODO*///	{
 /*TODO*///		UINT32 tile_width = tilemap->cached_tile_width;
@@ -2277,6 +2305,18 @@ public class tilemapC
 /*TODO*///		return (bWhollyOpaque || bWhollyTransparent)?0:TILE_FLAG_FG_OPAQUE;
 /*TODO*///	}
 /*TODO*///	
+        public static DrawTileHandlerPtr HandleTransparencyColor_ind = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyColor_ind");
+                return 0;
+            }
+        };
+        public static DrawTileHandlerPtr HandleTransparencyColor_raw = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyColor_raw");
+                return 0;
+            }
+        };
 /*TODO*///	static UINT8 TRANSP(HandleTransparencyColor)(struct tilemap *tilemap, UINT32 x0, UINT32 y0, UINT32 flags)
 /*TODO*///	{
 /*TODO*///		UINT32 tile_width = tilemap->cached_tile_width;
@@ -2377,6 +2417,18 @@ public class tilemapC
 /*TODO*///		return (bWhollyOpaque || bWhollyTransparent)?0:TILE_FLAG_FG_OPAQUE;
 /*TODO*///	}
 /*TODO*///	
+        public static DrawTileHandlerPtr HandleTransparencyPen_ind = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyPen_ind");
+                return 0;
+            }
+        };
+        public static DrawTileHandlerPtr HandleTransparencyPen_raw = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyPen_raw");
+                return 0;
+            }
+        };
 /*TODO*///	static UINT8 TRANSP(HandleTransparencyPen)(struct tilemap *tilemap, UINT32 x0, UINT32 y0, UINT32 flags)
 /*TODO*///	{
 /*TODO*///		UINT32 tile_width = tilemap->cached_tile_width;
@@ -2474,6 +2526,18 @@ public class tilemapC
 /*TODO*///	
 /*TODO*///		return (bWhollyOpaque || bWhollyTransparent)?0:TILE_FLAG_FG_OPAQUE;
 /*TODO*///	}
+        public static DrawTileHandlerPtr HandleTransparencyPenBit_ind = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyPenBit_ind");
+                return 0;
+            }
+        };
+        public static DrawTileHandlerPtr HandleTransparencyPenBit_raw = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyPenBit_raw");
+                return 0;
+            }
+        };
 /*TODO*///	
 /*TODO*///	static UINT8 TRANSP(HandleTransparencyPenBit)(struct tilemap *tilemap, UINT32 x0, UINT32 y0, UINT32 flags)
 /*TODO*///	{
@@ -2555,6 +2619,18 @@ public class tilemapC
 /*TODO*///		return or_flags ^ and_flags;
 /*TODO*///	}
 /*TODO*///	
+        public static DrawTileHandlerPtr HandleTransparencyPens_ind = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyPens_ind");
+                return 0;
+            }
+        };
+        public static DrawTileHandlerPtr HandleTransparencyPens_raw = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyPens_raw");
+                return 0;
+            }
+        };
 /*TODO*///	static UINT8 TRANSP(HandleTransparencyPens)(struct tilemap *tilemap, UINT32 x0, UINT32 y0, UINT32 flags)
 /*TODO*///	{
 /*TODO*///		UINT32 tile_width = tilemap->cached_tile_width;
@@ -2641,6 +2717,18 @@ public class tilemapC
 /*TODO*///		return and_flags ^ or_flags;
 /*TODO*///	}
 /*TODO*///	
+        public static DrawTileHandlerPtr HandleTransparencyNone_ind = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyNone_ind");
+                return 0;
+            }
+        };
+        public static DrawTileHandlerPtr HandleTransparencyNone_raw = new DrawTileHandlerPtr() {
+            public int handler(struct_tilemap tilemap, int x0, int y0, int flags) {
+                System.out.println("HandleTransparencyNone_raw");
+                return 0;
+            }
+        };
 /*TODO*///	static UINT8 TRANSP(HandleTransparencyNone)(struct tilemap *tilemap, UINT32 x0, UINT32 y0, UINT32 flags)
 /*TODO*///	{
 /*TODO*///		UINT32 tile_width = tilemap->cached_tile_width;
