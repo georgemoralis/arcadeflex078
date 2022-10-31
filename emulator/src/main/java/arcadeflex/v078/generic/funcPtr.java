@@ -5,6 +5,8 @@ package arcadeflex.v078.generic;
 
 //mame imports
 import static arcadeflex.v078.mame.driverH.*;
+//common imports
+import static common.ptr.*;
 
 public class funcPtr {
 
@@ -91,5 +93,13 @@ public class funcPtr {
     public static abstract interface TimerCallbackHandlerPtr {
 
         public abstract void handler(int i);
+    }
+
+    /**
+     * Video related
+     */
+    public static abstract interface PaletteInitHandlerPtr {
+
+        public abstract void handler(char[] colortable, UBytePtr color_prom);
     }
 }
