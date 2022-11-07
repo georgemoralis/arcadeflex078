@@ -6,9 +6,15 @@ package arcadeflex.v078.mame;
 
 import arcadeflex.v078.generic.funcPtr.MachineHandlerPtr;
 import arcadeflex.v078.mame.cpuexecH.MachineCPU;
+import arcadeflex.v078.mame.drawgfxH.rectangle;
 import arcadeflex.v078.mame.driverH.InternalMachineDriver;
 import static arcadeflex.v078.mame.driverH.MAX_CPU;
+import static arcadeflex.v078.mame.palette.get_black_pen;
+import static arcadeflex.v078.mame.tilemapC.priority_bitmap;
 import static arcadeflex036.osdepend.*;
+import static arcadeflex056.video.osd_skip_this_frame;
+import static mame056.drawgfx.fillbitmap;
+import static mame056.mame.Machine;
 
 public class mame {
 
@@ -171,9 +177,10 @@ public class mame {
 /*TODO*///static UINT8 visible_area_changed;
 /*TODO*///
 /*TODO*////* video updating */
-/*TODO*///static UINT8 full_refresh_pending;
-/*TODO*///static int last_partial_scanline;
-/*TODO*///
+    static int/*UINT8*/ full_refresh_pending;
+    static int last_partial_scanline;
+
+    /*TODO*///
 /*TODO*////* speed computation */
 /*TODO*///static cycles_t last_fps_time;
 /*TODO*///static int frames_since_last_fps;
@@ -1108,96 +1115,81 @@ public class mame {
 /*TODO*///	cpu_compute_scanline_timing();
 /*TODO*///}
 /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	schedule_full_refresh - force a full erase
-/*TODO*///	and refresh the next frame
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void schedule_full_refresh(void)
-/*TODO*///{
-/*TODO*///	full_refresh_pending = 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
+    /*-------------------------------------------------
+	schedule_full_refresh - force a full erase
+	and refresh the next frame
+    -------------------------------------------------*/
+    public static void schedule_full_refresh() {
+        full_refresh_pending = 1;
+    }
 
     /*-------------------------------------------------
 	reset_partial_updates - reset the partial
 	updating mechanism for a new frame
     -------------------------------------------------*/
     public static void reset_partial_updates() {
-        /*TODO*///	last_partial_scanline = 0;
-/*TODO*///	performance.partial_updates_this_frame = 0;
+        last_partial_scanline = 0;
+        /*TODO*///	performance.partial_updates_this_frame = 0;
+    }
+
+    /*-------------------------------------------------
+	force_partial_update - perform a partial
+	update from the last scanline up to and
+	including the specified scanline
+    -------------------------------------------------*/
+    public static void force_partial_update(int scanline) {
+        rectangle clip = Machine.visible_area;
+
+        /* if skipping this frame, bail */
+        if (osd_skip_this_frame() != 0) {
+            return;
+        }
+
+        /* skip if less than the lowest so far */
+        if (scanline < last_partial_scanline) {
+            return;
+        }
+
+        /* if there's a dirty bitmap and we didn't do any partial updates yet, handle it now */
+        if (full_refresh_pending != 0 && last_partial_scanline == 0) {
+            fillbitmap(Machine.scrbitmap, get_black_pen(), null);
+            full_refresh_pending = 0;
+        }
+
+        /* set the start/end scanlines */
+        if (last_partial_scanline > clip.min_y) {
+            clip.min_y = last_partial_scanline;
+        }
+        if (scanline < clip.max_y) {
+            clip.max_y = scanline;
+        }
+
+        /* render if necessary */
+        if (clip.min_y <= clip.max_y) {
+            (Machine.drv.video_update).handler(Machine.scrbitmap, clip);
+            /*TODO*///		performance.partial_updates_this_frame++;
+        }
+
+        /* remember where we left off */
+        last_partial_scanline = scanline + 1;
+    }
+
+    /*-------------------------------------------------
+	draw_screen - render the final screen bitmap
+	and update any artwork
+-------------------------------------------------*/
+    static int gbPriorityBitmapIsDirty;
+
+    static void draw_screen() {
+        /* finish updating the screen */
+        force_partial_update(Machine.visible_area.max_y);
+        if (gbPriorityBitmapIsDirty != 0) {
+            fillbitmap(priority_bitmap, 0x00, null);
+            gbPriorityBitmapIsDirty = 0;
+        }
     }
 
     /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	force_partial_update - perform a partial
-/*TODO*///	update from the last scanline up to and
-/*TODO*///	including the specified scanline
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void force_partial_update(int scanline)
-/*TODO*///{
-/*TODO*///	struct rectangle clip = Machine->visible_area;
-/*TODO*///
-/*TODO*///	/* if skipping this frame, bail */
-/*TODO*///	if (osd_skip_this_frame())
-/*TODO*///		return;
-/*TODO*///
-/*TODO*///	/* skip if less than the lowest so far */
-/*TODO*///	if (scanline < last_partial_scanline)
-/*TODO*///		return;
-/*TODO*///
-/*TODO*///	/* if there's a dirty bitmap and we didn't do any partial updates yet, handle it now */
-/*TODO*///	if (full_refresh_pending && last_partial_scanline == 0)
-/*TODO*///	{
-/*TODO*///		fillbitmap(Machine->scrbitmap, get_black_pen(), NULL);
-/*TODO*///		full_refresh_pending = 0;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* set the start/end scanlines */
-/*TODO*///	if (last_partial_scanline > clip.min_y)
-/*TODO*///		clip.min_y = last_partial_scanline;
-/*TODO*///	if (scanline < clip.max_y)
-/*TODO*///		clip.max_y = scanline;
-/*TODO*///
-/*TODO*///	/* render if necessary */
-/*TODO*///	if (clip.min_y <= clip.max_y)
-/*TODO*///	{
-/*TODO*///		profiler_mark(PROFILER_VIDEO);
-/*TODO*///		(*Machine->drv->video_update)(Machine->scrbitmap, &clip);
-/*TODO*///		performance.partial_updates_this_frame++;
-/*TODO*///		profiler_mark(PROFILER_END);
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* remember where we left off */
-/*TODO*///	last_partial_scanline = scanline + 1;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	draw_screen - render the final screen bitmap
-/*TODO*///	and update any artwork
-/*TODO*///-------------------------------------------------*/
-/*TODO*///int gbPriorityBitmapIsDirty;
-/*TODO*///
-/*TODO*///void draw_screen(void)
-/*TODO*///{
-/*TODO*///	/* finish updating the screen */
-/*TODO*///	force_partial_update(Machine->visible_area.max_y);
-/*TODO*///	if( gbPriorityBitmapIsDirty )
-/*TODO*///	{
-/*TODO*///		fillbitmap( priority_bitmap, 0x00, NULL );
-/*TODO*///		gbPriorityBitmapIsDirty = 0;
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///
 /*TODO*////*-------------------------------------------------
 /*TODO*///	update_video_and_audio - actually call the
 /*TODO*///	OSD layer to perform an update
@@ -1207,9 +1199,6 @@ public class mame {
 /*TODO*///{
 /*TODO*///	int skipped_it = osd_skip_this_frame();
 /*TODO*///
-/*TODO*///#ifdef MAME_DEBUG
-/*TODO*///	debug_trace_delay = 0;
-/*TODO*///#endif
 /*TODO*///
 /*TODO*///	/* fill in our portion of the display */
 /*TODO*///	current_display.changed_flags = 0;
@@ -1232,21 +1221,6 @@ public class mame {
 /*TODO*///			current_display.vector_dirty_pixels = vector_dirty_list;
 /*TODO*///			current_display.changed_flags |= VECTOR_PIXELS_CHANGED;
 /*TODO*///		}
-/*TODO*///
-/*TODO*///#ifdef MAME_DEBUG
-/*TODO*///	/* set the debugger bitmap */
-/*TODO*///	current_display.debug_bitmap = Machine->debug_bitmap;
-/*TODO*///	if (debugger_bitmap_changed)
-/*TODO*///		current_display.changed_flags |= DEBUG_BITMAP_CHANGED;
-/*TODO*///	debugger_bitmap_changed = 0;
-/*TODO*///
-/*TODO*///	/* adjust the debugger focus */
-/*TODO*///	if (debugger_focus != current_display.debug_focus)
-/*TODO*///	{
-/*TODO*///		current_display.debug_focus = debugger_focus;
-/*TODO*///		current_display.changed_flags |= DEBUG_FOCUS_CHANGED;
-/*TODO*///	}
-/*TODO*///#endif
 /*TODO*///
 /*TODO*///	/* set the LED status */
 /*TODO*///	if (leds_status != current_display.led_state)
@@ -1379,17 +1353,6 @@ public class mame {
 /*TODO*///	/* disable high score when cheats are used */
 /*TODO*///	if (he_did_cheat != 0)
 /*TODO*///		return 0;
-/*TODO*///
-/*TODO*///	/* disable high score when playing network game */
-/*TODO*///	/* (this forces all networked machines to start from the same state!) */
-/*TODO*///#ifdef MAME_NET
-/*TODO*///	if (net_active())
-/*TODO*///		return 0;
-/*TODO*///#elif defined XMAME_NET
-/*TODO*///	if (osd_net_active())
-/*TODO*///		return 0;
-/*TODO*///#endif
-/*TODO*///
 /*TODO*///	return 1;
 /*TODO*///}
 /*TODO*///

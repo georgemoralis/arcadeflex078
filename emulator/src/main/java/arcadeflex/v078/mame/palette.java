@@ -1071,11 +1071,11 @@ public class palette {
 /*TODO*///	fillbitmap() the background with black
 /*TODO*///-------------------------------------------------*/
 /*TODO*///
-/*TODO*///pen_t get_black_pen(void)
-/*TODO*///{
-/*TODO*///	return Machine->uifont->colortable[0];
-/*TODO*///}
-/*TODO*///
+    public static int /*pen_t*/ get_black_pen() {
+        throw new UnsupportedOperationException("Unsupported");
+        /*TODO*///	return Machine->uifont->colortable[0];
+    }
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*///
