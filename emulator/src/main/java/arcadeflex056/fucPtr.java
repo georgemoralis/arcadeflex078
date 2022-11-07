@@ -39,11 +39,6 @@ public class fucPtr {
         public abstract void handler();
     }
 
-    public static abstract interface VhUpdatePtr {
-
-        public abstract void handler(mame_bitmap bitmap, rectangle cliprect);
-    }
-
     public static abstract interface ShStartPtr {
 
         public abstract int handler(MachineSound msound);

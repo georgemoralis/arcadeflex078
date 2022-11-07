@@ -10,7 +10,7 @@ import static mame056.mame.Machine;
 
 public class tilemapH {
     
-    public static abstract interface GetTileInfoPtr {
+    public static abstract interface GetTileInfoHandlerPtr {
 
         public abstract void handler(int memory_offset);
     }

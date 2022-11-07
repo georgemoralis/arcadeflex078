@@ -5,6 +5,7 @@
  */
 package mame056.vidhrdw;
 
+import arcadeflex.v078.generic.funcPtr.VideoUpdateHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import arcadeflex.v078.mame.drawgfxH;
 import static arcadeflex.v078.vidhrdw.generic.videoram;
@@ -72,7 +73,7 @@ public class minivadr {
         }
     };
 
-    public static VhUpdatePtr video_update_minivadr = new VhUpdatePtr() 
+    public static VideoUpdateHandlerPtr video_update_minivadr = new VideoUpdateHandlerPtr() 
     { 
         public void handler(mame_bitmap bitmap,drawgfxH.rectangle cliprect) 
         {

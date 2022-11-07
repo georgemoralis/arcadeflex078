@@ -12,7 +12,6 @@ import static arcadeflex.v078.mame.mame.*;
 import static arcadeflex.v078.mame.memoryH.*;
 //TODO
 import arcadeflex056.fucPtr.VhConvertColorPromPtr;
-import arcadeflex056.fucPtr.VhUpdatePtr;
 import mame056.drawgfxH.GfxDecodeInfo;
 import arcadeflex.v078.mame.drawgfxH.rectangle;
 import mame056.sndintrfH.MachineSound;
@@ -224,7 +223,7 @@ public class driverH {
 /*TODO*///#define MDRV_VIDEO_EOF(name)											\
 /*TODO*///	machine->video_eof = video_eof_##name;								\
 /*TODO*///
-    public static void MDRV_VIDEO_UPDATE(VhUpdatePtr name) {
+    public static void MDRV_VIDEO_UPDATE(VideoUpdateHandlerPtr name) {
         temp_machine.video_update = name;
     }
 
@@ -296,7 +295,7 @@ public class driverH {
         public VideoStartHandlerPtr video_start;
         /*TODO*///	void (*video_stop)(void);
 /*TODO*///	void (*video_eof)(void);
-        public VhUpdatePtr video_update;
+        public VideoUpdateHandlerPtr video_update;
 
         public int /*UINT32*/ sound_attributes;
         public MachineSound sound[] = MachineSound.create(MAX_SOUND);

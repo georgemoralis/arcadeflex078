@@ -121,7 +121,7 @@ public class _1942 {
      *
      **************************************************************************
      */
-    static GetTileInfoPtr get_fg_tile_info = new GetTileInfoPtr() {
+    static GetTileInfoHandlerPtr get_fg_tile_info = new GetTileInfoHandlerPtr() {
         public void handler(int tile_index) {
 
             int code, color;
@@ -136,7 +136,7 @@ public class _1942 {
         }
     };
 
-    static GetTileInfoPtr get_bg_tile_info = new GetTileInfoPtr() {
+    static GetTileInfoHandlerPtr get_bg_tile_info = new GetTileInfoHandlerPtr() {
         public void handler(int tile_index) {
             int code, color;
 
@@ -273,7 +273,7 @@ public class _1942 {
 
     }
 
-    public static VhUpdatePtr c1942_vh_screenrefresh = new VhUpdatePtr() {
+    public static VideoUpdateHandlerPtr c1942_vh_screenrefresh = new VideoUpdateHandlerPtr() {
         public void handler(mame_bitmap bitmap, rectangle cliprect) {
             tilemap_draw(bitmap, cliprect, bg_tilemap, 0, 0);
             draw_sprites(bitmap, cliprect);

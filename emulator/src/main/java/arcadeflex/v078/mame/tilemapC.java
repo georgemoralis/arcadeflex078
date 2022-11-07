@@ -65,7 +65,7 @@ public class tilemapC
             public int[] logical_flip_to_cached_flip = new int[4];
 
             /* callback to interpret video RAM for the tilemap */
-            public GetTileInfoPtr tile_get_info;
+            public GetTileInfoHandlerPtr tile_get_info;
 
             public int/*UINT32*/ max_memory_offset;
             public int/*UINT32*/ num_tiles;
@@ -872,7 +872,7 @@ public class tilemapC
 	
 	/***********************************************************************************/
 
-        public static struct_tilemap tilemap_create(GetTileInfoPtr tile_get_info,
+        public static struct_tilemap tilemap_create(GetTileInfoHandlerPtr tile_get_info,
             GetMemoryOffsetPtr get_memory_offset,
             int type,
             int tile_width,
