@@ -1,162 +1,173 @@
-/*
+/**
  * ported to v0.78
- * 
  */
 package arcadeflex.v078.vidhrdw;
 
-import static arcadeflex.v078.mame.tilemapC.tilemap_set_flip;
+//generic imports
+import static arcadeflex.v078.generic.funcPtr.*;
+//mame imports
+import static arcadeflex.v078.mame.drawgfxH.*;
+import static arcadeflex.v078.mame.tilemapC.*;
 import static arcadeflex.v078.mame.tilemapH.*;
-import static mame056.common.set_vh_global_attribute;
-import static mame056.common.set_visible_area;
+//common imports
+import static common.libc.cstring.*;
+import static common.ptr.*;
+
+//TODO
+import mame056.commonH.mame_bitmap;
+import static mame056.drawgfx.copybitmap;
+import static mame056.drawgfxH.TRANSPARENCY_NONE;
 import static mame056.mame.Machine;
+import static arcadeflex036.osdepend.*;
+import static mame056.common.auto_bitmap_alloc;
+import static mame056.common.set_visible_area;
 
 public class generic {
 
-    /*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///  vidhrdw/generic.c
-/*TODO*///
-/*TODO*///  Some general purpose functions used by many video drivers.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///
-/*TODO*///#include "driver.h"
-/*TODO*///#include "vidhrdw/generic.h"
-/*TODO*///#include "state.h"
-/*TODO*///
-/*TODO*///
-/*TODO*///data8_t *videoram;
-/*TODO*///data16_t *videoram16;
+    public static UBytePtr videoram = new UBytePtr();
+    /*TODO*///data16_t *videoram16;
 /*TODO*///data32_t *videoram32;
-/*TODO*///size_t videoram_size;
-/*TODO*///data8_t *colorram;
-/*TODO*///data16_t *colorram16;
+    public static int[] videoram_size = new int[1];
+    public static UBytePtr colorram = new UBytePtr();
+    /*TODO*///data16_t *colorram16;
 /*TODO*///data32_t *colorram32;
-/*TODO*///data8_t *spriteram;			/* not used in this module... */
-/*TODO*///data16_t *spriteram16;		/* ... */
+    public static UBytePtr spriteram = new UBytePtr();
+    /* not used in this module... */
+ /*TODO*///data16_t *spriteram16;		/* ... */
 /*TODO*///data32_t *spriteram32;		/* ... */
-/*TODO*///data8_t *spriteram_2;
-/*TODO*///data16_t *spriteram16_2;
+    public static UBytePtr spriteram_2 = new UBytePtr();
+    /*TODO*///data16_t *spriteram16_2;
 /*TODO*///data32_t *spriteram32_2;
-/*TODO*///data8_t *spriteram_3;
-/*TODO*///data16_t *spriteram16_3;
+    public static UBytePtr spriteram_3 = new UBytePtr();
+    /*TODO*///data16_t *spriteram16_3;
 /*TODO*///data32_t *spriteram32_3;
-/*TODO*///data8_t *buffered_spriteram;
-/*TODO*///data16_t *buffered_spriteram16;
+    public static UBytePtr buffered_spriteram = new UBytePtr();
+    /*TODO*///data16_t *buffered_spriteram16;
 /*TODO*///data32_t *buffered_spriteram32;
-/*TODO*///data8_t *buffered_spriteram_2;
-/*TODO*///data16_t *buffered_spriteram16_2;
+    public static UBytePtr buffered_spriteram_2 = new UBytePtr();
+    /*TODO*///data16_t *buffered_spriteram16_2;
 /*TODO*///data32_t *buffered_spriteram32_2;
-/*TODO*///size_t spriteram_size;		/* ... here just for convenience */
-/*TODO*///size_t spriteram_2_size;
-/*TODO*///size_t spriteram_3_size;
-/*TODO*///data8_t *dirtybuffer;
-/*TODO*///data16_t *dirtybuffer16;
+    public static int[] spriteram_size = new int[1];
+    /* ... here just for convenience */
+    public static int[] spriteram_2_size = new int[1];
+    public static int[] spriteram_3_size = new int[1];
+    public static char[] /*data8_t * */ dirtybuffer;
+    /*TODO*///data16_t *dirtybuffer16;
 /*TODO*///data32_t *dirtybuffer32;
-/*TODO*///struct mame_bitmap *tmpbitmap;
-/*TODO*///
+    public static mame_bitmap tmpbitmap;
+
     public static int[] flip_screen_x = new int[1];
     public static int[] flip_screen_y = new int[1];
+    static int global_attribute_changed;
 
-    /*TODO*///static int global_attribute_changed;
-/*TODO*///
-/*TODO*///void video_generic_postload(void)
+    public static int flip_screen() {
+        return flip_screen_x[0];
+    }
+
+    /*TODO*///void video_generic_postload(void)
 /*TODO*///{
 /*TODO*///	memset(dirtybuffer,1,videoram_size);
 /*TODO*///}
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///  Start the video hardware emulation.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///VIDEO_START( generic )
-/*TODO*///{
-/*TODO*///	dirtybuffer = 0;
-/*TODO*///	tmpbitmap = 0;
-/*TODO*///
-/*TODO*///	if (videoram_size == 0)
-/*TODO*///	{
-/*TODO*///logerror("Error: video_start_generic() called but videoram_size not initialized\n");
-/*TODO*///		return 1;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	if ((dirtybuffer = auto_malloc(videoram_size)) == 0)
-/*TODO*///		return 1;
-/*TODO*///	memset(dirtybuffer,1,videoram_size);
-/*TODO*///
-/*TODO*///	if ((tmpbitmap = auto_bitmap_alloc(Machine->drv->screen_width,Machine->drv->screen_height)) == 0)
-/*TODO*///		return 1;
-/*TODO*///
-/*TODO*///	state_save_register_func_postload(video_generic_postload);
-/*TODO*///
-/*TODO*///	return 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///VIDEO_START( generic_bitmapped )
-/*TODO*///{
-/*TODO*///	if ((tmpbitmap = auto_bitmap_alloc(Machine->drv->screen_width,Machine->drv->screen_height)) == 0)
-/*TODO*///		return 1;
-/*TODO*///
-/*TODO*///	return 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************
-/*TODO*///
-/*TODO*///  Draw the game screen in the given mame_bitmap.
-/*TODO*///  To be used by bitmapped games not using sprites.
-/*TODO*///
-/*TODO*///***************************************************************************/
-/*TODO*///VIDEO_UPDATE( generic_bitmapped )
-/*TODO*///{
-/*TODO*///	copybitmap(bitmap,tmpbitmap,0,0,0,0,&Machine->visible_area,TRANSPARENCY_NONE,0);
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///READ_HANDLER( videoram_r )
-/*TODO*///{
-/*TODO*///	return videoram[offset];
-/*TODO*///}
-/*TODO*///
-/*TODO*///READ_HANDLER( colorram_r )
-/*TODO*///{
-/*TODO*///	return colorram[offset];
-/*TODO*///}
-/*TODO*///
-/*TODO*///WRITE_HANDLER( videoram_w )
-/*TODO*///{
-/*TODO*///	if (videoram[offset] != data)
-/*TODO*///	{
-/*TODO*///		dirtybuffer[offset] = 1;
-/*TODO*///
-/*TODO*///		videoram[offset] = data;
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///WRITE_HANDLER( colorram_w )
-/*TODO*///{
-/*TODO*///	if (colorram[offset] != data)
-/*TODO*///	{
-/*TODO*///		dirtybuffer[offset] = 1;
-/*TODO*///
-/*TODO*///		colorram[offset] = data;
-/*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*///READ_HANDLER( spriteram_r )
-/*TODO*///{
-/*TODO*///	return spriteram[offset];
-/*TODO*///}
-/*TODO*///
-/*TODO*///WRITE_HANDLER( spriteram_w )
-/*TODO*///{
-/*TODO*///	spriteram[offset] = data;
-/*TODO*///}
-/*TODO*///
+    /**
+     * *************************************************************************
+     *
+     * Start the video hardware emulation.
+     *
+     **************************************************************************
+     */
+    public static VideoStartHandlerPtr video_start_generic = new VideoStartHandlerPtr() {
+        public int handler() {
+            dirtybuffer = null;
+            tmpbitmap = null;
+
+            if (videoram_size[0] == 0) {
+                logerror("Error: video_start_generic() called but videoram_size not initialized\n");
+                return 1;
+            }
+
+            if ((dirtybuffer = new char[videoram_size[0]]) == null) {
+                return 1;
+            }
+            memset(dirtybuffer, 1, videoram_size[0]);
+
+            if ((tmpbitmap = auto_bitmap_alloc(Machine.drv.screen_width, Machine.drv.screen_height)) == null) {
+                return 1;
+            }
+
+            /*TODO*///	state_save_register_func_postload(video_generic_postload);
+            return 0;
+        }
+    };
+
+    public static VideoStartHandlerPtr video_start_generic_bitmapped = new VideoStartHandlerPtr() {
+        public int handler() {
+            if ((tmpbitmap = auto_bitmap_alloc(Machine.drv.screen_width, Machine.drv.screen_height)) == null) {
+                return 1;
+            }
+
+            return 0;
+        }
+    };
+
+    /**
+     * *************************************************************************
+     *
+     * Draw the game screen in the given mame_bitmap. To be used by bitmapped
+     * games not using sprites.
+     *
+     **************************************************************************
+     */
+    public static VideoUpdateHandlerPtr video_update_generic_bitmapped = new VideoUpdateHandlerPtr() {
+        public void handler(mame_bitmap bitmap, rectangle cliprect) {
+            copybitmap(bitmap, tmpbitmap, 0, 0, 0, 0, Machine.visible_area, TRANSPARENCY_NONE, 0);
+        }
+    };
+
+    public static ReadHandlerPtr videoram_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            return videoram.read(offset);
+        }
+    };
+
+    public static ReadHandlerPtr colorram_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            return colorram.read(offset);
+        }
+    };
+
+    public static WriteHandlerPtr videoram_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            if (videoram.read(offset) != data) {
+                dirtybuffer[offset] = 1;
+
+                videoram.write(offset, data);
+            }
+        }
+    };
+
+    public static WriteHandlerPtr colorram_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            if (colorram.read(offset) != data) {
+                dirtybuffer[offset] = 1;
+
+                colorram.write(offset, data);
+            }
+        }
+    };
+
+    public static ReadHandlerPtr spriteram_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            return spriteram.read(offset);
+        }
+    };
+
+    public static WriteHandlerPtr spriteram_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            spriteram.write(offset, data);
+        }
+    };
+
+    /*TODO*///
 /*TODO*///READ16_HANDLER( spriteram16_r )
 /*TODO*///{
 /*TODO*///	return spriteram16[offset];
@@ -167,64 +178,25 @@ public class generic {
 /*TODO*///	COMBINE_DATA(spriteram16+offset);
 /*TODO*///}
 /*TODO*///
-/*TODO*///READ_HANDLER( spriteram_2_r )
-/*TODO*///{
-/*TODO*///	return spriteram_2[offset];
-/*TODO*///}
-/*TODO*///
-/*TODO*///WRITE_HANDLER( spriteram_2_w )
-/*TODO*///{
-/*TODO*///	spriteram_2[offset] = data;
-/*TODO*///}
-/*TODO*///
-/*TODO*////* Mish:  171099
-/*TODO*///
-/*TODO*///	'Buffered spriteram' is where the graphics hardware draws the sprites
-/*TODO*///from private ram that the main CPU cannot access.  The main CPU typically
-/*TODO*///prepares sprites for the next frame in it's own sprite ram as the graphics
-/*TODO*///hardware renders sprites for the current frame from private ram.  Main CPU
-/*TODO*///sprite ram is usually copied across to private ram by setting some flag
-/*TODO*///in the VBL interrupt routine.
-/*TODO*///
-/*TODO*///	The reason for this is to avoid sprite flicker or lag - if a game
-/*TODO*///is unable to prepare sprite ram within a frame (for example, lots of sprites
-/*TODO*///on screen) then it doesn't trigger the buffering hardware - instead the
-/*TODO*///graphics hardware will use the sprites from the last frame. An example is
-/*TODO*///Dark Seal - the buffer flag is only written to if the CPU is idle at the time
-/*TODO*///of the VBL interrupt.  If the buffering is not emulated the sprites flicker
-/*TODO*///at busy scenes.
-/*TODO*///
-/*TODO*///	Some games seem to use buffering because of hardware constraints -
-/*TODO*///Capcom games (Cps1, Last Duel, etc) render spriteram _1 frame ahead_ and
-/*TODO*///buffer this spriteram at the end of a frame, so the _next_ frame must be drawn
-/*TODO*///from the buffer.  Presumably the graphics hardware and the main cpu cannot
-/*TODO*///share the same spriteram for whatever reason.
-/*TODO*///
-/*TODO*///	Sprite buffering & Mame:
-/*TODO*///
-/*TODO*///	To use sprite buffering in a driver use VIDEO_BUFFERS_SPRITERAM in the
-/*TODO*///machine driver.  This will automatically create an area for buffered spriteram
-/*TODO*///equal to the size of normal spriteram.
-/*TODO*///
-/*TODO*///	Spriteram size _must_ be declared in the memory map:
-/*TODO*///
-/*TODO*///	{ 0x120000, 0x1207ff, MWA_BANK2, &spriteram, &spriteram_size },
-/*TODO*///
-/*TODO*///	Then the video driver must draw the sprites from the buffered_spriteram
-/*TODO*///pointer.  The function buffer_spriteram_w() is used to simulate hardware
-/*TODO*///which buffers the spriteram from a memory location write.  The function
-/*TODO*///buffer_spriteram(unsigned char *ptr, int length) can be used where
-/*TODO*///more control is needed over what is buffered.
-/*TODO*///
-/*TODO*///	For examples see darkseal.c, contra.c, lastduel.c, bionicc.c etc.
-/*TODO*///
-/*TODO*///*/
-/*TODO*///
-/*TODO*///WRITE_HANDLER( buffer_spriteram_w )
-/*TODO*///{
-/*TODO*///	memcpy(buffered_spriteram,spriteram,spriteram_size);
-/*TODO*///}
-/*TODO*///
+    public static ReadHandlerPtr spriteram_2_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            return spriteram_2.read(offset);
+        }
+    };
+
+    public static WriteHandlerPtr spriteram_2_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            spriteram_2.write(offset, data);
+        }
+    };
+
+    public static WriteHandlerPtr buffer_spriteram_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            memcpy(buffered_spriteram, spriteram, spriteram_size[0]);
+        }
+    };
+
+    /*TODO*///
 /*TODO*///WRITE16_HANDLER( buffer_spriteram16_w )
 /*TODO*///{
 /*TODO*///	memcpy(buffered_spriteram16,spriteram16,spriteram_size);
@@ -235,11 +207,13 @@ public class generic {
 /*TODO*///	memcpy(buffered_spriteram32,spriteram32,spriteram_size);
 /*TODO*///}
 /*TODO*///
-/*TODO*///WRITE_HANDLER( buffer_spriteram_2_w )
-/*TODO*///{
-/*TODO*///	memcpy(buffered_spriteram_2,spriteram_2,spriteram_2_size);
-/*TODO*///}
-/*TODO*///
+    public static WriteHandlerPtr buffer_spriteram_2_w = new WriteHandlerPtr() {
+        public void handler(int offset, int data) {
+            memcpy(buffered_spriteram_2, spriteram_2, spriteram_2_size[0]);
+        }
+    };
+
+    /*TODO*///
 /*TODO*///WRITE16_HANDLER( buffer_spriteram16_2_w )
 /*TODO*///{
 /*TODO*///	memcpy(buffered_spriteram16_2,spriteram16_2,spriteram_2_size);
@@ -250,16 +224,14 @@ public class generic {
 /*TODO*///	memcpy(buffered_spriteram32_2,spriteram32_2,spriteram_2_size);
 /*TODO*///}
 /*TODO*///
-/*TODO*///void buffer_spriteram(unsigned char *ptr,int length)
-/*TODO*///{
-/*TODO*///	memcpy(buffered_spriteram,ptr,length);
-/*TODO*///}
-/*TODO*///
-/*TODO*///void buffer_spriteram_2(unsigned char *ptr,int length)
-/*TODO*///{
-/*TODO*///	memcpy(buffered_spriteram_2,ptr,length);
-/*TODO*///}
-/*TODO*///
+    public static void buffer_spriteram(UBytePtr ptr, int length) {
+        memcpy(buffered_spriteram, ptr, length);
+    }
+
+    public static void buffer_spriteram_2(UBytePtr ptr, int length) {
+        memcpy(buffered_spriteram_2, ptr, length);
+    }
+
     /**
      * *************************************************************************
      *
@@ -271,7 +243,7 @@ public class generic {
     /*-------------------------------------------------
 	updateflip - handle global flipping
     -------------------------------------------------*/
-    public static void updateflip() {
+    static void updateflip() {
         int min_x, max_x, min_y, max_y;
 
         tilemap_set_flip(ALL_TILEMAPS, (TILEMAP_FLIPX & flip_screen_x[0]) | (TILEMAP_FLIPY & flip_screen_y[0]));
@@ -299,14 +271,14 @@ public class generic {
         set_visible_area(min_x, max_x, min_y, max_y);
     }
 
-
     /*-------------------------------------------------
-            flip_screen_set - set global flip
+	flip_screen_set - set global flip
     -------------------------------------------------*/
     public static void flip_screen_set(int on) {
         flip_screen_x_set(on);
         flip_screen_y_set(on);
     }
+
 
     /*-------------------------------------------------
 	flip_screen_x_set - set global horizontal flip
@@ -336,32 +308,29 @@ public class generic {
     }
 
 
-    /*TODO*////*-------------------------------------------------
-/*TODO*///	set_vh_global_attribute - set an arbitrary
-/*TODO*///	global video attribute
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///void set_vh_global_attribute( int *addr, int data )
-/*TODO*///{
-/*TODO*///	if (!addr || *addr != data)
+    /*-------------------------------------------------
+	set_vh_global_attribute - set an arbitrary
+	global video attribute
+    -------------------------------------------------*/
+    public static void set_vh_global_attribute(int[] addr, int data) {
+        throw new UnsupportedOperationException("Unsupported");
+        /*TODO*///	if (!addr || *addr != data)
 /*TODO*///	{
 /*TODO*///		global_attribute_changed = 1;
 /*TODO*///		if (addr)
 /*TODO*///			*addr = data;
 /*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	get_vh_global_attribute - set an arbitrary
-/*TODO*///	global video attribute
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///int get_vh_global_attribute_changed(void)
-/*TODO*///{
-/*TODO*///	int result = global_attribute_changed;
-/*TODO*///	global_attribute_changed = 0;
-/*TODO*///	return result;
-/*TODO*///}
-/*TODO*///    
+    }
+
+
+    /*-------------------------------------------------
+	get_vh_global_attribute - set an arbitrary
+	global video attribute
+    -------------------------------------------------*/
+    public static int get_vh_global_attribute_changed() {
+        int result = global_attribute_changed;
+        global_attribute_changed = 0;
+        return result;
+    }
+
 }
