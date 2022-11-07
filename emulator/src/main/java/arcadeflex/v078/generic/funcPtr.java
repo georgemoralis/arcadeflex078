@@ -4,9 +4,13 @@
 package arcadeflex.v078.generic;
 
 //mame imports
+import static arcadeflex.v078.mame.drawgfxH.*;
 import static arcadeflex.v078.mame.driverH.*;
 //common imports
 import static common.ptr.*;
+
+//TODO
+import mame056.commonH.mame_bitmap;
 
 public class funcPtr {
 
@@ -101,5 +105,15 @@ public class funcPtr {
     public static abstract interface PaletteInitHandlerPtr {
 
         public abstract void handler(char[] colortable, UBytePtr color_prom);
+    }
+
+    public static abstract interface VideoStartHandlerPtr {
+
+        public abstract int handler();
+    }
+
+    public static abstract interface VideoUpdateHandlerPtr {
+
+        public abstract void handler(mame_bitmap bitmap, rectangle cliprect);
     }
 }

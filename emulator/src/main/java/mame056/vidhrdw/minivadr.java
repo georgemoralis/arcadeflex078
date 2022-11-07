@@ -7,6 +7,8 @@ package mame056.vidhrdw;
 
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import arcadeflex.v078.mame.drawgfxH;
+import static arcadeflex.v078.vidhrdw.generic.videoram;
+import static arcadeflex.v078.vidhrdw.generic.videoram_size;
 import static arcadeflex056.fucPtr.*;
 
 import static common.ptr.*;
@@ -14,7 +16,6 @@ import static common.ptr.*;
 import static mame056.drawgfx.*;
 import static mame056.mame.*;
 import static mame056.commonH.*;
-import static mame056.vidhrdw.generic.*;
 
 public class minivadr {
 

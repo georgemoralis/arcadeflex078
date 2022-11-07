@@ -38,15 +38,16 @@ import static mame037b7.cheat.StopCheat;
 import static mame037b7.cheat.he_did_cheat;
 import static common.libc.cstdio.*;
 import static arcadeflex036.osdepend.*;
-import static mame056.vidhrdw.generic.*;
 import static mame056.driver.*;
 
-import static arcadeflex056.fileio.*;
 import common.subArrays.IntArray;
 import static mame056.common.bitmap_alloc_depth;
 //import static mame056.tilemapC.*;
-import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static arcadeflex.v078.mame.tilemapC.*;
+import static arcadeflex.v078.vidhrdw.generic.buffered_spriteram;
+import static arcadeflex.v078.vidhrdw.generic.buffered_spriteram_2;
+import static arcadeflex.v078.vidhrdw.generic.spriteram_2_size;
+import static arcadeflex.v078.vidhrdw.generic.spriteram_size;
 //import static mame037b11.mame.tilemapH.*;
 
 public class mame {

@@ -86,7 +86,6 @@ public class common {
     public static /*unsigned*/ int[] lastcoin = new int[COIN_COUNTERS];
     public static /*unsigned*/ int[] coinlockedout = new int[COIN_COUNTERS];
 
-
     public static int snapno;
 
     /**
@@ -561,6 +560,10 @@ public class common {
             bitmap_alloc - allocate a bitmap at the
             current screen depth
     -------------------------------------------------*/
+    public static mame_bitmap auto_bitmap_alloc(int width, int height) {
+        return bitmap_alloc(width, height);// fake 0.78 call to 0.56 call (to be fixed!)
+    }
+
     public static mame_bitmap bitmap_alloc(int width, int height) {
         return bitmap_alloc_depth(width, height, Machine.scrbitmap.depth);
     }

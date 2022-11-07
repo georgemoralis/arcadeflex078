@@ -12,7 +12,6 @@ import static arcadeflex.v078.mame.mame.*;
 import static arcadeflex.v078.mame.memoryH.*;
 //TODO
 import arcadeflex056.fucPtr.VhConvertColorPromPtr;
-import arcadeflex056.fucPtr.VhStartPtr;
 import arcadeflex056.fucPtr.VhUpdatePtr;
 import mame056.drawgfxH.GfxDecodeInfo;
 import arcadeflex.v078.mame.drawgfxH.rectangle;
@@ -114,11 +113,12 @@ public class driverH {
 
     /* CPU parameters */
     public static void MDRV_CPU_FLAGS(int flags) {
-	if (temp_cpu != null)
-		temp_cpu.cpu_flags = (flags);
+        if (temp_cpu != null) {
+            temp_cpu.cpu_flags = (flags);
+        }
     }
-    
-/*TODO*///#define MDRV_CPU_CONFIG(config)											\
+
+    /*TODO*///#define MDRV_CPU_CONFIG(config)											\
 /*TODO*///	if (cpu)															\
 /*TODO*///		cpu->reset_param = &(config);									\
 /*TODO*///
@@ -129,12 +129,11 @@ public class driverH {
         }
     }
 
-
     public static void MDRV_CPU_PORTS(IO_ReadPort[] readport, IO_WritePort[] writeport) {
-	if (temp_cpu != null) {
-		temp_cpu.port_read = (readport);
-		temp_cpu.port_write = (writeport);
-	}
+        if (temp_cpu != null) {
+            temp_cpu.port_read = (readport);
+            temp_cpu.port_write = (writeport);
+        }
     }
 
     public static void MDRV_CPU_VBLANK_INT(InterruptHandlerPtr func, int rate) {
@@ -198,17 +197,16 @@ public class driverH {
         temp_machine.default_visible_area.max_y = (maxy);
     }
 
-
     public static void MDRV_GFXDECODE(GfxDecodeInfo[] gfx) {
-	temp_machine.gfxdecodeinfo = (gfx);
+        temp_machine.gfxdecodeinfo = (gfx);
     }
-    
+
     public static void MDRV_PALETTE_LENGTH(int length) {
         temp_machine.total_colors = (length);
     }
 
     public static void MDRV_COLORTABLE_LENGTH(int length) {
-	temp_machine.color_table_len = (length);
+        temp_machine.color_table_len = (length);
     }
 
     /* core video functions */
@@ -216,7 +214,7 @@ public class driverH {
         temp_machine.init_palette = name;
     }
 
-    public static void MDRV_VIDEO_START(VhStartPtr name) {
+    public static void MDRV_VIDEO_START(VideoStartHandlerPtr name) {
         temp_machine.video_start = name;
     }
 
@@ -295,7 +293,7 @@ public class driverH {
         public int /*UINT32*/ color_table_len;
         /*TODO*///
         public VhConvertColorPromPtr init_palette;
-        public VhStartPtr video_start;
+        public VideoStartHandlerPtr video_start;
         /*TODO*///	void (*video_stop)(void);
 /*TODO*///	void (*video_eof)(void);
         public VhUpdatePtr video_update;

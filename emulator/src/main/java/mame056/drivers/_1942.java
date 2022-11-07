@@ -76,6 +76,8 @@ import static arcadeflex.v078.mame.cpuintrfH.CPU_Z80;
 import static arcadeflex.v078.mame.cpuintrfH.HOLD_LINE;
 import static arcadeflex.v078.mame.driverH.*;
 import static arcadeflex.v078.mame.memoryH.*;
+import static arcadeflex.v078.vidhrdw.generic.spriteram;
+import static arcadeflex.v078.vidhrdw.generic.spriteram_size;
 
 import arcadeflex056.fucPtr.InputPortPtr;
 import arcadeflex056.fucPtr.RomLoadPtr;
@@ -90,7 +92,6 @@ import static mame056.driverH.VIDEO_TYPE_RASTER;
 import static mame056.inptport.*;
 import static mame056.inptportH.*;
 import static mame056.sndintrf.*;
-import static mame056.vidhrdw.generic.*;
 import static mame056.vidhrdw._1942.*;
 
 public class _1942

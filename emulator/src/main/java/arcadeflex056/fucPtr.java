@@ -34,11 +34,6 @@ public class fucPtr {
         public abstract void handler();
     }
 
-    public static abstract interface VhStartPtr {
-
-        public abstract int handler();
-    }
-
     public static abstract interface VhStopPtr {
 
         public abstract void handler();
