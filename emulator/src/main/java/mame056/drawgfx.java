@@ -6,6 +6,7 @@ package mame056;
 import static arcadeflex.v078.mame.cpuexec.cpu_getcurrentframe;
 import arcadeflex.v078.mame.drawgfxH.rectangle;
 import static arcadeflex.v078.mame.tilemapC.priority_bitmap;
+//import static arcadeflex.v078.mame.tilemapC.priority_bitmap;
 import arcadeflex036.libc_old.IntPtr;
 import java.util.Arrays;
 
@@ -1085,7 +1086,7 @@ public class drawgfx {
             flipy = NOT(flipy);
 
         }
-
+//System.out.println("DEPTH: "+dest.depth);
         if (dest.depth == 8) {
             drawgfx_core8(dest, gfx, code, color, flipx, flipy, sx, sy, clip, transparency, transparent_color, pri_buffer, pri_mask);
         } else if (dest.depth == 15 || dest.depth == 16) {

@@ -4,6 +4,7 @@
 package mame056;
 
 import static arcadeflex.v078.drivers._4enraya.driver_4enraya;
+import static arcadeflex.v078.drivers.troangel.driver_troangel;
 import static mame056.driverH.*;
 import static mame056.drivers._1942.driver_1942;
 
@@ -18,6 +19,7 @@ public class driver {
         /*minivadr*/driver_minivadr,
         driver_1942,
         driver_4enraya,
+        driver_troangel,
         null
     };
 }
