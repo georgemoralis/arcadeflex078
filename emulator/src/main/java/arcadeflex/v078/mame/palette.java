@@ -5,7 +5,8 @@
 package arcadeflex.v078.mame;
 
 import arcadeflex.v078.generic.funcPtr.PaletteInitHandlerPtr;
-import static arcadeflex.v078.mame.paletteH.MAKE_RGB;
+import arcadeflex.v078.generic.funcPtr.ReadHandlerPtr;
+import static arcadeflex.v078.mame.paletteH.*;
 import static arcadeflex036.osdepend.logerror;
 import static common.libc.expressions.sizeof;
 import common.ptr.UBytePtr;
@@ -38,9 +39,9 @@ public class palette {
 /*TODO*///UINT32 direct_rgb_components[3];
 /*TODO*///UINT16 *palette_shadow_table;
 /*TODO*///
-/*TODO*///data8_t *paletteram;
-/*TODO*///data8_t *paletteram_2;	/* use when palette RAM is split in two parts */
-/*TODO*///data16_t *paletteram16;
+    public static UBytePtr paletteram = new UBytePtr();
+    public static UBytePtr paletteram_2 = new UBytePtr();/* use when palette RAM is split in two parts */
+ /*TODO*///data16_t *paletteram16;
 /*TODO*///data16_t *paletteram16_2;
 /*TODO*///data32_t *paletteram32;
 /*TODO*///
@@ -97,11 +98,10 @@ public class palette {
 	entry for brightness and gamma
     -------------------------------------------------*/
     static int/*rgb_t*/ adjust_palette_entry(int/*rgb_t*/ entry, int pen_bright) {
-        throw new UnsupportedOperationException("Unsupported");
-        /*TODO*///	int r = color_correct_table[(RGB_RED(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
-/*TODO*///	int g = color_correct_table[(RGB_GREEN(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
-/*TODO*///	int b = color_correct_table[(RGB_BLUE(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
-/*TODO*///	return MAKE_RGB(r,g,b);
+        int r = color_correct_table[(RGB_RED(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
+        int g = color_correct_table[(RGB_GREEN(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
+        int b = color_correct_table[(RGB_BLUE(entry) * pen_bright) >> PEN_BRIGHTNESS_BITS];
+        return MAKE_RGB(r, g, b);
     }
 
     /*-------------------------------------------------
@@ -1072,29 +1072,28 @@ public class palette {
 /*TODO*///-------------------------------------------------*/
 /*TODO*///
     public static int /*pen_t*/ get_black_pen() {
-        throw new UnsupportedOperationException("Unsupported");
-        /*TODO*///	return Machine->uifont->colortable[0];
+        return Machine.uifont.colortable.read(0);
     }
-    /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////******************************************************************************
-/*TODO*///
-/*TODO*/// Commonly used palette RAM handling functions
-/*TODO*///
-/*TODO*///******************************************************************************/
-/*TODO*///
-/*TODO*///READ_HANDLER( paletteram_r )
-/*TODO*///{
-/*TODO*///	return paletteram[offset];
-/*TODO*///}
-/*TODO*///
-/*TODO*///READ_HANDLER( paletteram_2_r )
-/*TODO*///{
-/*TODO*///	return paletteram_2[offset];
-/*TODO*///}
-/*TODO*///
+
+    /**
+     * ****************************************************************************
+     *
+     * Commonly used palette RAM handling functions
+     *
+     *****************************************************************************
+     */
+    public static ReadHandlerPtr paletteram_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            return paletteram.read(offset);
+        }
+    };
+    
+    public static ReadHandlerPtr paletteram_2_r = new ReadHandlerPtr() {
+        public int handler(int offset) {
+            return paletteram_2.read(offset);
+        }
+    };
+
 /*TODO*///READ16_HANDLER( paletteram16_word_r )
 /*TODO*///{
 /*TODO*///	return paletteram16[offset];

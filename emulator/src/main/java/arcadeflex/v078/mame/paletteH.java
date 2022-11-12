@@ -36,11 +36,11 @@ public class paletteH {
     /*TODO*///#define MAKE_ARGB(a,r,g,b)	(MAKE_RGB(r,g,b) | (((a) & 0xff) << 24))
 /*TODO*///#define RGB_ALPHA(rgb)		(((rgb) >> 24) & 0xff)
     public static int RGB_RED(int rgb) {
-        return (((rgb) >> 16) & 0xff);
+        return (((rgb) >>> 16) & 0xff);
     }
 
     public static int RGB_GREEN(int rgb) {
-        return (((rgb) >> 8) & 0xff);
+        return (((rgb) >>> 8) & 0xff);
     }
 
     public static int RGB_BLUE(int rgb) {
