@@ -166,7 +166,7 @@ public class kangaroo
 		/* the copy protection. */
 		/* Anyway, what I do here is just immediately generate the NMI, so the game */
 		/* properly starts. */
-		cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
+                cpu_set_irq_line(0, IRQ_LINE_NMI, PULSE_LINE);
 	} };
 	
 	
@@ -461,7 +461,7 @@ public class kangaroo
 		MDRV_FRAMES_PER_SECOND(60);
 		MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION);
 	
-/*TODO*///		MDRV_MACHINE_INIT(kangaroo);
+		MDRV_MACHINE_INIT(machine_init_kangaroo);
 	
 		/* video hardware */
 		MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER);

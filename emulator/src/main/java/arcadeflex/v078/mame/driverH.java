@@ -162,11 +162,12 @@ public class driverH {
     /*TODO*///#define MDRV_INTERLEAVE(interleave)										\
 /*TODO*///	machine->cpu_slices_per_frame = (interleave);						\
 /*TODO*///
-/*TODO*///
-/*TODO*////* core functions */
-/*TODO*///#define MDRV_MACHINE_INIT(name)											\
-/*TODO*///	machine->machine_init = machine_init_##name;						\
-/*TODO*///
+
+    /* core functions */
+    public static void MDRV_MACHINE_INIT(MachineInitHandlerPtr machine_init_name) {
+	temp_machine.machine_init = machine_init_name;
+    }
+
 /*TODO*///#define MDRV_MACHINE_STOP(name)											\
 /*TODO*///	machine->machine_stop = machine_stop_##name;						\
 /*TODO*///
