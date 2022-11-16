@@ -122,26 +122,40 @@ interrupts:
  */ 
 package arcadeflex.v078.drivers;
 
+//generic imports
 import static arcadeflex.v078.generic.funcPtr.*;
-import static arcadeflex.v078.mame.common.*;
-import static arcadeflex.v078.mame.commonH.*;
-import static arcadeflex.v078.mame.cpuexecH.*;
-import static arcadeflex.v078.mame.cpuint.*;
-import static arcadeflex.v078.mame.cpuintrf.*;
-import static arcadeflex.v078.mame.cpuintrfH.*;
-import static arcadeflex.v078.mame.memory.*;
-import static arcadeflex.v078.mame.memoryH.*;
-import static arcadeflex.v078.vidhrdw.kangaroo.*;
-//import static common.FuncPtr.*;
-import static mame056.common.*;
 import static mame056.commonH.*;
+import static arcadeflex.v078.mame.commonH.*;
+//mame imports
+import static arcadeflex.v078.mame.cpuint.*;
+import static arcadeflex.v078.mame.cpuintrfH.*;
+import static arcadeflex.v078.mame.driverH.*;
+import static arcadeflex.v078.mame.memoryH.*;
+import static arcadeflex.v078.vidhrdw.generic.video_start_generic;
+import static arcadeflex.v078.vidhrdw.generic.videoram;
+import static arcadeflex.v078.vidhrdw.generic.videoram_size;
+
+import arcadeflex056.fucPtr.InputPortPtr;
+import static mame056.driverH.DEFAULT_60HZ_VBLANK_DURATION;
+import static mame056.driverH.VIDEO_TYPE_RASTER;
+import static mame056.inptport.input_port_0_r;
+import static mame056.inptportH.INPUT_PORTS_END;
+import static mame056.inptportH.IPT_BUTTON1;
+import static mame056.inptportH.IPT_COIN1;
+import static mame056.inptportH.IPT_JOYSTICK_LEFT;
+import static mame056.inptportH.IPT_JOYSTICK_RIGHT;
+import static mame056.inptportH.IPT_UNKNOWN;
+import static mame056.inptportH.IP_ACTIVE_LOW;
+import static mame056.inptportH.PORT_BIT;
+import static mame056.inptportH.PORT_START;
+import static arcadeflex.v078.vidhrdw.kangaroo.*;
+import static arcadeflex056.fucPtr.*;
+import static mame056.common.*;
 import static mame056.driverH.*;
+import static mame056.driverH.ROT90;
 import static mame056.inptport.*;
 import static mame056.inptportH.*;
 import static mame056.sndintrf.*;
-import static arcadeflex.v078.mame.driverH.*;
-import arcadeflex056.fucPtr.InputPortPtr;
-import arcadeflex056.fucPtr.RomLoadPtr;
 
 public class kangaroo
 {
@@ -452,11 +466,11 @@ public class kangaroo
 		MDRV_CPU_MEMORY(readmem,writemem);
 		MDRV_CPU_VBLANK_INT(irq0_line_hold,1);
 	
-		MDRV_CPU_ADD(CPU_Z80, 10000000/4);	/* 2.5 MHz */
-		MDRV_CPU_FLAGS(CPU_16BIT_PORT | CPU_AUDIO_CPU);
-		MDRV_CPU_MEMORY(sound_readmem,sound_writemem);
-		MDRV_CPU_PORTS(null,sound_writeport);
-		MDRV_CPU_VBLANK_INT(irq0_line_hold,1);
+/*TODO*///		MDRV_CPU_ADD(CPU_Z80, 10000000/4);	/* 2.5 MHz */
+/*TODO*///		MDRV_CPU_FLAGS(CPU_16BIT_PORT | CPU_AUDIO_CPU);
+/*TODO*///		MDRV_CPU_MEMORY(sound_readmem,sound_writemem);
+/*TODO*///		MDRV_CPU_PORTS(null,sound_writeport);
+/*TODO*///		MDRV_CPU_VBLANK_INT(irq0_line_hold,1);
 	
 		MDRV_FRAMES_PER_SECOND(60);
 		MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION);

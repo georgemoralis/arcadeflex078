@@ -65,12 +65,19 @@ public class kangaroo
             public void handler(char[] palette, char[] colortable, UBytePtr color_prom) {
          
 		int i;
+                
+                System.out.println("COLORS="+ Machine.drv.total_colors);
 	
 		for (i = 0;i < Machine.drv.total_colors;i++)
 		{
 			int r = ((i & 4) >> 2) * 0xff;
 			int g = ((i & 2) >> 1) * 0xff;
 			int b = ((i & 1) >> 0) * 0xff;
+                        System.out.println("R="+ r);
+                        System.out.println("G="+ g);
+                        System.out.println("B="+ b);
+                        System.out.println("-----------");
+                        
 			palette_set_color(i,r,g,b);
 		}
 	} };
@@ -219,6 +226,8 @@ public class kangaroo
 	
 	static void kangaroo_plot_pixel(mame_bitmap bitmap, int x, int y, int col, int color_base, int flip)
 	{
+            
+            //System.out.println("kangaroo_plot_pixel");
 		if (flip != 0)
 		{
 			x = bitmap.width - 1 - x;
@@ -226,6 +235,7 @@ public class kangaroo
 		}
 	
 		plot_pixel.handler(bitmap, x, y, Machine.pens[((col & 0x08) != 0 ? 0 : color_base) + (col & 0x07)]);
+                //plot_pixel.handler(bitmap, x, y, 23);
 	}
 	
 	static void kangaroo_redraw_4pixels(int x, int y)
@@ -310,7 +320,7 @@ public class kangaroo
 	public static VideoUpdateHandlerPtr video_update_kangaroo  = new VideoUpdateHandlerPtr() { public void handler(mame_bitmap bitmap, rectangle cliprect){
 		int scrollx, scrolly;
 	
-		if (screen_flipped != 0)
+		//if (screen_flipped != 0)
 		{
 			int x, y;
 	
