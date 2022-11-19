@@ -578,18 +578,17 @@ public class input {
     /*TODO*///		(*a)[j] = CODE_NONE;
     /*TODO*///}
     /*TODO*///
-    /*TODO*///void seq_set_5(InputSeq* a, InputCode code1, InputCode code2, InputCode code3, InputCode code4, InputCode code5)
-    /*TODO*///{
-    /*TODO*///	int j;
-    /*TODO*///	(*a)[0] = code1;
-    /*TODO*///	(*a)[1] = code2;
-    /*TODO*///	(*a)[2] = code3;
-    /*TODO*///	(*a)[3] = code4;
-    /*TODO*///	(*a)[4] = code5;
-    /*TODO*///	for(j=5;j<SEQ_MAX;++j)
-    /*TODO*///		(*a)[j] = CODE_NONE;
-    /*TODO*///}
-    /*TODO*///
+    public static void seq_set_5(int[] a, int code1, int code2, int code3,int code4,int code5) {
+        int j;
+        a[0] = code1;
+        a[1] = code2;
+        a[2] = code3;
+        a[3] = code4;
+        a[4] = code5;
+        for (j = 5; j < SEQ_MAX; ++j) {
+            a[j] = CODE_NONE;
+        }
+    }
     /*TODO*///void seq_copy(InputSeq* a, InputSeq* b)
     /*TODO*///{
     /*TODO*///	int j;

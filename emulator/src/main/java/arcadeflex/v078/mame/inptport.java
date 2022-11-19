@@ -23,6 +23,9 @@ import static arcadeflex.v078.mame.inptportH.IPT_START7;
 import static arcadeflex.v078.mame.inptportH.IPT_START8;
 import static arcadeflex.v078.mame.inptportH.IPT_UI_EDIT_CHEAT;
 import static arcadeflex.v078.mame.inptportH.IPT_UI_TOGGLE_CROSSHAIR;
+import static arcadeflex.v078.mame.input.seq_set_1;
+import static arcadeflex.v078.mame.input.seq_set_3;
+import static arcadeflex.v078.mame.input.seq_set_5;
 import static arcadeflex.v078.mame.inputH.*;
 import static arcadeflex.v078.mame.osdependH.MAX_ANALOG_AXES;
 import static arcadeflex.v078.mame.osdependH.OSD_MAX_JOY_ANALOG;
@@ -612,6 +615,7 @@ public class inptport {
                 new ipd(IPT_OSD_RESERVED, "", SEQ_DEF_0()),
                 new ipd(IPT_OSD_RESERVED, "", SEQ_DEF_0()),
                 new ipd(IPT_END, null, SEQ_DEF_0()) /* returned when there is no match */};
+
     /*TODO*///
 /*TODO*///struct ipd inputport_defaults_backup[sizeof(inputport_defaults)/sizeof(struct ipd)];
 /*TODO*///
@@ -1470,13 +1474,13 @@ public class inptport {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-/*TODO*///
-/*TODO*////***************************************************************************/
-/*TODO*////* Load */
-/*TODO*///
-/*TODO*///static void load_default_keys(void)
-/*TODO*///{
-/*TODO*///	config_file *cfg;
+    /**
+     * ************************************************************************
+     */
+    /* Load */
+    public static void load_default_keys() {
+        System.out.println("Unimplemented load_default_keys in inptport.java");
+        /*TODO*///	config_file *cfg;
 /*TODO*///
 /*TODO*///	osd_customize_inputport_defaults(inputport_defaults);
 /*TODO*///	memcpy(inputport_defaults_backup,inputport_defaults,sizeof(inputport_defaults));
@@ -1487,11 +1491,11 @@ public class inptport {
 /*TODO*///		config_read_default_ports(cfg, inputport_defaults);
 /*TODO*///		config_close(cfg);
 /*TODO*///	}
-/*TODO*///}
-/*TODO*///
-/*TODO*///static void save_default_keys(void)
-/*TODO*///{
-/*TODO*///	config_file *cfg;
+    }
+
+    public static void save_default_keys() {
+        System.out.println("Unimplemented save_default_keys in inptport.java");
+        /*TODO*///	config_file *cfg;
 /*TODO*///
 /*TODO*///	cfg = config_create(NULL);
 /*TODO*///	if (cfg)
@@ -1501,12 +1505,10 @@ public class inptport {
 /*TODO*///			}
 /*TODO*///
 /*TODO*///	memcpy(inputport_defaults,inputport_defaults_backup,sizeof(inputport_defaults_backup));
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///int load_input_port_settings(void)
-/*TODO*///{
-/*TODO*///	config_file *cfg;
+    }
+
+    public static int load_input_port_settings() {
+        /*TODO*///	config_file *cfg;
 /*TODO*///	int err;
 /*TODO*///	struct mixer_config mixercfg;
 /*TODO*///#ifdef MAME_NET
@@ -1665,21 +1667,22 @@ public class inptport {
 /*TODO*///
 /*TODO*///#endif /* MAME_NET */
 /*TODO*///
-/*TODO*///	init_analog_seq();
-/*TODO*///
+        init_analog_seq();
+        /*TODO*///
 /*TODO*///	update_input_ports();
 /*TODO*///
 /*TODO*///	/* if we didn't find a saved config, return 0 so the main core knows that it */
 /*TODO*///	/* is the first time the game is run and it should diplay the disclaimer. */
 /*TODO*///	return cfg ? 1 : 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*////***************************************************************************/
-/*TODO*////* Save */
-/*TODO*///
-/*TODO*///void save_input_port_settings(void)
-/*TODO*///{
-/*TODO*///	config_file *cfg;
+        return 0;//TODO fix me!
+    }
+
+    /**
+     * ************************************************************************
+     */
+    /* Save */
+    public static void save_input_port_settings() {
+        /*TODO*///	config_file *cfg;
 /*TODO*///	struct mixer_config mixercfg;
 /*TODO*///#ifdef MAME_NET
 /*TODO*///	struct InputPort *in;
@@ -1815,8 +1818,9 @@ public class inptport {
 /*TODO*///		config_write_mixer_config(cfg, &mixercfg);
 /*TODO*///		config_close(cfg);
 /*TODO*///	}
-/*TODO*///}
-/*TODO*///
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////* Note that the following 3 routines have slightly different meanings with analog ports */
@@ -2682,147 +2686,155 @@ public class inptport {
 /*TODO*///READ16_HANDLER( input_port_28_word_r ) { return readinputport(28); }
 /*TODO*///READ16_HANDLER( input_port_29_word_r ) { return readinputport(29); }
 /*TODO*///
-/*TODO*///#ifdef MAME_NET
-/*TODO*///void set_default_player_controls(int player)
-/*TODO*///{
-/*TODO*///	if (player == NET_SPECTATOR)
-/*TODO*///		default_player = NET_SPECTATOR;
-/*TODO*///	else
-/*TODO*///		default_player = player - 1;
-/*TODO*///}
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///
-/*TODO*////***************************************************************************/
-/*TODO*////* InputPort conversion */
-/*TODO*///
-/*TODO*///static unsigned input_port_count(const struct InputPortTiny *src)
-/*TODO*///{
-/*TODO*///	unsigned total;
-/*TODO*///
-/*TODO*///	total = 0;
-/*TODO*///	while (src->type != IPT_END)
-/*TODO*///	{
-/*TODO*///		int type = src->type & ~IPF_MASK;
-/*TODO*///		if (type > IPT_ANALOG_START && type < IPT_ANALOG_END)
-/*TODO*///			total += 2;
-/*TODO*///		else if (type != IPT_EXTENSION)
-/*TODO*///			++total;
-/*TODO*///		++src;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	++total; /* for IPT_END */
-/*TODO*///
-/*TODO*///	return total;
-/*TODO*///}
-/*TODO*///
-/*TODO*///struct InputPort* input_port_allocate(const struct InputPortTiny *src)
-/*TODO*///{
-/*TODO*///	struct InputPort* dst;
-/*TODO*///	struct InputPort* base;
-/*TODO*///	unsigned total;
-/*TODO*///
-/*TODO*///	total = input_port_count(src);
-/*TODO*///
-/*TODO*///	base = (struct InputPort*)malloc(total * sizeof(struct InputPort));
-/*TODO*///	dst = base;
-/*TODO*///
-/*TODO*///	while (src->type != IPT_END)
-/*TODO*///	{
-/*TODO*///		int type = src->type & ~IPF_MASK;
-/*TODO*///		const struct InputPortTiny *ext;
-/*TODO*///		const struct InputPortTiny *src_end;
-/*TODO*///		InputCode seq_default;
-/*TODO*///
-/*TODO*///		if (type > IPT_ANALOG_START && type < IPT_ANALOG_END)
-/*TODO*///			src_end = src + 2;
-/*TODO*///		else
-/*TODO*///			src_end = src + 1;
-/*TODO*///
-/*TODO*///		switch (type)
-/*TODO*///		{
-/*TODO*///			case IPT_END :
-/*TODO*///			case IPT_PORT :
-/*TODO*///			case IPT_DIPSWITCH_NAME :
-/*TODO*///			case IPT_DIPSWITCH_SETTING :
-/*TODO*///#ifdef MESS
-/*TODO*///			case IPT_CONFIG_NAME :
-/*TODO*///			case IPT_CONFIG_SETTING :
-/*TODO*///#endif
-/*TODO*///				seq_default = CODE_NONE;
-/*TODO*///			break;
-/*TODO*///			default:
-/*TODO*///				seq_default = CODE_DEFAULT;
-/*TODO*///				break;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		ext = src_end;
-/*TODO*///		while (src != src_end)
-/*TODO*///		{
-/*TODO*///			dst->type = src->type;
-/*TODO*///			dst->mask = src->mask;
-/*TODO*///			dst->default_value = src->default_value;
-/*TODO*///			dst->name = src->name;
-/*TODO*///
-/*TODO*///  			if (ext->type == IPT_EXTENSION)
-/*TODO*///  			{
-/*TODO*///				InputCode or1 =	IP_GET_CODE_OR1(ext);
-/*TODO*///				InputCode or2 =	IP_GET_CODE_OR2(ext);
-/*TODO*///				InputCode or3;
-/*TODO*///
-/*TODO*///				switch(or2)
-/*TODO*///				{
-/*TODO*///					case JOYCODE_1_BUTTON1:		or3 = JOYCODE_MOUSE_1_BUTTON1;	break;
-/*TODO*///					case JOYCODE_1_BUTTON2:		or3 = JOYCODE_MOUSE_1_BUTTON2;	break;
-/*TODO*///					case JOYCODE_1_BUTTON3:		or3 = JOYCODE_MOUSE_1_BUTTON3;	break;
-/*TODO*///					case JOYCODE_2_BUTTON1:		or3 = JOYCODE_MOUSE_2_BUTTON1;	break;
-/*TODO*///					case JOYCODE_2_BUTTON2:		or3 = JOYCODE_MOUSE_2_BUTTON2;	break;
-/*TODO*///					case JOYCODE_2_BUTTON3:		or3 = JOYCODE_MOUSE_2_BUTTON3;	break;
-/*TODO*///					case JOYCODE_3_BUTTON1:		or3 = JOYCODE_MOUSE_3_BUTTON1;	break;
-/*TODO*///					case JOYCODE_3_BUTTON2:		or3 = JOYCODE_MOUSE_3_BUTTON2;	break;
-/*TODO*///					case JOYCODE_3_BUTTON3:		or3 = JOYCODE_MOUSE_3_BUTTON3;	break;
-/*TODO*///					case JOYCODE_4_BUTTON1:		or3 = JOYCODE_MOUSE_4_BUTTON1;	break;
-/*TODO*///					case JOYCODE_4_BUTTON2:		or3 = JOYCODE_MOUSE_4_BUTTON2;	break;
-/*TODO*///					case JOYCODE_4_BUTTON3:		or3 = JOYCODE_MOUSE_4_BUTTON3;	break;
-/*TODO*///					default:					or3 = CODE_NONE;				break;
-/*TODO*///				}
-/*TODO*///
-/*TODO*///				if (or1 < __code_max)
-/*TODO*///				{
-/*TODO*///					if (or3 < __code_max)
-/*TODO*///						seq_set_5(&dst->seq, or1, CODE_OR, or2, CODE_OR, or3);
-/*TODO*///					else if (or2 < __code_max)
-/*TODO*///						seq_set_3(&dst->seq, or1, CODE_OR, or2);
-/*TODO*///					else
-/*TODO*///						seq_set_1(&dst->seq, or1);
-/*TODO*///				} else {
-/*TODO*///					if (or1 == CODE_NONE)
-/*TODO*///						seq_set_1(&dst->seq, or2);
-/*TODO*///					else
-/*TODO*///						seq_set_1(&dst->seq, or1);
-/*TODO*///				}
-/*TODO*///
-/*TODO*///  				++ext;
-/*TODO*///  			} else {
-/*TODO*///				seq_set_1(&dst->seq,seq_default);
-/*TODO*///  			}
-/*TODO*///
-/*TODO*///			++src;
-/*TODO*///			++dst;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		src = ext;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	dst->type = IPT_END;
-/*TODO*///
-/*TODO*///	return base;
-/*TODO*///}
-/*TODO*///
-/*TODO*///void input_port_free(struct InputPort* dst)
-/*TODO*///{
-/*TODO*///	free(dst);
-/*TODO*///}
-/*TODO*///
+    /**
+     * ************************************************************************
+     */
+    /* InputPort conversion */
+    public static int input_port_count(InputPortTiny[] src) {
+
+        int/*unsigned*/ total = 0;
+        int ptr = 0;
+        while (src[ptr].type != IPT_END) {
+            int type = src[ptr].type & ~IPF_MASK;
+            if (type > IPT_ANALOG_START && type < IPT_ANALOG_END) {
+                total += 2;
+            } else if (type != IPT_EXTENSION) {
+                ++total;
+            }
+            ++ptr;//++src;
+        }
+
+        ++total;/* for IPT_END */
+
+        return total;
+    }
+
+    public static InputPort[] input_port_allocate(InputPortTiny[] src) {
+        int dst; //struct InputPort* dst;
+        int inp_ptr = 0;
+        InputPort[] base;
+        int total;
+
+        total = input_port_count(src);
+
+        base = new InputPort[total];
+        dst = 0; //dst = base;
+
+        while (src[inp_ptr].type != IPT_END) {
+            int type = src[inp_ptr].type & ~IPF_MASK;
+            int ext;//const struct InputPortTiny *ext;
+            int src_end;//const struct InputPortTiny *src_end;
+            int/*InputCode*/ seq_default;
+
+            if (type > IPT_ANALOG_START && type < IPT_ANALOG_END) {
+                src_end = inp_ptr + 2;
+            } else {
+                src_end = inp_ptr + 1;
+            }
+            switch (type) {
+                case IPT_END:
+                case IPT_PORT:
+                case IPT_DIPSWITCH_NAME:
+                case IPT_DIPSWITCH_SETTING:
+                    seq_default = CODE_NONE;
+                    break;
+                default:
+                    seq_default = CODE_DEFAULT;
+            }
+
+            ext = src_end;
+            while (inp_ptr != src_end) {
+                base[dst] = new InputPort();
+                base[dst].type = src[inp_ptr].type;//dst->type = src->type;
+                base[dst].mask = src[inp_ptr].mask;//dst->mask = src->mask;
+                base[dst].default_value = src[inp_ptr].default_value;//dst->default_value = src->default_value;
+                base[dst].name = src[inp_ptr].name;//dst->name = src->name;
+
+                if (src[ext].type == IPT_EXTENSION) {
+                    int or1 = IP_GET_CODE_OR1(src[ext]);
+                    int or2 = IP_GET_CODE_OR2(src[ext]);
+                    int or3;
+                    switch (or2) {
+                        case JOYCODE_1_BUTTON1:
+                            or3 = JOYCODE_MOUSE_1_BUTTON1;
+                            break;
+                        case JOYCODE_1_BUTTON2:
+                            or3 = JOYCODE_MOUSE_1_BUTTON2;
+                            break;
+                        case JOYCODE_1_BUTTON3:
+                            or3 = JOYCODE_MOUSE_1_BUTTON3;
+                            break;
+                        case JOYCODE_2_BUTTON1:
+                            or3 = JOYCODE_MOUSE_2_BUTTON1;
+                            break;
+                        case JOYCODE_2_BUTTON2:
+                            or3 = JOYCODE_MOUSE_2_BUTTON2;
+                            break;
+                        case JOYCODE_2_BUTTON3:
+                            or3 = JOYCODE_MOUSE_2_BUTTON3;
+                            break;
+                        case JOYCODE_3_BUTTON1:
+                            or3 = JOYCODE_MOUSE_3_BUTTON1;
+                            break;
+                        case JOYCODE_3_BUTTON2:
+                            or3 = JOYCODE_MOUSE_3_BUTTON2;
+                            break;
+                        case JOYCODE_3_BUTTON3:
+                            or3 = JOYCODE_MOUSE_3_BUTTON3;
+                            break;
+                        case JOYCODE_4_BUTTON1:
+                            or3 = JOYCODE_MOUSE_4_BUTTON1;
+                            break;
+                        case JOYCODE_4_BUTTON2:
+                            or3 = JOYCODE_MOUSE_4_BUTTON2;
+                            break;
+                        case JOYCODE_4_BUTTON3:
+                            or3 = JOYCODE_MOUSE_4_BUTTON3;
+                            break;
+                        default:
+                            or3 = CODE_NONE;
+                            break;
+                    }
+
+                    if (or1 < __code_max) {
+                        if (or3 < __code_max) {
+                            seq_set_5(base[dst].seq, or1, CODE_OR, or2, CODE_OR, or3);
+                        } else if (or2 < __code_max) {
+                            seq_set_3(base[dst].seq, or1, CODE_OR, or2);
+                        } else {
+                            seq_set_1(base[dst].seq, or1);
+                        }
+                    } else {
+                        if (or1 == CODE_NONE) {
+                            seq_set_1(base[dst].seq, or2);
+                        } else {
+                            seq_set_1(base[dst].seq, or1);
+                        }
+                    }
+
+                    ++ext;
+                } else {
+                    seq_set_1(base[dst].seq, seq_default);
+                }
+
+                ++inp_ptr;
+                ++dst;
+            }
+
+            inp_ptr = ext;
+        }
+
+        base[dst] = new InputPort();
+        base[dst].type = IPT_END;//dst->type = IPT_END;
+
+        return base;
+    }
+
+    public static void input_port_free(InputPort[] dst) {
+        dst = null;
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*///void seq_set_string(InputSeq* a, const char *buf)
 /*TODO*///{
@@ -2902,9 +2914,9 @@ public class inptport {
 /*TODO*///	free (lbuf);
 /*TODO*///}
 /*TODO*///
-/*TODO*///void init_analog_seq()
-/*TODO*///{
-/*TODO*///	struct InputPort *in;
+    public static void init_analog_seq() {
+        System.out.println("Unimplemented int_analog_seq in inptport.java");
+        /*TODO*///	struct InputPort *in;
 /*TODO*///	int player, axis;
 /*TODO*///
 /*TODO*////* init analogjoy_input array */
@@ -3004,6 +3016,6 @@ public class inptport {
 /*TODO*///	}
 /*TODO*///
 /*TODO*///	return;
-/*TODO*///}
-/*TODO*///    
+    }
+
 }
