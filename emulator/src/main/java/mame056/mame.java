@@ -63,8 +63,8 @@ public class mame {
     /* Variables to hold the status of various game options */
     public static GameOptions options = new GameOptions();
 
-    static FILE record;/* for -record */
-    static FILE playback;/* for -playback */
+    public static FILE record;/* for -record */
+    public static FILE playback;/* for -playback */
 
     public static int bailing;/* set to 1 if the startup is aborted to prevent multiple error messages */
 

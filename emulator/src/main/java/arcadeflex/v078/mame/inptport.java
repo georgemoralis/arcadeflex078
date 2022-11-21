@@ -4,6 +4,9 @@
  */
 package arcadeflex.v078.mame;
 
+import static arcadeflex.v078.mame.cpuexec.cpu_scalebyfcount;
+import static arcadeflex.v078.mame.cpuexecH.cpu_set_reset_line;
+import static arcadeflex.v078.mame.cpuintrfH.PULSE_LINE;
 import static arcadeflex.v078.mame.inptportH.IPF_PLAYER5;
 import static arcadeflex.v078.mame.inptportH.IPF_PLAYER6;
 import static arcadeflex.v078.mame.inptportH.IPF_PLAYER7;
@@ -104,6 +107,7 @@ import static arcadeflex.v078.mame.inptportH.IPT_UI_TOGGLE_DEBUG;
 import static arcadeflex.v078.mame.inptportH.IPT_UI_UP;
 import static arcadeflex.v078.mame.inptportH.IPT_UI_WATCH_VALUE;
 import static arcadeflex.v078.mame.inptportH.IPT_UNKNOWN;
+import static arcadeflex.v078.mame.inptportH.IPT_VBLANK;
 import static arcadeflex.v078.mame.inptportH.IP_GET_PLAYER;
 import static arcadeflex.v078.mame.input.seq_pressed;
 import static arcadeflex.v078.mame.input.seq_set_1;
@@ -118,9 +122,10 @@ import static arcadeflex.v078.mame.osdependH.Y_AXIS;
 import static arcadeflex.v078.mame.osdependH.Z_AXIS;
 import static mame056.inptportH.*;
 import mame056.inptportH.ipd;
-import static mame056.mame.Machine;
 import static mame056.mame.options;
 import static arcadeflex036.osdepend.logerror;
+import static mame056.common.coinlockedout;
+import static mame056.mame.*;
 
 public class inptport {
 
@@ -146,6 +151,8 @@ public class inptport {
     static int[][] analog_current_axis = new int[OSD_MAX_JOY_ANALOG][MAX_ANALOG_AXES];
     static int[][] analog_previous_axis = new int[OSD_MAX_JOY_ANALOG][MAX_ANALOG_AXES];
 
+    static /*unsigned short*/ char[] input_port_value = new char[MAX_INPUT_PORTS];
+    static /*unsigned short*/ char[] input_vblank = new char[MAX_INPUT_PORTS];
     /**
      * *************************************************************************
      *
@@ -2267,47 +2274,41 @@ public class inptport {
         input_analog_current_value[port] = current;
     }
 
-    /*TODO*///static void scale_analog_port(int port)
-/*TODO*///{
-/*TODO*///	struct InputPort *in;
-/*TODO*///	int delta,current,sensitivity;
-/*TODO*///
-/*TODO*///profiler_mark(PROFILER_INPUT);
-/*TODO*///	in = input_analog[port];
-/*TODO*///	sensitivity = IP_GET_SENSITIVITY(in);
-/*TODO*///
-/*TODO*///	/* apply scaling fairly in both positive and negative directions */
-/*TODO*///	delta = input_analog_current_value[port] - input_analog_previous_value[port];
-/*TODO*///	if (delta >= 0)
-/*TODO*///		delta = cpu_scalebyfcount(delta);
-/*TODO*///	else
-/*TODO*///		delta = -cpu_scalebyfcount(-delta);
-/*TODO*///
-/*TODO*///	current = input_analog_previous_value[port] + delta;
-/*TODO*///
-/*TODO*///	/* An ugly hack to remove scaling on lightgun ports */
-/*TODO*///	if (input_analog_scale[port]) {
-/*TODO*///		/* apply scaling fairly in both positive and negative directions */
-/*TODO*///		if (current >= 0)
-/*TODO*///			current = (current * sensitivity + 50) / 100;
-/*TODO*///		else
-/*TODO*///			current = (-current * sensitivity + 50) / -100;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	input_port_value[port] &= ~in->mask;
-/*TODO*///	input_port_value[port] |= current & in->mask;
-/*TODO*///
-/*TODO*///	if (playback)
+    static void scale_analog_port(int port) {
+        //InputPort in;
+        int delta, current, sensitivity;
+
+        //in = input_analog[port];
+        sensitivity = IP_GET_SENSITIVITY(Machine.input_ports, input_analog[port]);
+
+        /* apply scaling fairly in both positive and negative directions */
+        delta = input_analog_current_value[port] - input_analog_previous_value[port];
+        if (delta >= 0) {
+            delta = cpu_scalebyfcount(delta);
+        } else {
+            delta = -cpu_scalebyfcount(-delta);
+        }
+
+        current = input_analog_previous_value[port] + delta;
+
+        /* An ugly hack to remove scaling on lightgun ports */
+        if (input_analog_scale[port] != 0) {
+            /* apply scaling fairly in both positive and negative directions */
+            if (current >= 0) {
+                current = (current * sensitivity + 50) / 100;
+            } else {
+                current = (-current * sensitivity + 50) / -100;
+            }
+        }
+        input_port_value[port] &= ~Machine.input_ports[input_analog[port]].mask;
+        input_port_value[port] |= current & Machine.input_ports[input_analog[port]].mask;
+        /*TODO*///	if (playback)
 /*TODO*///		readword(playback,&input_port_value[port]);
 /*TODO*///	if (record)
 /*TODO*///		writeword(record,input_port_value[port]);
-/*TODO*///#ifdef MAME_NET
-/*TODO*///	if ( net_active() && (default_player != NET_SPECTATOR) )
-/*TODO*///		net_analog_sync((unsigned char *) input_port_value, port, analog_player_port, default_player);
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///profiler_mark(PROFILER_END);
-/*TODO*///}
-/*TODO*///
+    }
+
+    /*TODO*///
 /*TODO*///#define MAX_JOYSTICKS 3
 /*TODO*///#define MAX_PLAYERS 8
 /*TODO*///static int mJoyCurrent[MAX_JOYSTICKS*MAX_PLAYERS];
@@ -2421,173 +2422,119 @@ public class inptport {
 /*TODO*///	}
 /*TODO*///} /* ScanJoysticks */
 /*TODO*///
-/*TODO*///void update_input_ports(void)
-/*TODO*///{
-/*TODO*///	int port,ib;
-/*TODO*///	struct InputPort *in;
+    public static final int MAX_INPUT_BITS = 1024;
+    static int[] impulsecount = new int[MAX_INPUT_BITS];
+    static int[] waspressed = new int[MAX_INPUT_BITS];
+    static int[] pbwaspressed = new int[MAX_INPUT_BITS];
+
+    public static void update_input_ports() {
+        int port, ib;
+        InputPort[] in;
+        int in_ptr = 0;
+
+        /* clear all the values before proceeding */
+        for (port = 0; port < MAX_INPUT_PORTS; port++) {
+            input_port_value[port] = 0;
+            input_vblank[port] = 0;
+            input_analog[port] = 0;
+        }
+
+        in = Machine.input_ports;
+
+        if (in[in_ptr].type == IPT_END) {
+            return;/* nothing to do */
+        }
+        /* make sure the InputPort definition is correct */
+        if (in[in_ptr].type != IPT_PORT) {
+            logerror("Error in InputPort definition: expecting PORT_START\n");
+            return;
+        } else {
+            in_ptr++;
+        }
+        /*TODO*///	ScanJoysticks( in ); /* populates mJoyCurrent[] */
 /*TODO*///
-/*TODO*///#define MAX_INPUT_BITS 1024
-/*TODO*///	static int impulsecount[MAX_INPUT_BITS];
-/*TODO*///	static int waspressed[MAX_INPUT_BITS];
-/*TODO*///	static int pbwaspressed[MAX_INPUT_BITS];
-/*TODO*///
-/*TODO*///#ifdef MAME_NET
-/*TODO*///	int player;
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///
-/*TODO*///
-/*TODO*///profiler_mark(PROFILER_INPUT);
-/*TODO*///
-/*TODO*///	/* clear all the values before proceeding */
-/*TODO*///	for (port = 0;port < MAX_INPUT_PORTS;port++)
-/*TODO*///	{
-/*TODO*///		input_port_value[port] = 0;
-/*TODO*///		input_vblank[port] = 0;
-/*TODO*///		input_analog[port] = 0;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	in = Machine->input_ports;
-/*TODO*///	if (in->type == IPT_END) return; 	/* nothing to do */
-/*TODO*///
-/*TODO*///	/* make sure the InputPort definition is correct */
-/*TODO*///	if (in->type != IPT_PORT)
-/*TODO*///	{
-/*TODO*///		logerror("Error in InputPort definition: expecting PORT_START\n");
-/*TODO*///		return;
-/*TODO*///	}
-/*TODO*///	else
-/*TODO*///	{
-/*TODO*///		in++;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	ScanJoysticks( in ); /* populates mJoyCurrent[] */
-/*TODO*///
-/*TODO*///	/* scan all the input ports */
-/*TODO*///	port = 0;
-/*TODO*///	ib = 0;
-/*TODO*///	while (in->type != IPT_END && port < MAX_INPUT_PORTS)
-/*TODO*///	{
-/*TODO*///		struct InputPort *start;
-/*TODO*///		/* first of all, scan the whole input port definition and build the */
-/*TODO*///		/* default value. I must do it before checking for input because otherwise */
-/*TODO*///		/* multiple keys associated with the same input bit wouldn't work (the bit */
-/*TODO*///		/* would be reset to its default value by the second entry, regardless if */
-/*TODO*///		/* the key associated with the first entry was pressed) */
-/*TODO*///		start = in;
-/*TODO*///		while (in->type != IPT_END && in->type != IPT_PORT)
-/*TODO*///		{
-/*TODO*///			if ((in->type & ~IPF_MASK) != IPT_DIPSWITCH_SETTING &&	/* skip dipswitch definitions */
-/*TODO*///#ifdef MESS
-/*TODO*///				(in->type & ~IPF_MASK) != IPT_CONFIG_SETTING &&		/* skip config definitions */
-/*TODO*///#endif /* MESS */
-/*TODO*///				(in->type & ~IPF_MASK) != IPT_EXTENSION)			/* skip analog extension fields */
-/*TODO*///			{
-/*TODO*///				input_port_value[port] =
-/*TODO*///						(input_port_value[port] & ~in->mask) | (in->default_value & in->mask);
-/*TODO*///#ifdef MAME_NET
-/*TODO*///				if ( net_active() )
-/*TODO*///					input_port_defaults[port] = input_port_value[port];
-/*TODO*///#elif defined XMAME_NET
-/*TODO*///				if ( osd_net_active() )
-/*TODO*///					input_port_defaults[port] = input_port_value[port];
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///			}
-/*TODO*///
-/*TODO*///			in++;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		/* now get back to the beginning of the input port and check the input bits. */
-/*TODO*///		for (in = start;
-/*TODO*///			 in->type != IPT_END && in->type != IPT_PORT;
-/*TODO*///			 in++, ib++)
-/*TODO*///		{
-/*TODO*///#ifdef MAME_NET
-/*TODO*///			player = IP_GET_PLAYER(in);
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///			if ((in->type & ~IPF_MASK) != IPT_DIPSWITCH_SETTING &&	/* skip dipswitch definitions */
-/*TODO*///#ifdef MESS
-/*TODO*///				(in->type & ~IPF_MASK) != IPT_CONFIG_SETTING &&		/* skip config definitions */
-/*TODO*///#endif
-/*TODO*///					(in->type & ~IPF_MASK) != IPT_EXTENSION)		/* skip analog extension fields */
-/*TODO*///			{
-/*TODO*///				if ((in->type & ~IPF_MASK) == IPT_VBLANK)
-/*TODO*///				{
-/*TODO*///					input_vblank[port] ^= in->mask;
-/*TODO*///					input_port_value[port] ^= in->mask;
-/*TODO*///if (Machine->drv->vblank_duration == 0)
-/*TODO*///	logerror("Warning: you are using IPT_VBLANK with vblank_duration = 0. You need to increase vblank_duration for IPT_VBLANK to work.\n");
-/*TODO*///				}
-/*TODO*///				/* If it's an analog control, handle it appropriately */
-/*TODO*///				else if (((in->type & ~IPF_MASK) > IPT_ANALOG_START)
-/*TODO*///					  && ((in->type & ~IPF_MASK) < IPT_ANALOG_END  )) /* LBO 120897 */
-/*TODO*///				{
-/*TODO*///					input_analog[port]=in;
-/*TODO*///					/* reset the analog port on first access */
-/*TODO*///					if (input_analog_init[port])
-/*TODO*///					{
-/*TODO*///						input_analog_init[port] = 0;
-/*TODO*///						input_analog_scale[port] = 1;
-/*TODO*///						input_analog_current_value[port] = input_analog_previous_value[port]
-/*TODO*///							= in->default_value * 100 / IP_GET_SENSITIVITY(in);
-/*TODO*///					}
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					InputSeq* seq;
-/*TODO*///					seq = input_port_seq(in);
-/*TODO*///					if (seq_pressed(seq))
-/*TODO*///					{
-/*TODO*///#ifdef MESS
-/*TODO*///						if (((in->type & ~IPF_MASK) == IPT_KEYBOARD) && osd_keyboard_disabled())
-/*TODO*///							continue;
-/*TODO*///#endif
-/*TODO*///
-/*TODO*///						/* skip if coin input and it's locked out */
-/*TODO*///						if ((in->type & ~IPF_MASK) >= IPT_COIN1 &&
-/*TODO*///							(in->type & ~IPF_MASK) <= IPT_COIN4 &&
-/*TODO*///                            coinlockedout[(in->type & ~IPF_MASK) - IPT_COIN1])
-/*TODO*///						{
-/*TODO*///							continue;
-/*TODO*///						}
-/*TODO*///						if ((in->type & ~IPF_MASK) >= IPT_COIN5 &&
-/*TODO*///							(in->type & ~IPF_MASK) <= IPT_COIN8 &&
-/*TODO*///                            coinlockedout[(in->type & ~IPF_MASK) - IPT_COIN5 + 4])
-/*TODO*///						{
-/*TODO*///							continue;
-/*TODO*///						}
-/*TODO*///
-/*TODO*///						/* if IPF_RESET set, reset the first CPU */
-/*TODO*///						if ((in->type & IPF_RESETCPU) && waspressed[ib] == 0 && !playback)
-/*TODO*///						{
-/*TODO*///							cpu_set_reset_line(0,PULSE_LINE);
-/*TODO*///						}
-/*TODO*///
-/*TODO*///						if (in->type & IPF_IMPULSE)
-/*TODO*///						{
-/*TODO*///if (IP_GET_IMPULSE(in) == 0)
-/*TODO*///	logerror("error in input port definition: IPF_IMPULSE with length = 0\n");
-/*TODO*///							if (waspressed[ib] == 0)
-/*TODO*///								impulsecount[ib] = IP_GET_IMPULSE(in);
-/*TODO*///								/* the input bit will be toggled later */
-/*TODO*///						}
-/*TODO*///						else if (in->type & IPF_TOGGLE)
-/*TODO*///						{
-/*TODO*///							if (waspressed[ib] == 0)
-/*TODO*///							{
-/*TODO*///								in->default_value ^= in->mask;
-/*TODO*///								input_port_value[port] ^= in->mask;
-/*TODO*///							}
-/*TODO*///						}
-/*TODO*///						else if ((in->type & ~IPF_MASK) >= IPT_JOYSTICK_UP &&
-/*TODO*///								(in->type & ~IPF_MASK) <= IPT_JOYSTICKLEFT_RIGHT)
-/*TODO*///						{
-/*TODO*///#ifndef MAME_NET
-/*TODO*///							int joynum,joydir,mask,player;
-/*TODO*///
+        port = 0;
+        ib = 0;
+        int start_ptr = 0;
+        while (in[in_ptr].type != IPT_END && port < MAX_INPUT_PORTS) {
+            //struct InputPort *start;
+            /* first of all, scan the whole input port definition and build the */
+ /* default value. I must do it before checking for input because otherwise */
+ /* multiple keys associated with the same input bit wouldn't work (the bit */
+ /* would be reset to its default value by the second entry, regardless if */
+ /* the key associated with the first entry was pressed) */
+            start_ptr = in_ptr;
+            while (in[in_ptr].type != IPT_END && in[in_ptr].type != IPT_PORT) {
+                if ((in[in_ptr].type & ~IPF_MASK) != IPT_DIPSWITCH_SETTING
+                        && /* skip dipswitch definitions */ (in[in_ptr].type & ~IPF_MASK) != IPT_EXTENSION) /* skip analog extension fields */ {
+                    input_port_value[port]
+                            = (char) ((input_port_value[port] & ~in[in_ptr].mask) | (in[in_ptr].default_value & in[in_ptr].mask));
+                }
+
+                in_ptr++;
+            }
+
+            /* now get back to the beginning of the input port and check the input bits. */
+            for (in_ptr = start_ptr;
+                    in[in_ptr].type != IPT_END && in[in_ptr].type != IPT_PORT;
+                    in_ptr++, ib++) {
+                if ((in[in_ptr].type & ~IPF_MASK) != IPT_DIPSWITCH_SETTING
+                        && /* skip dipswitch definitions */ (in[in_ptr].type & ~IPF_MASK) != IPT_EXTENSION) /* skip analog extension fields */ {
+                    if ((in[in_ptr].type & ~IPF_MASK) == IPT_VBLANK) {
+                        input_vblank[port] ^= in[in_ptr].mask;
+                        input_port_value[port] ^= in[in_ptr].mask;
+                        if (Machine.drv.vblank_duration == 0) {
+                            logerror("Warning: you are using IPT_VBLANK with vblank_duration = 0. You need to increase vblank_duration for IPT_VBLANK to work.\n");
+                        }
+                    } /* If it's an analog control, handle it appropriately */ else if (((in[in_ptr].type & ~IPF_MASK) > IPT_ANALOG_START)
+                            && ((in[in_ptr].type & ~IPF_MASK) < IPT_ANALOG_END)) /* LBO 120897 */ {
+                        input_analog[port] = in_ptr;
+                        /* reset the analog port on first access */
+                        if (input_analog_init[port] != 0) {
+                            input_analog_init[port] = 0;
+                            input_analog_scale[port] = 1;
+                            input_analog_current_value[port] = input_analog_previous_value[port]
+                                    = in[in_ptr].default_value * 100 / IP_GET_SENSITIVITY(in, in_ptr);
+                        }
+                    } else {
+                        int[] seq;
+
+                        seq = input_port_seq(in, in_ptr);
+
+                        if (seq_pressed(seq)) {
+                            /* skip if coin input and it's locked out */
+                            if ((in[in_ptr].type & ~IPF_MASK) >= IPT_COIN1
+                                    && (in[in_ptr].type & ~IPF_MASK) <= IPT_COIN4
+                                    && coinlockedout[(in[in_ptr].type & ~IPF_MASK) - IPT_COIN1] != 0) {
+                                continue;
+                            }
+                            if ((in[in_ptr].type & ~IPF_MASK) >= IPT_COIN5
+                                    && (in[in_ptr].type & ~IPF_MASK) <= IPT_COIN8
+                                    && coinlockedout[(in[in_ptr].type & ~IPF_MASK) - IPT_COIN5 + 4] != 0) {
+                                continue;
+                            }
+                            /* if IPF_RESET set, reset the first CPU */
+                            if ((in[in_ptr].type & IPF_RESETCPU) != 0 && waspressed[ib] == 0 && playback == null) {
+                                cpu_set_reset_line(0, PULSE_LINE);
+                            }
+                            if ((in[in_ptr].type & IPF_IMPULSE) != 0) {
+                                if (IP_GET_IMPULSE(in, in_ptr) == 0) {
+                                    logerror("error in input port definition: IPF_IMPULSE with length = 0\n");
+                                }
+                                if (waspressed[ib] == 0) {
+                                    impulsecount[ib] = IP_GET_IMPULSE(in, in_ptr);
+                                }
+                                /* the input bit will be toggled later */
+                            } else if ((in[in_ptr].type & IPF_TOGGLE) != 0) {
+                                if (waspressed[ib] == 0) {
+                                    in[in_ptr].default_value ^= in[in_ptr].mask;
+                                    input_port_value[port] ^= in[in_ptr].mask;
+                                }
+                            } else if ((in[in_ptr].type & ~IPF_MASK) >= IPT_JOYSTICK_UP
+                                    && (in[in_ptr].type & ~IPF_MASK) <= IPT_JOYSTICKLEFT_RIGHT) {
+                                throw new UnsupportedOperationException("Unsupported");
+                                /*TODO*///                                int joynum, joydir, mask, player;
 /*TODO*///							player = IP_GET_PLAYER(in);
-/*TODO*///#else
-/*TODO*///							int joynum,joydir,mask;
-/*TODO*///#endif /* !MAME_NET */
 /*TODO*///							joynum = player * MAX_JOYSTICKS +
 /*TODO*///									((in->type & ~IPF_MASK) - IPT_JOYSTICK_UP) / 4;
 /*TODO*///
@@ -2613,30 +2560,29 @@ public class inptport {
 /*TODO*///							}
 /*TODO*///
 /*TODO*///							input_port_value[port] ^= mask;
-/*TODO*///						} /* joystick */
-/*TODO*///						else
-/*TODO*///						{
-/*TODO*///							input_port_value[port] ^= in->mask;
-/*TODO*///						}
-/*TODO*///						waspressed[ib] = 1;
-/*TODO*///					}
-/*TODO*///					else
-/*TODO*///						waspressed[ib] = 0;
-/*TODO*///
-/*TODO*///					if ((in->type & IPF_IMPULSE) && impulsecount[ib] > 0)
-/*TODO*///					{
-/*TODO*///						impulsecount[ib]--;
-/*TODO*///						waspressed[ib] = 1;
-/*TODO*///						input_port_value[port] ^= in->mask;
-/*TODO*///					}
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		port++;
-/*TODO*///		if (in->type == IPT_PORT) in++;
-/*TODO*///	}
-/*TODO*///
+                            } /* joystick */ else {
+                                input_port_value[port] ^= in[in_ptr].mask;
+                            }
+
+                            waspressed[ib] = 1;
+                        } else {
+                            waspressed[ib] = 0;
+                        }
+                        if (((in[in_ptr].type & IPF_IMPULSE) != 0) && impulsecount[ib] > 0) {
+                            impulsecount[ib]--;
+                            waspressed[ib] = 1;
+                            input_port_value[port] ^= in[in_ptr].mask;
+                        }
+                    }
+                }
+            }
+
+            port++;
+            if (in[in_ptr].type == IPT_PORT) {
+                in_ptr++;
+            }
+        }
+        /*TODO*///
 /*TODO*///	if (playback)
 /*TODO*///	{
 /*TODO*///		int i;
@@ -2669,10 +2615,6 @@ public class inptport {
 /*TODO*///		}
 /*TODO*///	}
 /*TODO*///
-/*TODO*///#ifdef MESS
-/*TODO*///	inputx_update(input_port_value);
-/*TODO*///#endif
-/*TODO*///
 /*TODO*///	if (record)
 /*TODO*///	{
 /*TODO*///		int i;
@@ -2680,17 +2622,9 @@ public class inptport {
 /*TODO*///		for (i = 0; i < MAX_INPUT_PORTS; i ++)
 /*TODO*///			writeword(record,input_port_value[i]);
 /*TODO*///	}
-/*TODO*///#ifdef MAME_NET
-/*TODO*///	if ( net_active() && (default_player != NET_SPECTATOR) )
-/*TODO*///		net_input_sync((unsigned char *) input_port_value, (unsigned char *) input_port_defaults, MAX_INPUT_PORTS);
-/*TODO*///#elif defined XMAME_NET
-/*TODO*///	if ( osd_net_active() )
-/*TODO*///		osd_net_sync(input_port_value, input_port_defaults);
-/*TODO*///#endif /* MAME_NET */
-/*TODO*///
-/*TODO*///profiler_mark(PROFILER_END);
-/*TODO*///}
-/*TODO*///
+    }
+
+    /*TODO*///
 /*TODO*///
 /*TODO*///
 /*TODO*////* used the the CPU interface to notify that VBlank has ended, so we can update */
