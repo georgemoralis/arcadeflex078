@@ -8,29 +8,119 @@ import static arcadeflex.v078.mame.inptportH.IPF_PLAYER5;
 import static arcadeflex.v078.mame.inptportH.IPF_PLAYER6;
 import static arcadeflex.v078.mame.inptportH.IPF_PLAYER7;
 import static arcadeflex.v078.mame.inptportH.IPF_PLAYER8;
+import static arcadeflex.v078.mame.inptportH.IPT_AD_STICK_X;
+import static arcadeflex.v078.mame.inptportH.IPT_AD_STICK_Y;
 import static arcadeflex.v078.mame.inptportH.IPT_AD_STICK_Z;
+import static arcadeflex.v078.mame.inptportH.IPT_ANALOG_END;
+import static arcadeflex.v078.mame.inptportH.IPT_ANALOG_START;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON1;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON10;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON2;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON3;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON4;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON5;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON6;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON7;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON8;
+import static arcadeflex.v078.mame.inptportH.IPT_BUTTON9;
+import static arcadeflex.v078.mame.inptportH.IPT_COIN1;
+import static arcadeflex.v078.mame.inptportH.IPT_COIN2;
+import static arcadeflex.v078.mame.inptportH.IPT_COIN3;
+import static arcadeflex.v078.mame.inptportH.IPT_COIN4;
 import static arcadeflex.v078.mame.inptportH.IPT_COIN5;
 import static arcadeflex.v078.mame.inptportH.IPT_COIN6;
 import static arcadeflex.v078.mame.inptportH.IPT_COIN7;
 import static arcadeflex.v078.mame.inptportH.IPT_COIN8;
+import static arcadeflex.v078.mame.inptportH.IPT_DIAL;
+import static arcadeflex.v078.mame.inptportH.IPT_DIAL_V;
+import static arcadeflex.v078.mame.inptportH.IPT_DIPSWITCH_NAME;
+import static arcadeflex.v078.mame.inptportH.IPT_DIPSWITCH_SETTING;
+import static arcadeflex.v078.mame.inptportH.IPT_END;
+import static arcadeflex.v078.mame.inptportH.IPT_EXTENSION;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKLEFT_DOWN;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKLEFT_LEFT;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKLEFT_RIGHT;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKLEFT_UP;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKRIGHT_DOWN;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKRIGHT_LEFT;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKRIGHT_RIGHT;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICKRIGHT_UP;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICK_DOWN;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICK_LEFT;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICK_RIGHT;
+import static arcadeflex.v078.mame.inptportH.IPT_JOYSTICK_UP;
 import static arcadeflex.v078.mame.inptportH.IPT_LIGHTGUN_X;
 import static arcadeflex.v078.mame.inptportH.IPT_LIGHTGUN_Y;
 import static arcadeflex.v078.mame.inptportH.IPT_OSD_RESERVED;
+import static arcadeflex.v078.mame.inptportH.IPT_PADDLE;
+import static arcadeflex.v078.mame.inptportH.IPT_PADDLE_V;
+import static arcadeflex.v078.mame.inptportH.IPT_PEDAL;
 import static arcadeflex.v078.mame.inptportH.IPT_PEDAL2;
+import static arcadeflex.v078.mame.inptportH.IPT_PORT;
+import static arcadeflex.v078.mame.inptportH.IPT_SERVICE1;
+import static arcadeflex.v078.mame.inptportH.IPT_SERVICE2;
+import static arcadeflex.v078.mame.inptportH.IPT_SERVICE3;
+import static arcadeflex.v078.mame.inptportH.IPT_SERVICE4;
+import static arcadeflex.v078.mame.inptportH.IPT_START1;
+import static arcadeflex.v078.mame.inptportH.IPT_START2;
+import static arcadeflex.v078.mame.inptportH.IPT_START3;
+import static arcadeflex.v078.mame.inptportH.IPT_START4;
 import static arcadeflex.v078.mame.inptportH.IPT_START5;
 import static arcadeflex.v078.mame.inptportH.IPT_START6;
 import static arcadeflex.v078.mame.inptportH.IPT_START7;
 import static arcadeflex.v078.mame.inptportH.IPT_START8;
+import static arcadeflex.v078.mame.inptportH.IPT_TILT;
+import static arcadeflex.v078.mame.inptportH.IPT_TRACKBALL_X;
+import static arcadeflex.v078.mame.inptportH.IPT_TRACKBALL_Y;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_ADD_CHEAT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_CANCEL;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_CONFIGURE;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_DELETE_CHEAT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_DOWN;
 import static arcadeflex.v078.mame.inptportH.IPT_UI_EDIT_CHEAT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_FRAMESKIP_DEC;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_FRAMESKIP_INC;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_LEFT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_LOAD_STATE;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_ON_SCREEN_DISPLAY;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_PAN_DOWN;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_PAN_LEFT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_PAN_RIGHT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_PAN_UP;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_PAUSE;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_RESET_MACHINE;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_RIGHT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SAVE_CHEAT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SAVE_STATE;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SELECT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SHOW_FPS;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SHOW_GFX;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SHOW_PROFILER;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SNAPSHOT;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_THROTTLE;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_TOGGLE_CHEAT;
 import static arcadeflex.v078.mame.inptportH.IPT_UI_TOGGLE_CROSSHAIR;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_TOGGLE_DEBUG;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_UP;
+import static arcadeflex.v078.mame.inptportH.IPT_UI_WATCH_VALUE;
+import static arcadeflex.v078.mame.inptportH.IPT_UNKNOWN;
+import static arcadeflex.v078.mame.inptportH.IP_GET_PLAYER;
+import static arcadeflex.v078.mame.input.seq_pressed;
 import static arcadeflex.v078.mame.input.seq_set_1;
 import static arcadeflex.v078.mame.input.seq_set_3;
 import static arcadeflex.v078.mame.input.seq_set_5;
 import static arcadeflex.v078.mame.inputH.*;
 import static arcadeflex.v078.mame.osdependH.MAX_ANALOG_AXES;
 import static arcadeflex.v078.mame.osdependH.OSD_MAX_JOY_ANALOG;
+import static arcadeflex.v078.mame.osdependH.PEDAL_AXIS;
+import static arcadeflex.v078.mame.osdependH.X_AXIS;
+import static arcadeflex.v078.mame.osdependH.Y_AXIS;
+import static arcadeflex.v078.mame.osdependH.Z_AXIS;
 import static mame056.inptportH.*;
 import mame056.inptportH.ipd;
+import static mame056.mame.Machine;
+import static mame056.mame.options;
+import static arcadeflex036.osdepend.logerror;
 
 public class inptport {
 
@@ -1820,320 +1910,364 @@ public class inptport {
 /*TODO*///	}
     }
 
-    /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////* Note that the following 3 routines have slightly different meanings with analog ports */
-/*TODO*///const char *input_port_name(const struct InputPort *in)
-/*TODO*///{
-/*TODO*///	int i;
-/*TODO*///	unsigned type;
-/*TODO*///
-/*TODO*///	if (in->name != IP_NAME_DEFAULT) return in->name;
-/*TODO*///
-/*TODO*///	i = 0;
-/*TODO*///
-/*TODO*///	if ((in->type & ~IPF_MASK) == IPT_EXTENSION)
-/*TODO*///		type = (in-1)->type & (~IPF_MASK | IPF_PLAYERMASK);
-/*TODO*///	else
-/*TODO*///		type = in->type & (~IPF_MASK | IPF_PLAYERMASK);
-/*TODO*///
-/*TODO*///	while (inputport_defaults[i].type != IPT_END &&
-/*TODO*///			inputport_defaults[i].type != type)
-/*TODO*///		i++;
-/*TODO*///
-/*TODO*///	if ((in->type & ~IPF_MASK) == IPT_EXTENSION)
-/*TODO*///		return inputport_defaults[i+1].name;
-/*TODO*///	else
-/*TODO*///		return inputport_defaults[i].name;
-/*TODO*///}
-/*TODO*///
-/*TODO*///InputSeq* input_port_type_seq(int type)
-/*TODO*///{
-/*TODO*///	unsigned i;
-/*TODO*///
-/*TODO*///	i = 0;
-/*TODO*///
-/*TODO*///	while (inputport_defaults[i].type != IPT_END &&
-/*TODO*///			inputport_defaults[i].type != type)
-/*TODO*///		i++;
-/*TODO*///
-/*TODO*///	return &inputport_defaults[i].seq;
-/*TODO*///}
-/*TODO*///
-/*TODO*///InputSeq* input_port_seq(const struct InputPort *in)
-/*TODO*///{
-/*TODO*///	int i,type;
-/*TODO*///
-/*TODO*///	static InputSeq ip_none = SEQ_DEF_1(CODE_NONE);
-/*TODO*///
-/*TODO*///	while (seq_get_1((InputSeq*)&in->seq) == CODE_PREVIOUS) in--;
-/*TODO*///
-/*TODO*///	if ((in->type & ~IPF_MASK) == IPT_EXTENSION)
-/*TODO*///	{
-/*TODO*///		type = (in-1)->type & (~IPF_MASK | IPF_PLAYERMASK);
-/*TODO*///		/* if port is disabled, or cheat with cheats disabled, return no key */
-/*TODO*///		if (((in-1)->type & IPF_UNUSED) || (!options.cheat && ((in-1)->type & IPF_CHEAT)))
-/*TODO*///			return &ip_none;
-/*TODO*///	}
-/*TODO*///	else
-/*TODO*///	{
-/*TODO*///		type = in->type & (~IPF_MASK | IPF_PLAYERMASK);
-/*TODO*///		/* if port is disabled, or cheat with cheats disabled, return no key */
-/*TODO*///		if ((in->type & IPF_UNUSED) || (!options.cheat && (in->type & IPF_CHEAT)))
-/*TODO*///			return &ip_none;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	if (seq_get_1((InputSeq*)&in->seq) != CODE_DEFAULT)
-/*TODO*///		return (InputSeq*)&in->seq;
-/*TODO*///
-/*TODO*///	i = 0;
-/*TODO*///
-/*TODO*///	while (inputport_defaults[i].type != IPT_END &&
-/*TODO*///			inputport_defaults[i].type != type)
-/*TODO*///		i++;
-/*TODO*///
-/*TODO*///	if ((in->type & ~IPF_MASK) == IPT_EXTENSION)
-/*TODO*///		return &inputport_defaults[i+1].seq;
-/*TODO*///	else
-/*TODO*///		return &inputport_defaults[i].seq;
-/*TODO*///}
-/*TODO*///
-/*TODO*///void update_analog_port(int port)
-/*TODO*///{
-/*TODO*///	struct InputPort *in;
-/*TODO*///	int current, delta, type, sensitivity, min, max, default_value;
-/*TODO*///	int axis, is_stick, is_gun, check_bounds;
-/*TODO*///	InputSeq* incseq;
-/*TODO*///	InputSeq* decseq;
-/*TODO*///	int keydelta;
-/*TODO*///	int player;
-/*TODO*///
-/*TODO*///	/* get input definition */
-/*TODO*///	in = input_analog[port];
-/*TODO*///
-/*TODO*///	/* if we're not cheating and this is a cheat-only port, bail */
-/*TODO*///	if (!options.cheat && (in->type & IPF_CHEAT)) return;
-/*TODO*///	type=(in->type & ~IPF_MASK);
-/*TODO*///
-/*TODO*///	decseq = input_port_seq(in);
-/*TODO*///	incseq = input_port_seq(in+1);
-/*TODO*///
-/*TODO*///	keydelta = IP_GET_DELTA(in);
-/*TODO*///
-/*TODO*///	switch (type)
-/*TODO*///	{
-/*TODO*///		case IPT_PADDLE:
-/*TODO*///			axis = X_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		case IPT_PADDLE_V:
-/*TODO*///			axis = Y_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		case IPT_DIAL:
-/*TODO*///			axis = X_AXIS; is_stick = 0; is_gun=0; check_bounds = 0; break;
-/*TODO*///		case IPT_DIAL_V:
-/*TODO*///			axis = Y_AXIS; is_stick = 0; is_gun=0; check_bounds = 0; break;
-/*TODO*///		case IPT_TRACKBALL_X:
-/*TODO*///			axis = X_AXIS; is_stick = 0; is_gun=0; check_bounds = 0; break;
-/*TODO*///		case IPT_TRACKBALL_Y:
-/*TODO*///			axis = Y_AXIS; is_stick = 0; is_gun=0; check_bounds = 0; break;
-/*TODO*///		case IPT_AD_STICK_X:
-/*TODO*///			axis = X_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		case IPT_AD_STICK_Y:
-/*TODO*///			axis = Y_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		case IPT_AD_STICK_Z:
-/*TODO*///			axis = Z_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		case IPT_LIGHTGUN_X:
-/*TODO*///			axis = X_AXIS; is_stick = 1; is_gun=1; check_bounds = 1; break;
-/*TODO*///		case IPT_LIGHTGUN_Y:
-/*TODO*///			axis = Y_AXIS; is_stick = 1; is_gun=1; check_bounds = 1; break;
-/*TODO*///		case IPT_PEDAL:
-/*TODO*///			axis = PEDAL_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		case IPT_PEDAL2:
-/*TODO*///			axis = Z_AXIS; is_stick = 1; is_gun=0; check_bounds = 1; break;
-/*TODO*///		default:
-/*TODO*///			/* Use some defaults to prevent crash */
-/*TODO*///			axis = X_AXIS; is_stick = 0; is_gun=0; check_bounds = 0;
-/*TODO*///			logerror("Oops, polling non analog device in update_analog_port()????\n");
-/*TODO*///	}
-/*TODO*///
-/*TODO*///
-/*TODO*///	sensitivity = IP_GET_SENSITIVITY(in);
-/*TODO*///	min = IP_GET_MIN(in);
-/*TODO*///	max = IP_GET_MAX(in);
-/*TODO*///	default_value = in->default_value * 100 / sensitivity;
-/*TODO*///	/* extremes can be either signed or unsigned */
-/*TODO*///	if (min > max)
-/*TODO*///	{
-/*TODO*///		if (in->mask > 0xff) min = min - 0x10000;
-/*TODO*///		else min = min - 0x100;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	input_analog_previous_value[port] = input_analog_current_value[port];
-/*TODO*///
-/*TODO*///	/* if IPF_CENTER go back to the default position */
-/*TODO*///	/* sticks are handled later... */
-/*TODO*///	if ((in->type & IPF_CENTER) && (!is_stick))
-/*TODO*///		input_analog_current_value[port] = in->default_value * 100 / sensitivity;
-/*TODO*///
-/*TODO*///	current = input_analog_current_value[port];
-/*TODO*///
-/*TODO*///	delta = 0;
-/*TODO*///
-/*TODO*///	player = IP_GET_PLAYER(in);
-/*TODO*///
-/*TODO*///	delta = mouse_delta_axis[player][axis];
-/*TODO*///
-/*TODO*///	if (seq_pressed(decseq)) delta -= keydelta;
-/*TODO*///
-/*TODO*///	if (type != IPT_PEDAL && type != IPT_PEDAL2)
-/*TODO*///	{
-/*TODO*///		if (seq_pressed(incseq)) delta += keydelta;
-/*TODO*///	}
-/*TODO*///	else
-/*TODO*///	{
-/*TODO*///		/* is this cheesy or what? */
-/*TODO*///		if (!delta && seq_get_1(incseq) == KEYCODE_Y) delta += keydelta;
-/*TODO*///		delta = -delta;
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	if (in->type & IPF_REVERSE) delta = -delta;
-/*TODO*///
-/*TODO*///	if (is_gun)
-/*TODO*///	{
-/*TODO*///		/* The OSD lightgun call should return the delta from the middle of the screen
-/*TODO*///		when the gun is fired (not the absolute pixel value), and 0 when the gun is
-/*TODO*///		inactive.  We take advantage of this to provide support for other controllers
-/*TODO*///		in place of a physical lightgun.  When the OSD lightgun returns 0, then control
-/*TODO*///		passes through to the analog joystick, and mouse, in that order.  When the OSD
-/*TODO*///		lightgun returns a value it overrides both mouse & analog joystick.
-/*TODO*///
-/*TODO*///		The value returned by the OSD layer should be -128 to 128, same as analog
-/*TODO*///		joysticks.
-/*TODO*///
-/*TODO*///		There is an ugly hack to stop scaling of lightgun returned values.  It really
-/*TODO*///		needs rewritten...
-/*TODO*///		*/
-/*TODO*///		if (axis == X_AXIS) {
-/*TODO*///			if (lightgun_delta_axis[player][X_AXIS] || lightgun_delta_axis[player][Y_AXIS]) {
-/*TODO*///				analog_previous_axis[player][X_AXIS]=0;
-/*TODO*///				analog_current_axis[player][X_AXIS]=lightgun_delta_axis[player][X_AXIS];
-/*TODO*///				input_analog_scale[port]=0;
-/*TODO*///				sensitivity=100;
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///		else
-/*TODO*///		{
-/*TODO*///			if (lightgun_delta_axis[player][X_AXIS] || lightgun_delta_axis[player][Y_AXIS]) {
-/*TODO*///				analog_previous_axis[player][Y_AXIS]=0;
-/*TODO*///				analog_current_axis[player][Y_AXIS]=lightgun_delta_axis[player][Y_AXIS];
-/*TODO*///				input_analog_scale[port]=0;
-/*TODO*///				sensitivity=100;
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	if (is_stick)
-/*TODO*///	{
-/*TODO*///		int new, prev;
-/*TODO*///
-/*TODO*///		/* center stick */
-/*TODO*///		if ((delta == 0) && (in->type & IPF_CENTER))
-/*TODO*///		{
-/*TODO*///			if (current > default_value)
-/*TODO*///			delta = -100 / sensitivity;
-/*TODO*///			if (current < default_value)
-/*TODO*///			delta = 100 / sensitivity;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		/* An analog joystick which is not at zero position (or has just */
-/*TODO*///		/* moved there) takes precedence over all other computations */
-/*TODO*///		/* analog_x/y holds values from -128 to 128 (yes, 128, not 127) */
-/*TODO*///
-/*TODO*///		new  = analog_current_axis[player][axis];
-/*TODO*///		prev = analog_previous_axis[player][axis];
-/*TODO*///
-/*TODO*///		if ((new != 0) || (new-prev != 0))
-/*TODO*///		{
-/*TODO*///			delta=0;
-/*TODO*///
-/*TODO*///			/* for pedals, need to change to possitive number */
-/*TODO*///			/* and, if needed, reverse pedal input */
-/*TODO*///			if (type == IPT_PEDAL || type == IPT_PEDAL2)
-/*TODO*///			{
-/*TODO*///				new  = -new;
-/*TODO*///				prev = -prev;
-/*TODO*///				if (in->type & IPF_REVERSE)		// a reversed pedal is diff than normal reverse
-/*TODO*///				{								// 128 = no gas, 0 = all gas
-/*TODO*///					new  = 128-new;				// the default "new=-new" doesn't handle this
-/*TODO*///					prev = 128-prev;
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///			else if (in->type & IPF_REVERSE)
-/*TODO*///			{
-/*TODO*///				new  = -new;
-/*TODO*///				prev = -prev;
-/*TODO*///			}
-/*TODO*///
-/*TODO*///			/* apply sensitivity using a logarithmic scale */
-/*TODO*///			if (in->mask > 0xff)
-/*TODO*///			{
-/*TODO*///				if (new > 0)
-/*TODO*///				{
-/*TODO*///					current = (pow(new / 32768.0, 100.0 / sensitivity) * (max-in->default_value)
-/*TODO*///							+ in->default_value) * 100 / sensitivity;
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					current = (pow(-new / 32768.0, 100.0 / sensitivity) * (min-in->default_value)
-/*TODO*///							+ in->default_value) * 100 / sensitivity;
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///			else
-/*TODO*///			{
-/*TODO*///				if (new > 0)
-/*TODO*///				{
-/*TODO*///					current = (pow(new / 128.0, 100.0 / sensitivity) * (max-in->default_value)
-/*TODO*///							+ in->default_value) * 100 / sensitivity;
-/*TODO*///				}
-/*TODO*///				else
-/*TODO*///				{
-/*TODO*///					current = (pow(-new / 128.0, 100.0 / sensitivity) * (min-in->default_value)
-/*TODO*///							+ in->default_value) * 100 / sensitivity;
-/*TODO*///				}
-/*TODO*///			}
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	current += delta;
-/*TODO*///
-/*TODO*///	if (check_bounds)
-/*TODO*///	{
-/*TODO*///		int temp;
-/*TODO*///
-/*TODO*///		if (current >= 0)
-/*TODO*///			temp = (current * sensitivity + 50) / 100;
-/*TODO*///		else
-/*TODO*///			temp = (-current * sensitivity + 50) / -100;
-/*TODO*///
-/*TODO*///		if (temp < min)
-/*TODO*///		{
-/*TODO*///			if (min >= 0)
-/*TODO*///				current = (min * 100 + sensitivity/2) / sensitivity;
-/*TODO*///			else
-/*TODO*///				current = (-min * 100 + sensitivity/2) / -sensitivity;
-/*TODO*///		}
-/*TODO*///		if (temp > max)
-/*TODO*///		{
-/*TODO*///			if (max >= 0)
-/*TODO*///				current = (max * 100 + sensitivity/2) / sensitivity;
-/*TODO*///			else
-/*TODO*///				current = (-max * 100 + sensitivity/2) / -sensitivity;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	input_analog_current_value[port] = current;
-/*TODO*///}
-/*TODO*///
-/*TODO*///static void scale_analog_port(int port)
+    /* Note that the following 3 routines have slightly different meanings with analog ports */
+    public static String input_port_name(InputPort[] in, int in_ptr) {
+        int i;
+        int/*unsigned*/ type;
+
+        if (in[in_ptr].name != IP_NAME_DEFAULT) {
+            return in[in_ptr].name;
+        }
+
+        i = 0;
+
+        if ((in[in_ptr].type & ~IPF_MASK) == IPT_EXTENSION) {
+            type = in[in_ptr - 1].type & (~IPF_MASK | IPF_PLAYERMASK);
+        } else {
+            type = in[in_ptr].type & (~IPF_MASK | IPF_PLAYERMASK);
+        }
+
+        while (inputport_defaults[i].type != IPT_END
+                && inputport_defaults[i].type != type) {
+            i++;
+        }
+
+        if ((in[in_ptr].type & ~IPF_MASK) == IPT_EXTENSION) {
+            return inputport_defaults[i + 1].name;
+        } else {
+            return inputport_defaults[i].name;
+        }
+    }
+
+    public static int[] input_port_type_seq(int type) {
+        int i = 0;
+
+        while (inputport_defaults[i].type != IPT_END
+                && inputport_defaults[i].type != type) {
+            i++;
+        }
+
+        return inputport_defaults[i].seq;
+    }
+
+    public static int[] ip_none = SEQ_DEF_1(CODE_NONE);
+
+    public static int[] input_port_seq(InputPort[] in, int in_ptr) {
+        int i, type;
+
+        while (seq_get_1(in[in_ptr].seq) == CODE_PREVIOUS) {
+            in_ptr--;
+        }
+        if ((in[in_ptr].type & ~IPF_MASK) == IPT_EXTENSION) {
+            type = in[in_ptr - 1].type & (~IPF_MASK | IPF_PLAYERMASK);
+            /* if port is disabled, or cheat with cheats disabled, return no key */
+            if ((in[in_ptr - 1].type & IPF_UNUSED) != 0 || (options.cheat == 0 && (in[in_ptr - 1].type & IPF_CHEAT) != 0)) {
+                return ip_none;
+            }
+        } else {
+            type = in[in_ptr].type & (~IPF_MASK | IPF_PLAYERMASK);
+            /* if port is disabled, or cheat with cheats disabled, return no key */
+            if ((in[in_ptr].type & IPF_UNUSED) != 0 || (options.cheat == 0 && (in[in_ptr].type & IPF_CHEAT) != 0)) {
+                return ip_none;
+            }
+        }
+
+        if (seq_get_1(in[in_ptr].seq) != CODE_DEFAULT) {
+            return in[in_ptr].seq;
+        }
+
+        i = 0;
+
+        while (inputport_defaults[i].type != IPT_END
+                && inputport_defaults[i].type != type) {
+            i++;
+        }
+
+        if ((in[in_ptr].type & ~IPF_MASK) == IPT_EXTENSION) {
+            return inputport_defaults[i + 1].seq;
+        } else {
+            return inputport_defaults[i].seq;
+        }
+    }
+
+    public static void update_analog_port(int port) {
+        //InputPort in;
+        int current, delta, type, sensitivity, min, max, default_value;
+        int axis, is_stick, is_gun, check_bounds;
+        int[] incseq;
+        int[] decseq;
+        int keydelta;
+        int player;
+        /* get input definition */
+        //in = input_analog[port];
+
+        /* if we're not cheating and this is a cheat-only port, bail */
+        if (options.cheat == 0 && (Machine.input_ports[input_analog[port]].type & IPF_CHEAT) != 0) {
+            return;
+        }
+        type = (Machine.input_ports[input_analog[port]].type & ~IPF_MASK);
+
+        decseq = input_port_seq(Machine.input_ports, input_analog[port]);
+        incseq = input_port_seq(Machine.input_ports, input_analog[port] + 1);
+
+        keydelta = IP_GET_DELTA(Machine.input_ports, input_analog[port]);
+
+        switch (type) {
+            case IPT_PADDLE:
+                axis = X_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            case IPT_PADDLE_V:
+                axis = Y_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            case IPT_DIAL:
+                axis = X_AXIS;
+                is_stick = 0;
+                is_gun = 0;
+                check_bounds = 0;
+                break;
+            case IPT_DIAL_V:
+                axis = Y_AXIS;
+                is_stick = 0;
+                is_gun = 0;
+                check_bounds = 0;
+                break;
+            case IPT_TRACKBALL_X:
+                axis = X_AXIS;
+                is_stick = 0;
+                is_gun = 0;
+                check_bounds = 0;
+                break;
+            case IPT_TRACKBALL_Y:
+                axis = Y_AXIS;
+                is_stick = 0;
+                is_gun = 0;
+                check_bounds = 0;
+                break;
+            case IPT_AD_STICK_X:
+                axis = X_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            case IPT_AD_STICK_Y:
+                axis = Y_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            case IPT_AD_STICK_Z:
+                axis = Z_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            case IPT_LIGHTGUN_X:
+                axis = X_AXIS;
+                is_stick = 1;
+                is_gun = 1;
+                check_bounds = 1;
+                break;
+            case IPT_LIGHTGUN_Y:
+                axis = Y_AXIS;
+                is_stick = 1;
+                is_gun = 1;
+                check_bounds = 1;
+                break;
+            case IPT_PEDAL:
+                axis = PEDAL_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            case IPT_PEDAL2:
+                axis = Z_AXIS;
+                is_stick = 1;
+                is_gun = 0;
+                check_bounds = 1;
+                break;
+            default:
+                /* Use some defaults to prevent crash */
+                axis = X_AXIS;
+                is_stick = 0;
+                is_gun = 0;
+                check_bounds = 0;
+                logerror("Oops, polling non analog device in update_analog_port()????\n");
+        }
+
+        sensitivity = IP_GET_SENSITIVITY(Machine.input_ports, input_analog[port]);
+        min = IP_GET_MIN(Machine.input_ports, input_analog[port]);
+        max = IP_GET_MAX(Machine.input_ports, input_analog[port]);
+        default_value = Machine.input_ports[input_analog[port]].default_value * 100 / sensitivity;
+        /* extremes can be either signed or unsigned */
+        if (min > max) {
+            if (Machine.input_ports[input_analog[port]].mask > 0xff) {
+                min = min - 0x10000;
+            } else {
+                min = min - 0x100;
+            }
+        }
+
+        input_analog_previous_value[port] = input_analog_current_value[port];
+
+        /* if IPF_CENTER go back to the default position sticks are handled later... */
+        if ((Machine.input_ports[input_analog[port]].type & IPF_CENTER) != 0 && (is_stick == 0)) {
+            input_analog_current_value[port] = Machine.input_ports[input_analog[port]].default_value * 100 / sensitivity;
+        }
+
+        current = input_analog_current_value[port];
+
+        delta = 0;
+
+        player = IP_GET_PLAYER(Machine.input_ports, input_analog[port]);
+
+        delta = mouse_delta_axis[player][axis];
+
+        if (seq_pressed(decseq)) {
+            delta -= keydelta;
+        }
+
+        if (type != IPT_PEDAL && type != IPT_PEDAL2) {
+            if (seq_pressed(incseq)) {
+                delta += keydelta;
+            }
+        } else {
+            /* is this cheesy or what? */
+            if (delta == 0 && seq_get_1(incseq) == KEYCODE_Y) {
+                delta += keydelta;
+            }
+            delta = -delta;
+        }
+
+        if ((Machine.input_ports[input_analog[port]].type & IPF_REVERSE) != 0) {
+            delta = -delta;
+        }
+
+        if (is_gun != 0) {
+            /* The OSD lightgun call should return the delta from the middle of the screen
+		when the gun is fired (not the absolute pixel value), and 0 when the gun is
+		inactive.  We take advantage of this to provide support for other controllers
+		in place of a physical lightgun.  When the OSD lightgun returns 0, then control
+		passes through to the analog joystick, and mouse, in that order.  When the OSD
+		lightgun returns a value it overrides both mouse & analog joystick.
+
+		The value returned by the OSD layer should be -128 to 128, same as analog
+		joysticks.
+
+		There is an ugly hack to stop scaling of lightgun returned values.  It really
+		needs rewritten...
+             */
+            if (axis == X_AXIS) {
+                if (lightgun_delta_axis[player][X_AXIS] != 0 || lightgun_delta_axis[player][Y_AXIS] != 0) {
+                    analog_previous_axis[player][X_AXIS] = 0;
+                    analog_current_axis[player][X_AXIS] = lightgun_delta_axis[player][X_AXIS];
+                    input_analog_scale[port] = 0;
+                    sensitivity = 100;
+                }
+            } else {
+                if (lightgun_delta_axis[player][X_AXIS] != 0 || lightgun_delta_axis[player][Y_AXIS] != 0) {
+                    analog_previous_axis[player][Y_AXIS] = 0;
+                    analog_current_axis[player][Y_AXIS] = lightgun_delta_axis[player][Y_AXIS];
+                    input_analog_scale[port] = 0;
+                    sensitivity = 100;
+                }
+            }
+        }
+
+        if (is_stick != 0) {
+            int _new, prev;
+
+            /* center stick */
+            if ((delta == 0) && (Machine.input_ports[input_analog[port]].type & IPF_CENTER) != 0) {
+                if (current > default_value) {
+                    delta = -100 / sensitivity;
+                }
+                if (current < default_value) {
+                    delta = 100 / sensitivity;
+                }
+            }
+
+            /* An analog joystick which is not at zero position (or has just */
+ /* moved there) takes precedence over all other computations */
+ /* analog_x/y holds values from -128 to 128 (yes, 128, not 127) */
+            _new = analog_current_axis[player][axis];
+            prev = analog_previous_axis[player][axis];
+
+            if ((_new != 0) || (_new - prev != 0)) {
+                delta = 0;
+
+                /* for pedals, need to change to possitive number */
+ /* and, if needed, reverse pedal input */
+                if (type == IPT_PEDAL || type == IPT_PEDAL2) {
+                    _new = -_new;
+                    prev = -prev;
+                    if ((Machine.input_ports[input_analog[port]].type & IPF_REVERSE) != 0) // a reversed pedal is diff than normal reverse
+                    {								// 128 = no gas, 0 = all gas
+                        _new = 128 - _new;				// the default "new=-new" doesn't handle this
+                        prev = 128 - prev;
+                    }
+                } else if ((Machine.input_ports[input_analog[port]].type & IPF_REVERSE) != 0) {
+                    _new = -_new;
+                    prev = -prev;
+                }
+
+                /* apply sensitivity using a logarithmic scale */
+                if (Machine.input_ports[input_analog[port]].mask > 0xff) {
+                    if (_new > 0) {
+                        current = (int) (Math.pow(_new / 32768.0, 100.0 / sensitivity) * (max - Machine.input_ports[input_analog[port]].default_value)
+                                + Machine.input_ports[input_analog[port]].default_value) * 100 / sensitivity;
+                    } else {
+                        current = (int) (Math.pow(-_new / 32768.0, 100.0 / sensitivity) * (min - Machine.input_ports[input_analog[port]].default_value)
+                                + Machine.input_ports[input_analog[port]].default_value) * 100 / sensitivity;
+                    }
+                } else {
+                    if (_new > 0) {
+                        current = (int) (Math.pow(_new / 128.0, 100.0 / sensitivity) * (max - Machine.input_ports[input_analog[port]].default_value)
+                                + Machine.input_ports[input_analog[port]].default_value) * 100 / sensitivity;
+                    } else {
+                        current = (int) (Math.pow(-_new / 128.0, 100.0 / sensitivity) * (min - Machine.input_ports[input_analog[port]].default_value)
+                                + Machine.input_ports[input_analog[port]].default_value) * 100 / sensitivity;
+                    }
+                }
+            }
+        }
+
+        current += delta;
+
+        if (check_bounds != 0) {
+            int temp;
+
+            if (current >= 0) {
+                temp = (current * sensitivity + 50) / 100;
+            } else {
+                temp = (-current * sensitivity + 50) / -100;
+            }
+
+            if (temp < min) {
+                if (min >= 0) {
+                    current = (min * 100 + sensitivity / 2) / sensitivity;
+                } else {
+                    current = (-min * 100 + sensitivity / 2) / -sensitivity;
+                }
+            }
+            if (temp > max) {
+                if (max >= 0) {
+                    current = (max * 100 + sensitivity / 2) / sensitivity;
+                } else {
+                    current = (-max * 100 + sensitivity / 2) / -sensitivity;
+                }
+            }
+        }
+
+        input_analog_current_value[port] = current;
+    }
+
+    /*TODO*///static void scale_analog_port(int port)
 /*TODO*///{
 /*TODO*///	struct InputPort *in;
 /*TODO*///	int delta,current,sensitivity;

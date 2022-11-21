@@ -4,6 +4,8 @@
  */
 package arcadeflex.v078.mame;
 
+import mame056.inptportH.InputPort;
+
 public class inptportH {
 
     /*TODO*///#ifndef INPTPORT_H
@@ -199,6 +201,7 @@ public class inptportH {
     public static final int IPF_PLAYER6 = 0x00050000;
     public static final int IPF_PLAYER7 = 0x00060000;
     public static final int IPF_PLAYER8 = 0x00070000;
+
     /*TODO*///
 /*TODO*///#define IPF_8WAY       0         	/* Joystick modes of operation. 8WAY is the default, */
 /*TODO*///#define IPF_4WAY       0x00080000	/* it prevents left/right or up/down to be pressed at */
@@ -233,8 +236,10 @@ public class inptportH {
 /*TODO*///#define IPF_SENSITIVITY(percent)	((percent & 0xff) << 8)
 /*TODO*///#define IPF_DELTA(val)				((val & 0xff) << 16)
 /*TODO*///
-/*TODO*///#define IP_GET_PLAYER(port) (((port)->type >> 16) & 7)
-/*TODO*///#define IP_GET_IMPULSE(port) (((port)->type >> 8) & 0xff)
+    public static int IP_GET_PLAYER(InputPort[] ports, int port) {
+        return (ports[port].type >> 16) & 7;
+    }
+    /*TODO*///#define IP_GET_IMPULSE(port) (((port)->type >> 8) & 0xff)
 /*TODO*///#define IP_GET_SENSITIVITY(port) ((((port)+1)->type >> 8) & 0xff)
 /*TODO*///#define IP_SET_SENSITIVITY(port,val) ((port)+1)->type = ((port+1)->type & 0xffff00ff)|((val&0xff)<<8)
 /*TODO*///#define IP_GET_DELTA(port) ((((port)+1)->type >> 16) & 0xff)

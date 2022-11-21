@@ -3,8 +3,8 @@
  */
 package arcadeflex056;
 
+import static arcadeflex.v078.mame.inptportH.IPT_UI_SHOW_FPS;
 import static arcadeflex.v078.mame.input.input_ui_pressed;
-import static arcadeflex036.libc_old.strlen;
 import arcadeflex036.osdepend;
 import static arcadeflex036.ticker.TICKS_PER_SEC;
 import static arcadeflex056.blit.*;
@@ -12,7 +12,6 @@ import static common.libc.cstdio.printf;
 import static common.ptr.*;
 import static mame056.driverH.*;
 
-import static mame056.mame.Machine;
 
 // refactor
 import static arcadeflex036.osdepend.logerror;
@@ -20,7 +19,6 @@ import arcadeflex036.software_gfx;
 import static arcadeflex036.sound.update_audio;
 import static arcadeflex056.dirtyH.MARKDIRTY;
 import static common.libc.cstdio.sprintf;
-import common.libc.ctime;
 import static common.libc.ctime.*;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -32,7 +30,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import static java.lang.Math.pow;
 import mame056.commonH.mame_bitmap;
-import static mame056.inptportH.*;
 import static mame056.mame.Machine;
 import static mame056.mame.schedule_full_refresh;
 import static mame056.usrintrf.set_ui_visarea;

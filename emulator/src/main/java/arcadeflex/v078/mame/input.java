@@ -4,6 +4,8 @@
  */
 package arcadeflex.v078.mame;
 
+import static arcadeflex.v078.mame.inptportH.IPT_UI_CANCEL;
+import static arcadeflex.v078.mame.inptportH.__ipt_max;
 import static arcadeflex.v078.mame.inputH.*;
 import static arcadeflex036.input.osd_get_key_list;
 import static arcadeflex036.input.osd_is_key_pressed;
@@ -11,8 +13,6 @@ import static common.libc.cstring.strlen;
 import static common.libc.ctime.UCLOCKS_PER_SEC;
 import static common.libc.ctime.uclock;
 import static mame056.inptport.input_port_type_seq;
-import static mame056.inptportH.IPT_UI_CANCEL;
-import static mame056.inptportH.__ipt_max;
 import static mame056.mame.Machine;
 
 public class input {
