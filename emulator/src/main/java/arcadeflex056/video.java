@@ -1948,7 +1948,7 @@ public class video {
 /*TODO*///}
 /*TODO*///
 /*TODO*///
-public static int osd_allocate_colors(int totalcolors,char[] palette,int[] rgb_components)
+public static int osd_allocate_colors(int totalcolors,int[] palette,int[] rgb_components)
 {
         /*TODO*///TEMPHACK*/
         video_depth = Machine.scrbitmap.depth;

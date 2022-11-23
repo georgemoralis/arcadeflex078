@@ -17,6 +17,8 @@ import static common.ptr.*;
 import static mame056.drawgfx.*;
 import static mame056.mame.*;
 import static mame056.commonH.*;
+import static mame056.palette.game_palette;
+
 
 public class minivadr {
 
@@ -33,11 +35,11 @@ public class minivadr {
                 0xff, 0xff, 0xff /* white */};
 
     public static VhConvertColorPromPtr palette_init_minivadr = new VhConvertColorPromPtr() {
-        public void handler(char[] palette, char[] colortable, UBytePtr color_prom) {
+        public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
 
             //memcpy(game_palette, minivadr_palette, sizeof(minivadr_palette));
             for (int i = 0; i < minivadr_palette.length; i++) {
-                palette[i] = minivadr_palette[i];
+                game_palette[i] = minivadr_palette[i];
             }
         }
     };

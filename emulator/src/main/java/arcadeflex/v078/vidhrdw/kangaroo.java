@@ -25,6 +25,7 @@ import static mame056.drawgfx.*;
 import static mame056.drawgfxH.*;
 import static mame056.mame.Machine;
 import static mame056.palette.*;
+import static arcadeflex.v078.mame.palette.palette_set_color;
 
 public class kangaroo
 {
@@ -62,7 +63,7 @@ public class kangaroo
 	//public static PaletteInitHandlerPtr palette_init_kangaroo  = new PaletteInitHandlerPtr() { public void handler(char[] colortable, UBytePtr color_prom){
         public static VhConvertColorPromPtr palette_init_kangaroo = new fucPtr.VhConvertColorPromPtr() {
             @Override
-            public void handler(char[] palette, char[] colortable, UBytePtr color_prom) {
+            public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
          
 		int i;
                 
@@ -79,6 +80,7 @@ public class kangaroo
                         System.out.println("-----------");
                         
 			palette_set_color(i,r,g,b);
+                        
 		}
 	} };
 	

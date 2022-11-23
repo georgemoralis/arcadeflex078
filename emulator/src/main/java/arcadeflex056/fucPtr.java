@@ -26,7 +26,7 @@ public class fucPtr {
 
     public static abstract interface VhConvertColorPromPtr {
 
-        public abstract void handler(char[] palette, char[] colortable, UBytePtr color_prom);
+        public abstract void handler(int[] palette, char[] colortable, UBytePtr color_prom);
     }
 
     public static abstract interface VhEofCallbackPtr {

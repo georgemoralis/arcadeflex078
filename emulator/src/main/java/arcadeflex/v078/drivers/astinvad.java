@@ -51,10 +51,12 @@ import arcadeflex056.fucPtr.RomLoadPtr;
 import static mame056.driverH.*;
 import static mame056.palette.*;
 
+import static arcadeflex.v078.mame.palette.palette_set_color;
+
 public class astinvad
 {
 	
-	public static /*PaletteInitHandlerPtr*/ VhConvertColorPromPtr palette_init_astinvad  = new /*PaletteInitHandlerPtr*/ VhConvertColorPromPtr() { public void handler(char[] palette, char[] colortable, ptr.UBytePtr color_prom){
+	public static /*PaletteInitHandlerPtr*/ VhConvertColorPromPtr palette_init_astinvad  = new /*PaletteInitHandlerPtr*/ VhConvertColorPromPtr() { public void handler(int[] palette, char[] colortable, ptr.UBytePtr color_prom){
 		int i;
 	
 		for (i = 0; i < 8; i++)

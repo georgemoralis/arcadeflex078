@@ -19,6 +19,8 @@ import static mame056.commonH.*;
 import static mame056.drawgfx.*;
 import static mame056.drawgfxH.*;
 
+import static arcadeflex.v078.mame.palette.palette_set_color;
+
 public class troangel
 {
 	
@@ -55,7 +57,7 @@ public class troangel
 	public static VhConvertColorPromPtr/*PaletteInitHandlerPtr*/ palette_init_troangel  = new VhConvertColorPromPtr/*PaletteInitHandlerPtr*/() 
         {
             @Override
-            public void handler(char[] palette, char[] colortable, UBytePtr color_prom) {
+            public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
                 int i;
 		
 	

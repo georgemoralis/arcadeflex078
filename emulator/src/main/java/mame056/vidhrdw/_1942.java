@@ -30,6 +30,8 @@ import static mame056.drawgfx.drawgfx;
 import static mame056.drawgfxH.TRANSPARENCY_PEN;
 import static mame056.palette.*;
 
+import static arcadeflex.v078.mame.palette.palette_set_color;
+
 public class _1942 {
 
     public static UBytePtr c1942_fgvideoram = new UBytePtr();
@@ -62,7 +64,7 @@ public class _1942 {
     }
 
     public static VhConvertColorPromPtr c1942_vh_convert_color_prom = new VhConvertColorPromPtr() {
-        public void handler(char[] palette, char[] colortable, UBytePtr color_prom) {
+        public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
             int i;
 
             for (i = 0; i < Machine.drv.total_colors; i++) {

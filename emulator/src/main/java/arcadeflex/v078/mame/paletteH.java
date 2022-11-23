@@ -10,16 +10,16 @@ public class paletteH {
 /*TODO*///
 /*TODO*///typedef UINT32 pen_t;
 /*TODO*///typedef UINT32 rgb_t;
-/*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	CONSTANTS
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///#define PALETTE_DEFAULT_SHADOW_FACTOR (0.6)
-/*TODO*///#define PALETTE_DEFAULT_HIGHLIGHT_FACTOR (1/PALETTE_DEFAULT_SHADOW_FACTOR)
-/*TODO*///
+
+
+
+    /*-------------------------------------------------
+            CONSTANTS
+    -------------------------------------------------*/
+
+    public static final double PALETTE_DEFAULT_SHADOW_FACTOR = (0.6);
+    public static final double PALETTE_DEFAULT_HIGHLIGHT_FACTOR = (1 / PALETTE_DEFAULT_SHADOW_FACTOR);
+
 /*TODO*///#define PALETTE_DEFAULT_SHADOW_FACTOR32 (0.6)
 /*TODO*///#define PALETTE_DEFAULT_HIGHLIGHT_FACTOR32 (1/PALETTE_DEFAULT_SHADOW_FACTOR32)
 /*TODO*///

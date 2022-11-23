@@ -39,6 +39,8 @@ import static mame056.pngH.*;
 import static mame056.png.*;
 import static arcadeflex056.fileio.*;
 
+import static arcadeflex.v078.mame.palette.palette_set_color;
+
 public class artwork
 {
 	

@@ -21,7 +21,7 @@ import static mame056.mame.Machine;
 public class palette {
 
     /*TODO*///#define VERBOSE 0
-    public static char[] game_palette;/* RGB palette as set by the driver */
+    public static int[] game_palette;/* RGB palette as set by the driver */
     public static char[] actual_palette;/* actual RGB palette after brightness adjustments */
     static double[] brightness;
     /*TODO*///
@@ -63,7 +63,7 @@ public class palette {
 /*TODO*///	shadow_factor = PALETTE_DEFAULT_SHADOW_FACTOR;
 /*TODO*///	highlight_factor = PALETTE_DEFAULT_HIGHLIGHT_FACTOR;
 /*TODO*///
-        game_palette = new char[3 * total_colors];
+        game_palette = new int[3 * total_colors];
         actual_palette = new char[3 * total_colors];
         brightness = new double[Machine.drv.total_colors];
         /*TODO*///
@@ -187,12 +187,15 @@ public class palette {
             else
                 (Machine.drv.init_palette).handler(game_palette, Machine.game_colortable, null);                
         }
+        
+        System.out.println("Color Mode="+colormode);
 
         switch (colormode) {
             case PALETTIZED_16BIT: {
                 if (osd_allocate_colors(total_colors, game_palette, null) != 0) {
                     return 1;
                 }
+                System.out.println("1");
 
                 for (i = 0; i < total_colors; i++) {
                     Machine.pens[i] = i;
@@ -202,6 +205,7 @@ public class palette {
                 for (i = 0; i < Machine.drv.total_colors; i++) {
                     palette_set_color(i, game_palette[3 * i + 0], game_palette[3 * i + 1], game_palette[3 * i + 2]);
                 }
+                System.out.println("2");
             }
             break;
             /*TODO*///
@@ -237,7 +241,7 @@ public class palette {
 /*TODO*///			break;
 /*TODO*///		}
         }
-
+System.out.println("Machine.drv.color_table_len: "+Machine.drv.color_table_len);
         for (i = 0; i < Machine.drv.color_table_len; i++) {
             int color = Machine.game_colortable[i];
 
