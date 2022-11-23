@@ -48,18 +48,22 @@ public class palette {
     /*-------------------------------------------------
 	LOCAL VARIABLES
     -------------------------------------------------*/
-    static int[]/*rgb_t*/ game_palette;/* RGB palette as set by the driver */
+    public static int[]/*rgb_t*/ game_palette;/* RGB palette as set by the driver */
+    
+    public static char[] actual_palette;/* actual RGB palette after brightness adjustments */
+    public static double[] brightness;
+    
     static int[]/*rgb_t*/ adjusted_palette;/* actual RGB palette after brightness/gamma adjustments */
     static int[] /*UINT32*/ dirty_palette;
     static char[] pen_brightness;
 
     static int/*UINT8*/ adjusted_palette_dirty;
 
-    /*TODO*///static UINT16 shadow_factor, highlight_factor;
+    public static int shadow_factor, highlight_factor;
     static double global_brightness, global_brightness_adjust, global_gamma;
 
-    static int/*UINT8*/ colormode, highlight_method;
-    static int/*pen_t*/ total_colors;
+    public static int/*UINT8*/ colormode, highlight_method;
+    public static int/*pen_t*/ total_colors;
 
     static int/*pen_t*/ total_colors_with_ui;
 
@@ -127,6 +131,12 @@ public class palette {
         global_brightness_adjust = 1.0;
         global_gamma = 1.0;
         /*TODO*///(options.gamma > .001) ? options.gamma : 1.0;
+        
+        total_colors = Machine.drv.total_colors;
+        
+        game_palette = new int[3 * total_colors];
+        actual_palette = new char[3 * total_colors];
+        brightness = new double[Machine.drv.total_colors];
 
         /* determine the color mode */
         if (Machine.color_depth == 15) {
@@ -536,98 +546,107 @@ public class palette {
         return 0;
     }
 
+    
+
+
+    /*-------------------------------------------------
+            palette_init - palette initialization that
+            takes place after the display is created
+    -------------------------------------------------*/
+
+    public static int palette_init()
+    {
+        int i;
+
+        /* We initialize the palette and colortable to some default values so that */
+        /* drivers which dynamically change the palette don't need a vh_init_palette() */
+        /* function (provided the default color table fits their needs). */
+        for (i = 0; i < total_colors; i++) {
+            game_palette[3 * i + 0] = actual_palette[3 * i + 0] = (char) (((i & 1) >> 0) * 0xff);
+            game_palette[3 * i + 1] = actual_palette[3 * i + 1] = (char) (((i & 2) >> 1) * 0xff);
+            game_palette[3 * i + 2] = actual_palette[3 * i + 2] = (char) (((i & 4) >> 2) * 0xff);
+        }
+        
+    	/* recompute the default palette and initalize the color correction table */
+    	recompute_adjusted_palette(1);
+    
+    /*TODO*///	/* now let the driver modify the initial palette and colortable */
+    /*TODO*///	if (Machine->drv->init_palette)
+    /*TODO*///		(*Machine->drv->init_palette)(Machine->game_colortable, memory_region(REGION_PROMS));
     /*TODO*///
-/*TODO*///
-/*TODO*///
-/*TODO*////*-------------------------------------------------
-/*TODO*///	palette_init - palette initialization that
-/*TODO*///	takes place after the display is created
-/*TODO*///-------------------------------------------------*/
-/*TODO*///
-/*TODO*///int palette_init(void)
-/*TODO*///{
-/*TODO*///	int i;
-/*TODO*///
-/*TODO*///	/* recompute the default palette and initalize the color correction table */
-/*TODO*///	recompute_adjusted_palette(1);
-/*TODO*///
-/*TODO*///	/* now let the driver modify the initial palette and colortable */
-/*TODO*///	if (Machine->drv->init_palette)
-/*TODO*///		(*Machine->drv->init_palette)(Machine->game_colortable, memory_region(REGION_PROMS));
-/*TODO*///
-/*TODO*///	/* switch off the color mode */
-/*TODO*///	switch (colormode)
-/*TODO*///	{
-/*TODO*///		/* 16-bit paletteized case */
-/*TODO*///		case PALETTIZED_16BIT:
-/*TODO*///		{
-/*TODO*///			/* refresh the palette to support shadows in static palette games */
-/*TODO*///			for (i = 0; i < Machine->drv->total_colors; i++)
-/*TODO*///				palette_set_color(i, RGB_RED(game_palette[i]), RGB_GREEN(game_palette[i]), RGB_BLUE(game_palette[i]));
-/*TODO*///
-/*TODO*///			/* map the UI pens */
-/*TODO*///			if (total_colors_with_ui <= 65534)
-/*TODO*///			{
-/*TODO*///				game_palette[total_colors + 0] = adjusted_palette[total_colors + 0] = MAKE_RGB(0x00,0x00,0x00);
-/*TODO*///				game_palette[total_colors + 1] = adjusted_palette[total_colors + 1] = MAKE_RGB(0xff,0xff,0xff);
-/*TODO*///				Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = total_colors_with_ui++;
-/*TODO*///				Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = total_colors_with_ui++;
-/*TODO*///			}
-/*TODO*///			else
-/*TODO*///			{
-/*TODO*///				game_palette[0] = adjusted_palette[0] = MAKE_RGB(0x00,0x00,0x00);
-/*TODO*///				game_palette[65535] = adjusted_palette[65535] = MAKE_RGB(0xff,0xff,0xff);
-/*TODO*///				Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = 0;
-/*TODO*///				Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = 65535;
-/*TODO*///			}
-/*TODO*///			break;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		/* 15-bit direct case */
-/*TODO*///		case DIRECT_15BIT:
-/*TODO*///		{
-/*TODO*///			/* remap the game palette into direct RGB pens */
-/*TODO*///			for (i = 0; i < total_colors; i++)
-/*TODO*///				Machine->pens[i] = rgb_to_direct15(game_palette[i]);
-/*TODO*///
-/*TODO*///			/* map the UI pens */
-/*TODO*///			Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = rgb_to_direct15(MAKE_RGB(0x00,0x00,0x00));
-/*TODO*///			Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = rgb_to_direct15(MAKE_RGB(0xff,0xff,0xff));
-/*TODO*///			break;
-/*TODO*///		}
-/*TODO*///
-/*TODO*///		case DIRECT_32BIT:
-/*TODO*///		{
-/*TODO*///			/* remap the game palette into direct RGB pens */
-/*TODO*///			for (i = 0; i < total_colors; i++)
-/*TODO*///				Machine->pens[i] = rgb_to_direct32(game_palette[i]);
-/*TODO*///
-/*TODO*///			/* map the UI pens */
-/*TODO*///			Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = rgb_to_direct32(MAKE_RGB(0x00,0x00,0x00));
-/*TODO*///			Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = rgb_to_direct32(MAKE_RGB(0xff,0xff,0xff));
-/*TODO*///			break;
-/*TODO*///		}
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* now compute the remapped_colortable */
-/*TODO*///	for (i = 0; i < Machine->drv->color_table_len; i++)
-/*TODO*///	{
-/*TODO*///		pen_t color = Machine->game_colortable[i];
-/*TODO*///
-/*TODO*///		/* check for invalid colors set by Machine->drv->init_palette */
-/*TODO*///		if (color < total_colors)
-/*TODO*///			Machine->remapped_colortable[i] = Machine->pens[color];
-/*TODO*///		else
-/*TODO*///			usrintf_showmessage("colortable[%d] (=%d) out of range (total_colors = %d)",
-/*TODO*///					i,color,total_colors);
-/*TODO*///	}
-/*TODO*///
-/*TODO*///	/* all done */
-/*TODO*///	return 0;
-/*TODO*///}
-/*TODO*///
-/*TODO*///
-/*TODO*///
+    /*TODO*///	/* switch off the color mode */
+    /*TODO*///	switch (colormode)
+    /*TODO*///	{
+    /*TODO*///		/* 16-bit paletteized case */
+    /*TODO*///		case PALETTIZED_16BIT:
+    /*TODO*///		{
+    /*TODO*///			/* refresh the palette to support shadows in static palette games */
+    /*TODO*///			for (i = 0; i < Machine->drv->total_colors; i++)
+    /*TODO*///				palette_set_color(i, RGB_RED(game_palette[i]), RGB_GREEN(game_palette[i]), RGB_BLUE(game_palette[i]));
+    /*TODO*///
+    /*TODO*///			/* map the UI pens */
+    /*TODO*///			if (total_colors_with_ui <= 65534)
+    /*TODO*///			{
+    /*TODO*///				game_palette[total_colors + 0] = adjusted_palette[total_colors + 0] = MAKE_RGB(0x00,0x00,0x00);
+    /*TODO*///				game_palette[total_colors + 1] = adjusted_palette[total_colors + 1] = MAKE_RGB(0xff,0xff,0xff);
+    /*TODO*///				Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = total_colors_with_ui++;
+    /*TODO*///				Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = total_colors_with_ui++;
+    /*TODO*///			}
+    /*TODO*///			else
+    /*TODO*///			{
+    /*TODO*///				game_palette[0] = adjusted_palette[0] = MAKE_RGB(0x00,0x00,0x00);
+    /*TODO*///				game_palette[65535] = adjusted_palette[65535] = MAKE_RGB(0xff,0xff,0xff);
+    /*TODO*///				Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = 0;
+    /*TODO*///				Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = 65535;
+    /*TODO*///			}
+    /*TODO*///			break;
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		/* 15-bit direct case */
+    /*TODO*///		case DIRECT_15BIT:
+    /*TODO*///		{
+    /*TODO*///			/* remap the game palette into direct RGB pens */
+    /*TODO*///			for (i = 0; i < total_colors; i++)
+    /*TODO*///				Machine->pens[i] = rgb_to_direct15(game_palette[i]);
+    /*TODO*///
+    /*TODO*///			/* map the UI pens */
+    /*TODO*///			Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = rgb_to_direct15(MAKE_RGB(0x00,0x00,0x00));
+    /*TODO*///			Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = rgb_to_direct15(MAKE_RGB(0xff,0xff,0xff));
+    /*TODO*///			break;
+    /*TODO*///		}
+    /*TODO*///
+    /*TODO*///		case DIRECT_32BIT:
+    /*TODO*///		{
+    /*TODO*///			/* remap the game palette into direct RGB pens */
+    /*TODO*///			for (i = 0; i < total_colors; i++)
+    /*TODO*///				Machine->pens[i] = rgb_to_direct32(game_palette[i]);
+    /*TODO*///
+    /*TODO*///			/* map the UI pens */
+    /*TODO*///			Machine->uifont->colortable[0] = Machine->uifont->colortable[3] = rgb_to_direct32(MAKE_RGB(0x00,0x00,0x00));
+    /*TODO*///			Machine->uifont->colortable[1] = Machine->uifont->colortable[2] = rgb_to_direct32(MAKE_RGB(0xff,0xff,0xff));
+    /*TODO*///			break;
+    /*TODO*///		}
+    /*TODO*///	}
+    /*TODO*///
+    /*TODO*///	/* now compute the remapped_colortable */
+    /*TODO*///	for (i = 0; i < Machine->drv->color_table_len; i++)
+    /*TODO*///	{
+    /*TODO*///		pen_t color = Machine->game_colortable[i];
+    /*TODO*///
+    /*TODO*///		/* check for invalid colors set by Machine->drv->init_palette */
+    /*TODO*///		if (color < total_colors)
+    /*TODO*///			Machine->remapped_colortable[i] = Machine->pens[color];
+    /*TODO*///		else
+    /*TODO*///			usrintf_showmessage("colortable[%d] (=%d) out of range (total_colors = %d)",
+    /*TODO*///					i,color,total_colors);
+    /*TODO*///	}
+
+            /* all done */
+            return 0;
+    }
+
+
+
 /*TODO*////*-------------------------------------------------
 /*TODO*///	palette_get_total_colors_with_ui - returns
 /*TODO*///	the total number of palette entries including

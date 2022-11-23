@@ -19,6 +19,7 @@ import static mame056.commonH.*;
 import static mame056.drawgfxH.*;
 import static mame056.driverH.*;
 import static arcadeflex.v078.mame.input.*;
+import static arcadeflex.v078.mame.palette.*;
 import static mame056.drawgfx.*;
 import static mame056.inptport.*;
 import static mame056.ui_text.*;
@@ -348,7 +349,7 @@ public class mame {
             Machine.scrbitmap = null;
         }
 
-        palette_stop();
+        //palette_stop();
 
         if ((drv.video_attributes & VIDEO_BUFFERS_SPRITERAM) != 0) {
             buffered_spriteram = null;
@@ -538,7 +539,7 @@ public class mame {
         }
 
         /* initialize the palette - must be done after osd_create_display() */
-        if (palette_init() != 0) {
+        if (mame056.palette.palette_init() != 0) {
             vh_close();
             return 1;
         }
