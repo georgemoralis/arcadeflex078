@@ -31,7 +31,7 @@ import static mame056.drawgfxH.*;
 import static mame056.drawgfx.*;
 import static mame056.driverH.*;
 import static mame056.mame.*;
-import static mame056.palette.*;
+
 // refactor
 import static arcadeflex036.osdepend.logerror;
 import static common.subArrays.*;

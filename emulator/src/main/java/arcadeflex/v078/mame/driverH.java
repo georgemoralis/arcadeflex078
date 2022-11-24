@@ -210,7 +210,7 @@ public class driverH {
     }
 
     /* core video functions */
-    public static void MDRV_PALETTE_INIT(VhConvertColorPromPtr name) {
+    public static void MDRV_PALETTE_INIT(PaletteInitHandlerPtr name) {
         temp_machine.init_palette = name;
     }
 
@@ -292,7 +292,7 @@ public class driverH {
         public int /*UINT32*/ total_colors;
         public int /*UINT32*/ color_table_len;
         /*TODO*///
-        public VhConvertColorPromPtr init_palette;
+        public PaletteInitHandlerPtr init_palette;
         public VideoStartHandlerPtr video_start;
         /*TODO*///	void (*video_stop)(void);
 /*TODO*///	void (*video_eof)(void);

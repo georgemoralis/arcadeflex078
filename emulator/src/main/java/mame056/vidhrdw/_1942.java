@@ -28,7 +28,6 @@ import static mame056.commonH.flip_screen;
 import mame056.commonH.mame_bitmap;
 import static mame056.drawgfx.drawgfx;
 import static mame056.drawgfxH.TRANSPARENCY_PEN;
-import static mame056.palette.*;
 
 import static arcadeflex.v078.mame.palette.palette_set_color;
 
@@ -63,8 +62,9 @@ public class _1942 {
         (colortable[Machine.drv.gfxdecodeinfo[gfxn].color_codes_start + offs]) = (char) value;
     }
 
-    public static VhConvertColorPromPtr c1942_vh_convert_color_prom = new VhConvertColorPromPtr() {
-        public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
+    public static PaletteInitHandlerPtr c1942_vh_convert_color_prom = new PaletteInitHandlerPtr() {
+        @Override
+        public void handler(char[] colortable, UBytePtr color_prom) {
             int i;
 
             for (i = 0; i < Machine.drv.total_colors; i++) {

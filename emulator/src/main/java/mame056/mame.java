@@ -25,7 +25,6 @@ import static mame056.inptport.*;
 import static mame056.ui_text.*;
 import static mame056.usrintrf.*;
 import static mame056.sndintrf.*;
-import static mame056.palette.*;
 
 import static common.ptr.*;
 import static arcadeflex056.video.osd_close_display;
@@ -539,7 +538,7 @@ public class mame {
         }
 
         /* initialize the palette - must be done after osd_create_display() */
-        if (mame056.palette.palette_init() != 0) {
+        if (palette_init() != 0) {
             vh_close();
             return 1;
         }

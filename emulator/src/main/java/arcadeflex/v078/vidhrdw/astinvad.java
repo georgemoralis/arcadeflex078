@@ -70,7 +70,7 @@ public class astinvad
 		//	This is almost certainly wrong.
 		//
 	
-		int col = memory_region(REGION_PROMS).read(n);
+		int col = new UBytePtr(memory_region(REGION_PROMS)).read(n);
 	
 		plot_byte(8 * (offset / 256), 255 - offset % 256, videoram.read(offset), col & 7);
 	}
@@ -84,11 +84,11 @@ public class astinvad
 	
 		if (flip_screen() == 0)
 		{
-			col = memory_region(REGION_PROMS).read((~n + astinvad_adjust) & 0x3ff);
+			col = new UBytePtr(memory_region(REGION_PROMS)).read((~n + astinvad_adjust) & 0x3ff);
 		}
 		else
 		{
-			col = memory_region(REGION_PROMS).read(n) >> 4;
+			col = new UBytePtr(memory_region(REGION_PROMS)).read(n) >> 4;
 		}
 	
 		plot_byte(8 * (offset % 32), offset / 32, videoram.read(offset), col & 7);

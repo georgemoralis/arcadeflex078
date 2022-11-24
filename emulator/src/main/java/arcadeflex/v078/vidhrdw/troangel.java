@@ -11,7 +11,6 @@ import static arcadeflex056.fucPtr.VhConvertColorPromPtr;
 import common.ptr.UBytePtr;
 import static mame056.inptport.*;
 import static mame056.mame.Machine;
-import static mame056.palette.*;
 import static common.libc.cstring.*;
 import static common.libc.expressions.*;
 import static mame056.common.*;
@@ -54,10 +53,9 @@ public class troangel
         public static int TOTAL_COLORS(int gfxn) { return Machine.gfx[gfxn].total_colors * Machine.gfx[gfxn].color_granularity; }
 	public static void COLOR(char[] colortable, int gfxn, int offs, int value) { colortable[Machine.drv.gfxdecodeinfo[gfxn].color_codes_start + offs] = (char) value; }
 	
-	public static VhConvertColorPromPtr/*PaletteInitHandlerPtr*/ palette_init_troangel  = new VhConvertColorPromPtr/*PaletteInitHandlerPtr*/() 
-        {
+	public static PaletteInitHandlerPtr palette_init_troangel = new PaletteInitHandlerPtr() {
             @Override
-            public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
+            public void handler(char[] colortable, UBytePtr color_prom) {
                 int i;
 		
 	

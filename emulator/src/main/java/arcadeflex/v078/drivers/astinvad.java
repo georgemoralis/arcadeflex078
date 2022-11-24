@@ -49,15 +49,16 @@ import static arcadeflex.v078.mame.inptportH.IPT_UNKNOWN;
 import static arcadeflex.v078.mame.inptportH.IPT_VBLANK;
 import arcadeflex056.fucPtr.RomLoadPtr;
 import static mame056.driverH.*;
-import static mame056.palette.*;
 
 import static arcadeflex.v078.mame.palette.palette_set_color;
 
 public class astinvad
 {
 	
-	public static /*PaletteInitHandlerPtr*/ VhConvertColorPromPtr palette_init_astinvad  = new /*PaletteInitHandlerPtr*/ VhConvertColorPromPtr() { public void handler(int[] palette, char[] colortable, ptr.UBytePtr color_prom){
-		int i;
+	public static PaletteInitHandlerPtr palette_init_astinvad  = new PaletteInitHandlerPtr() {
+            @Override
+            public void handler(char[] colortable, ptr.UBytePtr color_prom) {
+                int i;
 	
 		for (i = 0; i < 8; i++)
 		{
@@ -66,9 +67,9 @@ public class astinvad
 				(i & 4)!=0 ? 0xff : 0,
 				(i & 2)!=0 ? 0xff : 0);
 		}
-	} };
-	
-	
+            }
+        };
+                
 	public static Memory_ReadAddress astinvad_readmem[]={
 		new Memory_ReadAddress(MEMPORT_MARKER, MEMPORT_DIRECTION_READ | MEMPORT_TYPE_MEM | MEMPORT_WIDTH_8),
 		new Memory_ReadAddress( 0x0000, 0x1bff, MRA_ROM ),

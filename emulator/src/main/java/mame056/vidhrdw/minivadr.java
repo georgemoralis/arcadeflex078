@@ -5,6 +5,8 @@
  */
 package mame056.vidhrdw;
 
+import arcadeflex.v078.generic.funcPtr;
+import arcadeflex.v078.generic.funcPtr.PaletteInitHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.VideoUpdateHandlerPtr;
 import arcadeflex.v078.generic.funcPtr.WriteHandlerPtr;
 import arcadeflex.v078.mame.drawgfxH;
@@ -34,9 +36,9 @@ public class minivadr {
                 0x00, 0x00, 0x00, /* black */
                 0xff, 0xff, 0xff /* white */};
 
-    public static VhConvertColorPromPtr palette_init_minivadr = new VhConvertColorPromPtr() {
-        public void handler(int[] palette, char[] colortable, UBytePtr color_prom) {
-
+    public static PaletteInitHandlerPtr palette_init_minivadr = new PaletteInitHandlerPtr() {
+        @Override
+        public void handler(char[] colortable, UBytePtr color_prom) {
             //memcpy(game_palette, minivadr_palette, sizeof(minivadr_palette));
             for (int i = 0; i < minivadr_palette.length; i++) {
                 game_palette[i] = minivadr_palette[i];
